@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v110 (Live Fix)</title>
+    <title>SmartCheck - School OS v114 (Stable)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,10 +13,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* STILI ORIGINALI INTATTI */
+        /* STILI ORIGINALI COMPLETI */
         body { font-family: 'Inter', sans-serif; background-color: #050b14; -webkit-tap-highlight-color: transparent; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .glass-panel { background: rgba(20, 27, 45, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .glass-panel { background: rgba(20, 27, 45, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         .hidden { display: none !important; }
         input[type="date"] { color-scheme: dark; }
         input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
@@ -83,25 +83,26 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v110.0 • Live Fix</div>
+                <div class="text-xs font-mono text-slate-500">v114.0 • Stability Fix</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
                     <div class="text-center"><h2 class="text-2xl font-bold text-white mb-1">Accesso</h2><p class="text-slate-400 text-sm">Inserisci le tue credenziali</p></div>
                     
-                    <div id="login-form-container" class="space-y-5">
-                        <input type="text" id="input-username" placeholder="cognome.nome" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center font-bold lowercase transition-all mb-4">
-                        
-                        <div id="password-container" class="hidden space-y-5">
-                            <p class="text-center text-sm font-bold text-blue-400 uppercase tracking-widest" id="user-welcome">--</p>
-                            <input type="password" id="input-password" placeholder="Password (Il tuo Nome)" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center mb-4">
-                            <button type="button" onclick="processAuth()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
-                            <button type="button" onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-white underline text-center mt-4">Indietro</button>
+                    <div id="login-container" class="space-y-5">
+                        <div id="step-user">
+                            <input type="text" id="input-username" placeholder="cognome.nome" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center font-bold lowercase transition-all mb-4">
+                            <button type="button" id="btn-next" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
                         </div>
                         
-                        <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                        <div id="step-pass" class="hidden">
+                            <p class="text-center text-sm font-bold text-blue-400 uppercase tracking-widest mb-4" id="user-welcome">--</p>
+                            <input type="password" id="input-password" placeholder="Password (Nome)" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center mb-4">
+                            <button type="button" id="btn-entra" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
+                            <button type="button" onclick="location.reload()" class="w-full text-xs text-slate-500 hover:text-white underline text-center mt-4">Indietro</button>
+                        </div>
                     </div>
-
+                    
                     <p id="login-error" class="hidden text-red-400 text-xs font-bold text-center bg-red-900/20 p-2 rounded border border-red-900/50"><i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="error-text">Credenziali Errate</span></p>
                 </div>
             </div>
@@ -120,7 +121,7 @@
         <header class="bg-[#0b1121]/90 backdrop-blur-md border-b border-slate-800 px-8 py-4 flex justify-between items-center sticky top-0 z-40">
             <div class="flex items-center gap-6">
                 <button id="back-btn" onclick="backToHub()" class="p-2.5 bg-slate-800 rounded-xl hover:bg-slate-700 text-slate-400 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
-                <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div></div></div>
+                <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full ml-2 animate-pulse"></div></div></div>
             </div>
             <div class="relative group mx-4">
                 <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 cursor-pointer border border-slate-700 hover:border-blue-500 transition-all" onclick="resetToToday()">
@@ -231,8 +232,8 @@
         const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
         
-        let _supabase = null;
-        try { _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { console.error("Supabase Error"); }
+        // Uso un nome diverso per evitare conflitti con la variabile locale della libreria
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const STUDENTS_4AEE=["Emiliano Calò","Antonio Navarroli","Filippo Agnitti","Ivan Garofalo","Mattia Galli","Lorenzo Esposito","Kristian Methasa","Stefano Spaczil","Federico Pasqualone","Leonardo Pacchione","Oleksandr Tsikhanskyi","Alessio Tofano","Pierpaolo Carosa","Stefano Camassa","Lorenzo Pisone","Abdula Chackari","Ernest Cupi","Matteo Di Michele","Luca Iarossi","Biagio Recchione","Luigi Mirandola","Mattia Raulli","Giuseppe Palombizio"];
         const TEACHERS_NAMES=["Antonini Tania","Caputo Tonino","Cardilli Giuseppina","Centofanti Pietro","Chiarelli Sandra","Consalvo Simone","De Michele Alessandra","Del Fattore Alice","Di Bacco Emilio","Di Cioccio Felicia","Di Giacomo Pierluigi","Di Marzio Cinzia","Di Mascio Stefano","Di Tella Arianna","Fabrizi Paola","Federico Anna Lucia","Giammarco Fulvia","Guadagnoli Francesco","Liberatore Walter","Manna Valeria","Mariani Monica","Marinucci Chiara","Mascio Fabio","Mascitti Valentina","Mazzara Lucia","Natarelli Francesco","Oddi Pasqualina","Paciocco Marco","Pasqua Franca","Perinetti Tullio","Petrilli Antonio","Piccirilli Stefania","Recanati Giulia","Rizzo Sabrina","Roselli Michele","Rucci Piero","Sabatini Leonardo","Sambuco Nazzareno","Santangelo Marco","Santarelli Fabrizio","Santilli Mirco","Scarsella Alessio","Schiavo Marina","Sciarra Santa","Stampone Agata","Trabucco Silvia","Vallera Alessandra","D'Urbano Antonio","De Dominicis Giovanni","Di Bacco Antonio","Di Cesare Paqualino","Di Nino Ivan","Febbo Katia","Liberatore Piergiuseppe","Pace Dino","Tedeschi Diletta","Vallera Villiam"];
@@ -542,7 +543,6 @@
             const div = document.createElement('div'); div.className = isSingle ? "w-[300px]" : "w-full";
             const clickAction = (d.name !== "Libero") ? `onclick="openStudentDetail('${id}')"` : "";
             let alertHtml = "";
-            // Check Online Notes
             const hasNotes = onlineNotes.filter(n => n.student_name === d.name).length > 0;
             if(hasNotes) {
                 const color = "text-yellow-500"; 
@@ -554,163 +554,83 @@
             return div;
         }
 
-        // --- FEATURES ---
         function getGradeColor(v) { if(v>=6) return 'g-green'; if(v>=5) return 'g-orange'; return 'g-red'; }
-        
-        function openGradesModal(){
-            const m=document.getElementById('modal-grades');
-            const list=document.getElementById('grades-list');
-            
-            // Usa onlineGrades (filtrato per utente corrente se studente, o per selectedStudentId se prof)
-            let targetUser = currentUser.role === 'stud' ? currentUser.name : document.getElementById('modal-detail-name').innerText;
-            const myGrades = onlineGrades.filter(g => g.student_name === targetUser);
-
-            list.innerHTML="";
-            let subjects={};
-            myGrades.forEach(g=>{if(!subjects[g.subject])subjects[g.subject]=[];subjects[g.subject].push(g);});
-            
-            if(Object.keys(subjects).length===0)list.innerHTML=`<div class="text-center text-slate-500 mt-10 italic">Nessuna valutazione</div>`;
-            
-            let allV = []; for(let s in subjects) allV = allV.concat(subjects[s].map(g=>g.value));
-            let gAvg = allV.length > 0 ? (allV.reduce((a,b)=>parseFloat(a)+parseFloat(b),0)/allV.length).toFixed(1) : "0.0";
-            
-            const header = document.getElementById('grades-header-bg');
-            if (allV.length === 0 || gAvg >= 6) header.className = "cv-header p-6 pb-8 bg-cv-green";
-            else if (gAvg >= 5) header.className = "cv-header p-6 pb-8 bg-cv-orange";
-            else header.className = "cv-header p-6 pb-8 bg-cv-red";
-            
-            document.getElementById('grades-total-avg').innerText = gAvg;
-            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni`;
-            
-            for(const[subj,votes]of Object.entries(subjects)){
-                let avg=(votes.reduce((a,b)=>parseFloat(a)+parseFloat(b.value),0)/votes.length).toFixed(1);
-                let id = `details-${subj.replace(/\s/g, '')}`;
-                let voteStr = (v) => { let val = parseFloat(v); if(val % 1 === 0.25) return Math.floor(val) + "+"; if(val % 1 === 0.75) return Math.ceil(val) + "-"; if(val % 1 === 0.5) return Math.floor(val) + "½"; return val; };
-                list.innerHTML+=`<div class="mb-3"><div onclick="toggleGradeDetails('${id}')" class="cv-card p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition-colors"><div class="text-white font-bold text-lg">${subj}</div><div class="grade-circle ${getGradeColor(avg)}" style="--percent: ${avg*10}%"><span class="grade-value">${avg}</span></div></div><div id="${id}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl grade-details">${votes.map(v => `<div class="flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0"><div><span class="text-[10px] text-slate-500 font-mono block">${v.date}</span><span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${v.type}</span></div><span class="font-black text-lg ${getGradeColor(v.value).replace('g-','text-g-')}">${voteStr(v.value)}</span></div>`).join('')}</div></div>`;
-            } m.classList.remove('hidden');
-        }
-
         function toggleGradeDetails(id){ document.getElementById(id).classList.toggle('hidden'); }
+        function selectSignHour(h){ selectedSignHour=h; for(let i=1;i<=5;i++) document.getElementById(`hour-btn-${i}`).className=i===h?'hour-selected flex-1 py-1.5 rounded':'flex-1 py-1.5 rounded bg-slate-800'; }
+        function filterSubjects(){ const input=document.getElementById('subject-search').value.toLowerCase(); const drop=document.getElementById('subject-dropdown'); drop.innerHTML=""; ALL_SUBJECTS.forEach(s=>{ if(s.toLowerCase().includes(input)){ const div=document.createElement('div'); div.innerText=s; div.className="p-2 hover:bg-blue-600 cursor-pointer"; div.onclick=()=>{ document.getElementById('subject-search').value=s; drop.classList.add('hidden'); }; drop.appendChild(div); } }); drop.classList.remove('hidden'); }
         
-        function loadTeacherGradesView(){
-            const subject=TEACHER_SUBJECT_MAP[currentUser.name]||"Generale";
-            const list=document.getElementById('teacher-grades-list');
-            list.innerHTML="";
-            
-            const studentName=document.getElementById('modal-detail-name').innerText;
-            const grades = onlineGrades.filter(g => g.student_name === studentName && g.subject === subject);
-
-            grades.forEach((g,idx)=>{
-                let color = g.value>=6?'text-green-400':(g.value>=5?'text-orange-400':'text-red-400'); 
-                let disp = parseFloat(g.value);
-                if(disp%1===0.25) disp=Math.floor(disp)+"+"; else if(disp%1===0.75) disp=Math.ceil(disp)+"-"; else if(disp%1===0.5) disp=Math.floor(disp)+"½";
-                list.innerHTML+=`<tr><td class="px-6 py-3">${g.date}</td><td class="px-6 py-3 uppercase text-[10px]">${g.type}</td><td class="px-6 py-3 text-right font-bold ${color}">${disp}</td><td class="px-6 py-3 text-right"><button onclick="deleteGrade('${studentName}', ${g.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
-            });
-            document.getElementById('teacher-subject-name').innerText=subject;
-        }
-
-        async function addGrade(){
-            const val=document.getElementById('new-grade-value').value; 
-            if(!val) return; 
-            
-            const studentName = document.getElementById('modal-detail-name').innerText;
-            const newGrade = {
-                student_name: studentName,
-                teacher_name: currentUser.name,
-                subject: TEACHER_SUBJECT_MAP[currentUser.name]||"Generale",
-                value: val,
-                type: document.getElementById('new-grade-type').value,
-                date: new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}),
-                class: currentClass
-            };
-            
-            await _supabase.from('grades').insert([newGrade]);
-            // Refresh immediato
-            const g = await _supabase.from('grades').select('*');
-            if(g.data) {
-                onlineGrades = g.data;
-                organizeGrades(onlineGrades);
-            }
-            
-            loadTeacherGradesView(); 
-            document.getElementById('new-grade-value').value = "10"; 
-            openGradesModal(); 
-        }
-
-        async function deleteGrade(studentName, id){
-            if(confirm("Eliminare?")){
-                await _supabase.from('grades').delete().eq('id', id);
-                // Refresh
-                const g = await _supabase.from('grades').select('*');
-                if(g.data) {
-                    onlineGrades = g.data;
-                    organizeGrades(onlineGrades);
+        function openStudentDetail(id) { 
+            document.getElementById('modal-class-list').classList.add('hidden'); 
+            const db=getSchoolDB(); 
+            const student=db[currentClass][id]; 
+            selectedStudentId=id; 
+             
+            document.getElementById('modal-detail-name').innerText=student.name; 
+            const statusEl=document.getElementById('modal-detail-status'); 
+            statusEl.innerText=student.status.toUpperCase().replace('_',' '); 
+             
+            let color="text-white"; 
+            if(student.status==='presente') color="text-green-400"; 
+            else if(student.status==='bagno') color="text-cyan-400 animate-pulse"; 
+            else if(student.status==='ritardo') color="text-orange-400"; 
+            else if(student.status==='assente') color="text-red-400"; 
+            else if(student.status==='uscita_anticipata') color="text-yellow-400"; 
+            statusEl.className=`text-3xl font-black ${color}`; 
+             
+            document.getElementById('modal-detail-count').innerText=student.history.length; 
+            const tbody=document.getElementById('modal-history-body'); tbody.innerHTML=""; 
+            student.history.forEach(h=>{ 
+                let durationStr = "";
+                if(h.in) {
+                   const [h1, m1] = h.out.split(':').map(Number);
+                   const [h2, m2] = h.in.split(':').map(Number);
+                   let diff = (h2*60+m2) - (h1*60+m1);
+                   durationStr = `<span class="text-[10px] text-slate-500 ml-2">(${diff} min)</span>`;
                 }
-                loadTeacherGradesView();
-            }
-        }
-        
-        async function deleteAgendaItem(id){ 
-            if(confirm("Eliminare?")){ 
-                await _supabase.from('agenda').delete().eq('id', id); 
-                const agendaReq = await _supabase.from('agenda').select('*');
-                if(agendaReq.data) onlineAgenda = agendaReq.data;
-                renderAgendaList(); 
-            } 
+                tbody.innerHTML+=`<tr><td class="px-6 py-4 font-bold text-cyan-400">${h.out}</td><td class="px-6 py-4 font-bold text-green-400">${h.in||'--'} ${durationStr}</td><td class="px-6 py-4 text-right text-slate-500">${h.in?'Chiusa':'In corso'}</td></tr>`;
+            }); 
+             
+            const viewMode=document.getElementById('status-view-mode'); 
+            const editMode=document.getElementById('status-edit-mode'); 
+             
+            // IMPORTANT: Reset view state
+            viewMode.classList.remove('hidden'); 
+            editMode.classList.add('hidden'); 
+
+            // IMPORTANT: Assign Click Handler
+            if(currentUser.role!=='stud'){ 
+                viewMode.onclick = toggleStatusEdit; // Bind function
+                viewMode.classList.add('cursor-pointer'); 
+                document.getElementById('status-edit-hint').classList.remove('hidden'); 
+                document.getElementById('teacher-note-input').classList.remove('hidden'); 
+            } else { 
+                viewMode.onclick = null; 
+                viewMode.classList.remove('cursor-pointer'); 
+                document.getElementById('status-edit-hint').classList.add('hidden'); 
+                document.getElementById('teacher-note-input').classList.add('hidden'); 
+            } 
+             
+            switchTab('presence'); 
+            if(currentUser.role==='stud'){ document.getElementById('tab-presence').parentElement.classList.add('hidden'); } 
+            else { document.getElementById('tab-presence').parentElement.classList.remove('hidden'); } 
+             
+            document.getElementById('modal-student-detail').classList.remove('hidden'); 
         }
 
-        // NOTES
-        function loadNotes(){
-            const list = document.getElementById('notes-list'); list.innerHTML="";
-            const name = document.getElementById('modal-detail-name').innerText;
-            const notes = onlineNotes.filter(n => n.student_name === name);
-            
-            if(notes.length===0) list.innerHTML = `<div class="text-center text-slate-500 text-xs py-4">Nessuna nota</div>`;
-            notes.forEach((n, idx) => {
-                const border = n.type === 'warning' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
-                const del = currentUser.role !== 'stud' ? `<button onclick="deleteNote(${n.id})" class="text-red-500 text-xs ml-2">Elimina</button>` : '';
-                list.innerHTML += `<div class="bg-slate-800 p-3 rounded mb-2 ${border}"><div class="flex justify-between"><span class="text-[10px] text-slate-400">${n.date} • ${n.teacher_name}</span>${del}</div><p class="text-sm text-slate-200 mt-1">${n.text}</p></div>`;
-            });
-        }
-        async function addNote(){
-            const text = document.getElementById('note-text').value; if(!text) return;
-            const type = document.getElementById('note-type').value;
-            const name = document.getElementById('modal-detail-name').innerText;
-            
-            const newNote = {
-                student_name: name,
-                teacher_name: currentUser.name,
-                text: text,
-                type: type,
-                date: new Date().toLocaleDateString('it-IT'),
-                class: currentClass
-            };
-            
-            await _supabase.from('notes').insert([newNote]);
-            const n = await _supabase.from('notes').select('*');
-            if(n.data) {
-                onlineNotes = n.data;
-                organizeNotes(onlineNotes);
-            }
-
-            document.getElementById('note-text').value = "";
-            loadNotes();
-            renderGrid(localSchoolDB[currentClass]); 
-        }
-        async function deleteNote(id){ 
-            if(confirm("Eliminare?")){ 
-                 await _supabase.from('notes').delete().eq('id', id);
-                 const n = await _supabase.from('notes').select('*');
-                 if(n.data) {
-                    onlineNotes = n.data;
-                    organizeNotes(onlineNotes);
-                 }
-                 loadNotes();
-                 renderGrid(localSchoolDB["4AEE"]);
-            } 
+        function toggleStatusEdit(){ 
+            document.getElementById('status-view-mode').classList.add('hidden'); 
+            document.getElementById('status-edit-mode').classList.remove('hidden'); 
+            const db = getSchoolDB(); 
+            selectStatusPreview(db[currentClass][selectedStudentId].status); 
         }
 
-        // --- AZIONI CHE SCRIVONO NEL DB ---
+        function selectStatusPreview(s){ 
+            pendingStatus=s; 
+            document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('btn-selected')); 
+            const btn = document.getElementById(`btn-${s}`); 
+            if(btn) btn.classList.add('btn-selected'); 
+        }
+
         async function confirmStatusChange(){ 
             if(!pendingStatus) return; 
             const s = localSchoolDB[currentClass][selectedStudentId]; 
@@ -809,6 +729,16 @@
                 list.innerHTML+=`<div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start"><div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span><p class="text-sm text-slate-300 mt-1">${item.description}</p></div>${delBtn}</div>`;
             });
         }
+        
+        async function deleteAgendaItem(id){ 
+            if(confirm("Eliminare?")){ 
+                await _supabase.from('agenda').delete().eq('id', id); 
+                const agendaReq = await _supabase.from('agenda').select('*');
+                if(agendaReq.data) onlineAgenda = agendaReq.data;
+                renderAgendaList(); 
+            } 
+        }
+        function toggleNoticeModal(){const m=document.getElementById('modal-notices');if(m.classList.contains('hidden'))m.classList.remove('hidden');else m.classList.add('hidden');}
     </script>
 </body>
 </html>
