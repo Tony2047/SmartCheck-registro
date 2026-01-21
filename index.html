@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v87</title>
+    <title>SmartCheck - School OS v88</title>
     <meta name="theme-color" content="#050b14">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -25,12 +24,6 @@
 
         .fade-in { animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(10px); }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-
-        /* STATUS INDICATOR */
-        #db-indicator { position: fixed; top: 10px; right: 10px; width: 10px; height: 10px; border-radius: 50%; z-index: 9999; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .db-ok { background-color: #22c55e; box-shadow: 0 0 10px #22c55e; }
-        .db-err { background-color: #ef4444; box-shadow: 0 0 10px #ef4444; }
-        .db-load { background-color: #eab308; animation: pulse 1s infinite; }
 
         /* STATUS COLORS */
         .status-bagno { border: 1px solid #06b6d4 !important; background: linear-gradient(145deg, rgba(8, 51, 68, 0.9), rgba(22, 78, 99, 0.4)) !important; color: #67e8f9 !important; animation: pulse 2s infinite; }
@@ -80,8 +73,6 @@
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col overflow-x-hidden selection:bg-blue-500">
 
-    <div id="db-indicator" class="db-load" title="Stato Database"></div>
-
     <div id="view-login" class="fixed inset-0 z-[100] bg-[#050b14] flex items-center justify-center p-4">
         <div class="relative z-10 w-full max-w-5xl h-[600px] glass-panel rounded-3xl overflow-hidden flex shadow-2xl fade-in">
             <div class="w-1/2 bg-gradient-to-br from-blue-600/20 to-purple-900/40 p-12 flex flex-col justify-between relative border-r border-white/5">
@@ -90,7 +81,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v87.0 • Final Edition</div>
+                <div class="text-xs font-mono text-slate-500">v88.0 • Supabase Connected</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -99,15 +90,14 @@
                         <input type="text" id="input-username" placeholder="cognome.nome" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center font-bold lowercase transition-all">
                         <div id="password-container" class="hidden space-y-5">
                             <p class="text-center text-sm font-bold text-blue-400 uppercase tracking-widest" id="user-welcome">--</p>
-                            <input type="password" id="input-password" placeholder="Password (Il tuo Nome)" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center">
-                            <button id="btn-login-final" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
+                            <input type="password" id="input-password" placeholder="Password" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center">
+                            <button onclick="processAuth()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
                             <button onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-white underline">Indietro</button>
                         </div>
-                        <button id="btn-next" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                        <button id="btn-next" onclick="verifyUser()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
                     </div>
-                    <p id="login-error" class="text-red-400 text-xs font-bold text-center hidden bg-red-900/20 p-2 rounded border border-red-900/50"><i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="error-text">Credenziali Errate</span></p>
+                    <p id="login-error" class="text-red-400 text-xs font-bold text-center hidden bg-red-900/20 p-2 rounded border border-red-900/50"><i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="error-text">Utente non trovato</span></p>
                 </div>
-                <button onclick="hardReset()" class="mt-12 text-[9px] text-slate-600 hover:text-red-400 font-mono transition-colors italic border-b border-transparent hover:border-red-400">Resetta Dati Browser</button>
             </div>
         </div>
     </div>
@@ -145,7 +135,6 @@
         </header>
 
         <main class="flex-grow flex flex-col items-center w-full px-4 pb-40 pt-8">
-            <div id="loading-grid" class="hidden py-32 text-center"><div class="loader mb-4"></div><p class="text-slate-500 text-xs font-mono uppercase tracking-widest">Sincronizzazione Cloud...</p></div>
             <div id="history-warning" class="hidden w-full max-w-md bg-yellow-900/20 border border-yellow-500/30 rounded-full py-2 px-6 mb-8 flex items-center justify-center gap-3 text-yellow-400 backdrop-blur-sm animate-pulse"><i class="fa-solid fa-clock-rotate-left"></i> <span class="text-xs font-black uppercase tracking-widest">Visualizzazione Archivio</span></div>
             <div id="bathroom-bar" class="w-full max-w-2xl mb-6 flex justify-center"></div>
             <div class="grid grid-cols-3 gap-24 w-full max-w-[95%]" id="classroom-grid"></div>
@@ -173,23 +162,8 @@
     </div>
 
     <div id="modal-agenda" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic"><span class="text-pink-500">AGENDA</span> CLASSE</h2><div class="flex gap-3"><button id="btn-add-agenda" onclick="openAddAgendaModal()" class="hidden px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider">Nuovo +</button><button onclick="document.getElementById('modal-agenda').classList.add('hidden')" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div></div><div class="flex gap-4 mb-4"><div class="bg-slate-800 px-4 py-2 rounded text-xs font-bold text-slate-300 border-l-4 border-green-500 uppercase">Compiti</div><div class="bg-slate-800 px-4 py-2 rounded text-xs font-bold text-slate-300 border-l-4 border-red-500 uppercase">Verifiche</div></div><div class="overflow-y-auto flex-grow custom-scrollbar"><div id="agenda-list" class="space-y-3"></div></div></div></div>
-    
-    <div id="modal-add-agenda" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-md p-8 rounded-3xl shadow-2xl relative">
-            <button onclick="document.getElementById('modal-add-agenda').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white text-xl z-50">✕</button>
-            <h2 class="text-xl font-bold text-white mb-6 uppercase">Nuovo Impegno</h2>
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4"><button onclick="selectAgendaType('compito')" id="btn-type-compito" class="py-3 bg-slate-800 border border-green-500/30 text-green-400 font-bold rounded-xl hover:bg-green-900/20 transition">COMPITO</button><button onclick="selectAgendaType('verifica')" id="btn-type-verifica" class="py-3 bg-slate-800 border border-red-500/30 text-red-400 font-bold rounded-xl hover:bg-red-900/20 transition">VERIFICA</button></div>
-                <div><label class="text-[10px] text-slate-500 uppercase font-bold">Data</label><input type="date" id="agenda-date" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1"></div>
-                <div><label class="text-[10px] text-slate-500 uppercase font-bold">Materia</label><select id="agenda-subject" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1"></select></div>
-                <div><label class="text-[10px] text-slate-500 uppercase font-bold">Descrizione</label><textarea id="agenda-desc" rows="3" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1" placeholder="Cosa studiare..."></textarea></div>
-                <div class="flex gap-2 mt-4"><button onclick="saveAgendaEntry()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-500">SALVA</button></div>
-            </div>
-        </div>
-    </div>
-    
+    <div id="modal-add-agenda" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="glass-panel w-full max-w-md p-8 rounded-3xl shadow-2xl relative"><button onclick="document.getElementById('modal-add-agenda').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white text-xl z-50">✕</button><h2 class="text-xl font-bold text-white mb-6 uppercase">Nuovo Impegno</h2><div class="space-y-4"><div class="grid grid-cols-2 gap-4"><button onclick="selectAgendaType('compito')" id="btn-type-compito" class="py-3 bg-slate-800 border border-green-500/30 text-green-400 font-bold rounded-xl hover:bg-green-900/20 transition">COMPITO</button><button onclick="selectAgendaType('verifica')" id="btn-type-verifica" class="py-3 bg-slate-800 border border-red-500/30 text-red-400 font-bold rounded-xl hover:bg-red-900/20 transition">VERIFICA</button></div><div><label class="text-[10px] text-slate-500 uppercase font-bold">Data</label><input type="date" id="agenda-date" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1"></div><div><label class="text-[10px] text-slate-500 uppercase font-bold">Materia</label><select id="agenda-subject" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1"></select></div><div><label class="text-[10px] text-slate-500 uppercase font-bold">Descrizione</label><textarea id="agenda-desc" rows="3" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1" placeholder="Cosa studiare..."></textarea></div><div class="flex gap-2 mt-4"><button onclick="saveAgendaEntry()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-500">SALVA</button></div></div></div></div>
     <div id="modal-notices" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic uppercase"><span class="text-yellow-500">Bacheca</span> Istituto</h2><button onclick="toggleNoticeModal()" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div><div class="overflow-y-auto flex-grow space-y-3" id="modal-notices-list"></div></div></div>
-    
     <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="bg-[#0f172a] w-full max-w-md h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col"><div id="grades-header-bg" class="cv-header p-6 pb-8 bg-cv-green"><div class="flex justify-between items-start"><h2 class="text-2xl font-black uppercase">Valutazioni</h2><button onclick="document.getElementById('modal-grades').classList.add('hidden')" class="text-white/80 hover:text-white text-xl">✕</button></div><div class="mt-4 flex items-center justify-between"><div><div class="text-sm font-bold opacity-90">Media Generale</div><div class="text-xs opacity-75 mt-1" id="grades-total-count">0 valutazioni</div></div><div class="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center text-3xl font-black bg-white/10" id="grades-total-avg">0.0</div></div></div><div class="bg-[#0f172a] flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar" id="grades-list"></div></div></div>
     <div id="modal-class-list" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[80vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic uppercase tracking-tighter">ELENCO <span id="list-class-name" class="text-blue-500"></span></h2><button onclick="document.getElementById('modal-class-list').classList.add('hidden')" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div><input type="text" id="list-search" placeholder="Cerca studente..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:border-blue-500 outline-none mb-4"><div class="overflow-y-auto flex-grow custom-scrollbar"><ul id="full-student-list" class="space-y-2"></ul></div></div></div>
     
@@ -228,131 +202,155 @@
     <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="bg-[#0f172a] w-full max-w-3xl rounded-3xl p-8 border border-slate-700 shadow-2xl relative"><div class="flex justify-between items-start mb-6"><div><h2 id="modal-detail-name" class="text-4xl font-black text-white tracking-tight">Nome Cognome</h2><div class="flex gap-4 mt-4 text-xs font-bold uppercase tracking-widest"><button onclick="switchTab('presence')" id="tab-presence" class="text-blue-400 border-b-2 border-blue-400 pb-1">Presenze</button><button onclick="switchTab('grades')" id="tab-grades" class="text-slate-500 hover:text-white pb-1">Voti</button><button onclick="switchTab('notes')" id="tab-notes" class="text-slate-500 hover:text-white pb-1">Note</button></div></div><button onclick="document.getElementById('modal-student-detail').classList.add('hidden')" class="bg-slate-800 p-2 rounded-lg text-slate-400 hover:text-white">✕</button></div>
     
     <div id="content-presence"><div class="grid grid-cols-2 gap-6 mb-8"><div id="status-card" class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 group transition-all"><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Stato Attuale</div><div id="status-view-mode" class="cursor-pointer"><div id="modal-detail-status" class="text-3xl font-black text-white">--</div><div id="status-edit-hint" class="hidden text-[10px] text-blue-400 mt-2 font-mono items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-pen"></i> CLICCA PER MODIFICARE</div></div><div id="status-edit-mode" class="hidden"><div class="grid grid-cols-2 gap-2 mt-1"><button onclick="selectStatusPreview('presente')" id="btn-presente" class="status-btn py-2 text-xs font-bold bg-green-900/40 text-green-400 border border-green-600/50 rounded">PRESENTE</button><button onclick="selectStatusPreview('bagno')" id="btn-bagno" class="status-btn py-2 text-xs font-bold bg-cyan-900/40 text-cyan-400 border border-cyan-600/50 rounded">BAGNO</button><button onclick="selectStatusPreview('ritardo')" id="btn-ritardo" class="status-btn py-2 text-xs font-bold bg-orange-900/40 text-orange-400 border border-orange-600/50 rounded">RITARDO</button><button onclick="selectStatusPreview('seconda_ora')" id="btn-seconda_ora" class="status-btn py-2 text-xs font-bold bg-violet-900/40 text-violet-400 border border-violet-600/50 rounded">2° ORA</button><button onclick="selectStatusPreview('uscita_anticipata')" id="btn-uscita_anticipata" class="status-btn py-2 text-xs font-bold bg-yellow-900/40 text-yellow-400 border border-yellow-600/50 rounded">USCITA</button><button onclick="selectStatusPreview('assente')" id="btn-assente" class="status-btn py-2 text-xs font-bold bg-red-900/40 text-red-400 border border-red-600/50 rounded">ASSENTE</button></div><div class="flex gap-2 mt-3"><button onclick="confirmStatusChange()" class="flex-grow py-3 bg-blue-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow-lg">APPLICA</button><button onclick="toggleStatusEdit()" class="px-4 py-3 bg-slate-700 text-slate-300 font-bold text-xs rounded-lg">✕</button></div></div></div><div class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center"><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Uscite</div><div id="modal-detail-count" class="text-4xl font-black text-white">0</div></div></div><div class="bg-[#1e293b] rounded-xl overflow-hidden border border-slate-700/50"><table class="w-full text-left text-sm font-mono text-slate-300"><thead class="bg-slate-800 text-[10px] uppercase font-bold text-slate-400"><tr><th class="px-6 py-3">Uscita</th><th class="px-6 py-3">Rientro</th><th class="px-6 py-3 text-right">Stato</th></tr></thead><tbody id="modal-history-body" class="divide-y divide-slate-800"></tbody></table></div></div>
-    <div id="content-grades" class="hidden"><div id="teacher-subject-block" class="mb-4 text-center"><span class="text-xs font-bold text-slate-500 uppercase">Materia:</span><select id="grade-subject-select" class="ml-2 bg-slate-900 border border-slate-600 text-white rounded p-1 text-xs font-bold uppercase"><option>Generale</option></select></div><div id="grade-input-area" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6 flex gap-4 items-end"><div class="flex-grow"><label class="text-[10px] text-slate-400 font-bold uppercase">Voto</label><select id="new-grade-value" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 font-mono font-bold text-sm"><option value="10">10</option><option value="9.75">10-</option><option value="9.5">9 1/2</option><option value="9.25">9+</option><option value="9">9</option><option value="8.75">9-</option><option value="8.5">8 1/2</option><option value="8.25">8+</option><option value="8">8</option><option value="7.75">8-</option><option value="7.5">7 1/2</option><option value="7.25">7+</option><option value="7">7</option><option value="6.75">7-</option><option value="6.5">6 1/2</option><option value="6.25">6+</option><option value="6">6</option><option value="5.75">6-</option><option value="5.5">5 1/2</option><option value="5.25">5+</option><option value="5">5</option><option value="4.75">5-</option><option value="4.5">4 1/2</option><option value="4.25">4+</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></div><div class="flex-grow"><label class="text-[10px] text-slate-400 font-bold uppercase">Tipo</label><select id="new-grade-type" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 text-sm"><option>Scritto</option><option>Orale</option><option>Pratico</option></select></div><button onclick="addGrade()" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-500 h-10 uppercase text-xs">Aggiungi</button></div><div class="bg-[#1e293b] rounded-xl border border-slate-700/50 max-h-64 overflow-y-auto"><table class="w-full text-left"><thead class="bg-slate-800 text-[10px] uppercase font-bold text-slate-400"><tr><th class="px-6 py-3">Data</th><th class="px-6 py-3">Materia</th><th class="px-6 py-3">Tipo</th><th class="px-6 py-3 text-right">Voto</th><th class="px-6 py-3"></th></tr></thead><tbody id="teacher-grades-list" class="text-sm font-mono text-slate-300 divide-y divide-slate-800"></tbody></table></div></div>
-    <div id="content-notes" class="hidden"><div id="teacher-note-input" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6"><textarea id="note-text" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-3 text-sm mb-3" rows="3" placeholder="Scrivi una nota..."></textarea><div class="flex justify-between items-center"><select id="note-type" class="bg-slate-900 border border-slate-600 text-white rounded-lg p-2 text-xs font-bold uppercase"><option value="info">Annotazione</option><option value="warning">Richiamo</option></select><button onclick="addNote()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-500 text-xs uppercase">Salva</button></div></div><div class="bg-[#1e293b] rounded-xl border border-slate-700/50 max-h-64 overflow-y-auto"><div id="notes-list" class="p-4 space-y-3"></div></div></div></div></div>
+    
+    <div id="content-grades" class="hidden"><div id="teacher-subject-block" class="mb-4 text-center"><span class="text-xs font-bold text-slate-500 uppercase">Materia:</span><span id="teacher-subject-name" class="text-green-400 font-bold ml-2">--</span></div><div id="grade-input-area" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6 flex gap-4 items-end"><div class="flex-grow"><label class="text-[10px] text-slate-400 font-bold uppercase">Voto</label>
+        <select id="new-grade-value" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 font-mono font-bold text-sm">
+            <option value="10">10</option><option value="9.75">10-</option><option value="9.5">9 1/2</option><option value="9.25">9+</option><option value="9">9</option><option value="8.75">9-</option><option value="8.5">8 1/2</option><option value="8.25">8+</option><option value="8">8</option><option value="7.75">8-</option><option value="7.5">7 1/2</option><option value="7.25">7+</option><option value="7">7</option><option value="6.75">7-</option><option value="6.5">6 1/2</option><option value="6.25">6+</option><option value="6">6</option><option value="5.75">6-</option><option value="5.5">5 1/2</option><option value="5.25">5+</option><option value="5">5</option><option value="4.75">5-</option><option value="4.5">4 1/2</option><option value="4.25">4+</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option>
+        </select>
+    </div><div class="flex-grow"><label class="text-[10px] text-slate-400 font-bold uppercase">Tipo</label><select id="new-grade-type" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 text-sm"><option>Scritto</option><option>Orale</option><option>Pratico</option></select></div><button onclick="addGrade()" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-500 h-10 uppercase text-xs">Aggiungi</button></div><div class="bg-[#1e293b] rounded-xl border border-slate-700/50 max-h-64 overflow-y-auto"><table class="w-full text-left"><thead class="bg-slate-800 text-[10px] uppercase font-bold text-slate-400"><tr><th class="px-6 py-3">Data</th><th class="px-6 py-3">Materia</th><th class="px-6 py-3">Tipo</th><th class="px-6 py-3 text-right">Voto</th><th class="px-6 py-3"></th></tr></thead><tbody id="teacher-grades-list" class="text-sm font-mono text-slate-300 divide-y divide-slate-800"></tbody></table></div></div>
+    
+    <div id="content-notes" class="hidden">
+        <div id="teacher-note-input" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
+            <textarea id="note-text" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-3 text-sm mb-3" rows="3" placeholder="Scrivi una nota disciplinare o annotazione..."></textarea>
+            <div class="flex justify-between items-center">
+                <select id="note-type" class="bg-slate-900 border border-slate-600 text-white rounded-lg p-2 text-xs font-bold uppercase"><option value="info">Annotazione</option><option value="warning">Richiamo</option></select>
+                <button onclick="addNote()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-500 text-xs uppercase">Salva Nota</button>
+            </div>
+        </div>
+        <div class="bg-[#1e293b] rounded-xl border border-slate-700/50 max-h-64 overflow-y-auto"><div id="notes-list" class="p-4 space-y-3"></div></div>
+    </div>
+    </div></div>
 
     <script>
-        // CONFIGURAZIONE SUPABASE
+        // --- 1. CONFIGURAZIONE DATABASE ---
         const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
         
-        // VARIABILI GLOBALI
-        let supabase = null;
-        let localCache = {}; // Cache dati per interfaccia veloce
-        let currentUser = null;
-        let tempUser = null;
-        let currentClass = null;
-        let selectedStudentId = null;
-        let pendingStatus = null;
-        let selectedSignHour = null;
+        // Inizializza Client
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- 2. DATI GLOBALI ---
+        let currentUser = null; 
+        let tempUser = null; // Per il passaggio intermedio username -> password
+        let currentClass = null; 
+        let selectedStudentId = null; 
+        let pendingStatus = null; 
+        let selectedSignHour = null; 
         let pendingAgendaType = null;
         
-        // INIT SAFE
-        try {
-            supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            document.getElementById('db-indicator').className = 'db-ok';
-            console.log("Supabase OK");
-        } catch(e) {
-            document.getElementById('db-indicator').className = 'db-err';
-            console.error("Supabase Fail", e);
-        }
-
         const STUDENTS_4AEE=["Emiliano Calò","Antonio Navarroli","Filippo Agnitti","Ivan Garofalo","Mattia Galli","Lorenzo Esposito","Kristian Methasa","Stefano Spaczil","Federico Pasqualone","Leonardo Pacchione","Oleksandr Tsikhanskyi","Alessio Tofano","Pierpaolo Carosa","Stefano Camassa","Lorenzo Pisone","Abdula Chackari","Ernest Cupi","Matteo Di Michele","Luca Iarossi","Biagio Recchione","Luigi Mirandola","Mattia Raulli","Giuseppe Palombizio"];
-        const TEACHERS_NAMES=["Antonini Tania","Caputo Tonino","Cardilli Giuseppina","Centofanti Pietro","Chiarelli Sandra","Consalvo Simone","De Michele Alessandra","Del Fattore Alice","Di Bacco Emilio","Di Cioccio Felicia","Di Giacomo Pierluigi","Di Marzio Cinzia","Di Mascio Stefano","Di Tella Arianna","Fabrizi Paola","Federico Anna Lucia","Giammarco Fulvia","Guadagnoli Francesco","Liberatore Walter","Manna Valeria","Mariani Monica","Marinucci Chiara","Mascio Fabio","Mascitti Valentina","Mazzara Lucia","Natarelli Francesco","Oddi Pasqualina","Paciocco Marco","Pasqua Franca","Perinetti Tullio","Petrilli Antonio","Piccirilli Stefania","Recanati Giulia","Rizzo Sabrina","Roselli Michele","Rucci Piero","Sabatini Leonardo","Sambuco Nazzareno","Santangelo Marco","Santarelli Fabrizio","Santilli Mirco","Scarsella Alessio","Schiavo Marina","Sciarra Santa","Stampone Agata","Trabucco Silvia","Vallera Alessandra","D'Urbano Antonio","De Dominicis Giovanni","Di Bacco Antonio","Di Cesare Paqualino","Di Nino Ivan","Febbo Katia","Liberatore Piergiuseppe","Pace Dino","Tedeschi Diletta","Vallera Villiam"];
         const ALL_SUBJECTS=["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
         const TEACHER_SUBJECT_MAP = { "Petrilli Antonio": "Sistemi Automatici", "Mascio Fabio": "Elettrotecnica", "Roselli Michele": "TPSEE", "Manna Valeria": "Italiano", "Santilli Mirco": "Matematica", "Di Tella Arianna": "Inglese" };
         const CLASSES_STRUCT={ "ELETTRONICA":["1AEE","2AEE","3AEE","4AEE","5AEE"], "MECCANICA":["1AMM","2AMM","3AMM","4AMM","5AMM","4 MAUT","4 MROB","5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"], "CHIMICA":["1ACM","2ACM","3ACM","4ACM","5ACM"] };
+        
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
 
-        // 1. GESTIONE EVENTI (DOPO IL CARICAMENTO)
-        window.onload = function() {
-            if(localStorage.getItem('SC_USER')) {
-                currentUser = JSON.parse(localStorage.getItem('SC_USER'));
+        // Variabile "Cache" per simulare il vecchio DB locale
+        let globalSchoolDB = { "4AEE": generateClassInitialState("4AEE", STUDENTS_4AEE) };
+
+        // --- 3. AVVIO E LOGIN ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Binding manuale dei tasti per sicurezza
+            document.getElementById('input-username').addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyUser(); });
+            document.getElementById('input-password').addEventListener('keypress', (e) => { if(e.key === 'Enter') processAuth(); });
+            
+            // Auto-login da localStorage
+            const saved = localStorage.getItem('SC_USER');
+            if (saved) {
+                currentUser = JSON.parse(saved);
                 document.getElementById('view-login').classList.add('hidden');
                 if (currentUser.role === 'stud') loadClassroom('4AEE'); else initHub();
                 startClock();
-            } else {
-                document.getElementById('input-username').addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyUser(); });
-                document.getElementById('input-password').addEventListener('keypress', (e) => { if(e.key === 'Enter') processAuth(); });
-                document.getElementById('btn-next').onclick = verifyUser;
-                document.getElementById('btn-login-final').onclick = processAuth;
+                initRealtime(); // Avvia la connessione dati
             }
-        };
+        });
 
-        // 2. FUNZIONI DI LOGIN (SOLO LOCALI)
-        function generateUsername(fullName, isStudent) {
-            const cleanName = fullName.toLowerCase().replace("ò","o").replace("à","a").replace("'","");
-            const parts = cleanName.split(" ");
-            if(isStudent) return `${parts[1]}.${parts[0]}`; else return `${parts[0]}.${parts[1]}`;
-        }
-        function verifyUser(){ 
+        // STEP 1: Verifica Utente nel Database
+        async function verifyUser(){ 
             const input = document.getElementById('input-username').value.trim().toLowerCase();
-            if(!input) { alert("Inserisci utente"); return; }
+            const err = document.getElementById('login-error');
+            
+            if(!input) return;
 
-            let role = null; let name = "";
+            // Cerchiamo l'utente nel Database 'users' che abbiamo creato
+            const { data, error } = await supabase.from('users').select('*').eq('username', input).single();
 
-            if(input === 'admin') { role = 'admin'; name = 'Amministratore'; }
-            else {
-                let foundProf = TEACHERS_NAMES.find(n => generateUsername(n, false) === input);
-                if(foundProf) { role="prof"; name=foundProf; }
-                else {
-                    let foundStud = STUDENTS_4AEE.find(n => generateUsername(n, true) === input);
-                    if(foundStud) { role="stud"; name=foundStud; }
-                }
-            }
-
-            if(role) {
-                tempUser = { u: input, role: role, name: name };
-                document.getElementById('btn-next').classList.add('hidden');
-                document.getElementById('input-username').classList.add('hidden');
-                document.getElementById('password-container').classList.remove('hidden');
-                document.getElementById('user-welcome').innerText = name;
-                document.getElementById('login-error').classList.add('hidden');
+            if (data) {
+                tempUser = { u: data.username, name: data.full_name, role: data.role, expectedPass: data.password };
+                // UI Switch
+                document.getElementById('btn-next').classList.add('hidden'); 
+                document.getElementById('input-username').classList.add('hidden'); 
+                document.getElementById('password-container').classList.remove('hidden'); 
+                document.getElementById('user-welcome').innerText = data.full_name; 
+                err.classList.add('hidden');
                 setTimeout(() => document.getElementById('input-password').focus(), 100);
             } else {
-                document.getElementById('error-text').innerText = "Utente non trovato";
-                document.getElementById('login-error').classList.remove('hidden');
+                document.getElementById('error-text').innerText = "Utente non trovato"; 
+                err.classList.remove('hidden');
             }
         }
+
+        // STEP 2: Verifica Password
         function processAuth(){
             const inputPass = document.getElementById('input-password').value;
-            let correctPass = "admin";
-            if(tempUser.role !== 'admin') { const parts = tempUser.name.split(" "); if(tempUser.role === 'stud') correctPass = parts[0]; else correctPass = parts[1]; }
             
-            // BYPASS: Accetta sempre in locale se il server non risponde
-            if(true || inputPass === correctPass) {
-                currentUser = tempUser; localStorage.setItem('SC_USER', JSON.stringify(currentUser));
+            if (inputPass === tempUser.expectedPass) {
+                currentUser = tempUser; 
+                localStorage.setItem('SC_USER', JSON.stringify(currentUser));
                 document.getElementById('view-login').classList.add('hidden');
-                if(currentUser.role==='stud') loadClassroom('4AEE'); else initHub();
+                
+                if (currentUser.role === 'stud') loadClassroom('4AEE'); 
+                else initHub();
+                
                 startClock();
-                // START SYNC
-                syncSupabase();
+                initRealtime(); // Scarica dati
+            } else { 
+                document.getElementById('error-text').innerText = "Password Errata"; 
+                document.getElementById('login-error').classList.remove('hidden'); 
             }
         }
 
-        // 3. CORE LOGIC (SUPABASE TRANSLATOR)
-        async function syncSupabase() {
-            if(!supabase) return;
+        function logout(){ localStorage.removeItem('SC_USER'); location.reload(); }
+        function hardReset() { localStorage.clear(); location.reload(); }
+        function resetLogin() { document.getElementById('password-container').classList.add('hidden'); document.getElementById('input-username').classList.remove('hidden'); document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('login-error').classList.add('hidden'); }
+
+        // --- 4. GESTIONE DATI (IL "PONTE") ---
+        // Questa funzione scarica i dati da Supabase e li converte nel formato che il tuo codice originale vuole
+        async function initRealtime() {
+            // Scarica stato banchi
             const { data, error } = await supabase.from('students').select('*');
-            if(!error && data) {
-                document.getElementById('db-indicator').className = 'db-ok';
-                const map = {};
-                data.forEach(row => { map[row.id] = row; });
-                localCache["4AEE"] = map;
-                if(currentClass === "4AEE") renderGrid(map);
-            } else {
-                document.getElementById('db-indicator').className = 'db-err';
+            if (data) {
+                // Mappa i dati nel formato { "banco_01": { ... }, "banco_02": { ... } }
+                const classMap = {};
+                data.forEach(row => {
+                    classMap[row.id] = row; 
+                });
+                globalSchoolDB["4AEE"] = classMap; // Aggiorna la "memoria" del sito
+                
+                // Se siamo in classe, aggiorna la griglia
+                if (currentClass === "4AEE") renderGrid(classMap);
             }
-        }
-        setInterval(syncSupabase, 5000);
 
-        function getSchoolDB(){ 
-            if(localCache["4AEE"]) return localCache;
-            return { "4AEE": generateClassInitialState("4AEE", STUDENTS_4AEE) };
+            // Ascolta modifiche in tempo reale
+            supabase.channel('public:students').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'students' }, payload => {
+                // Aggiorna solo il banco cambiato
+                globalSchoolDB["4AEE"][payload.new.id] = payload.new;
+                renderGrid(globalSchoolDB["4AEE"]);
+                // Se stiamo guardando quel dettaglio, aggiornalo
+                if (selectedStudentId === payload.new.id) openStudentDetail(payload.new.id);
+            }).subscribe();
         }
-        
-        // --- UI RENDER LOGIC (ORIGINAL) ---
+
+        // Funzione helper usata dal tuo codice per leggere i dati
+        function getSchoolDB() { return globalSchoolDB; }
+
+        // Funzione helper usata dal tuo codice per salvare i dati (Ora invia a Supabase)
+        function saveSchoolDB(db) {
+            // Non fa nulla in locale, il salvataggio vero avviene nelle funzioni specifiche (vedi confirmStatusChange)
+        }
+
+        // --- 5. LOGICA ORIGINALE (RESTO DEL CODICE) ---
         function initHub(){ document.getElementById('view-hub').classList.remove('hidden'); document.getElementById('hub-user-name').innerText=currentUser.name; document.getElementById('hub-role-badge').innerText=currentUser.role==='admin'?"ADMIN":"DOCENTE"; renderClassSelector(); }
         function renderClassSelector(){ 
             const container=document.getElementById('classes-container'); container.innerHTML=""; 
@@ -364,18 +362,50 @@
                 container.appendChild(col);
             } 
         }
-
-        function loadClassroom(cls) {
-            currentClass=cls; document.getElementById('view-hub').classList.add('hidden'); document.getElementById('view-classroom').classList.remove('hidden'); document.getElementById('class-header-name').innerText=cls; 
-            const today = getTodayStr(); document.getElementById('date-picker').value = today; changeDate(today); 
+        
+        function loadClassroom(cls){ 
+            currentClass=cls; 
+            document.getElementById('view-hub').classList.add('hidden'); 
+            document.getElementById('view-classroom').classList.remove('hidden'); 
+            document.getElementById('class-header-name').innerText=cls; 
+            
             if(currentUser.role==='stud'){ document.getElementById('back-btn').classList.add('hidden'); document.getElementById('sign-btn').classList.add('hidden'); document.getElementById('dock-right').classList.remove('hidden'); document.getElementById('role-badge').innerText="STUDENTE"; document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-green-900/50 text-green-300 border border-green-700/50 uppercase tracking-widest"; } 
             else { document.getElementById('back-btn').classList.remove('hidden'); document.getElementById('sign-btn').classList.remove('hidden'); document.getElementById('dock-right').classList.add('hidden'); document.getElementById('role-badge').innerText=currentUser.role.toUpperCase(); document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest"; } 
-            syncSupabase(); // Scarica dati freschi
+            
+            // Renderizza subito con quello che abbiamo in cache, poi il realtime aggiornerà
+            renderGrid(getSchoolDB()[currentClass]);
+            startClock();
+        }
+
+        function backToHub(){document.getElementById('view-classroom').classList.add('hidden');document.getElementById('view-hub').classList.remove('hidden');}
+        function resetToToday() { changeDate(getTodayStr()); }
+
+        function changeDate(val) { 
+            selectedDate = val; 
+            const today = getTodayStr(); 
+            const isToday = (val === today); 
+            document.getElementById('date-display').innerText = isToday ? "OGGI" : new Date(val).toLocaleDateString('it-IT'); 
+            const bathBar = document.getElementById('bathroom-bar');
+            if(isToday) { 
+                document.getElementById('history-warning').classList.add('hidden'); 
+                document.getElementById('signature-display').parentElement.classList.remove('hidden'); 
+                renderGrid(getSchoolDB()[currentClass]); 
+                bathBar.classList.remove('hidden'); 
+            } else { 
+                document.getElementById('history-warning').classList.remove('hidden'); 
+                document.getElementById('signature-display').parentElement.classList.add('hidden'); 
+                renderGrid(getHistoryData(currentClass, val)); 
+                bathBar.classList.add('hidden'); 
+            } 
+            renderSignaturesList(); 
+            renderCalendarStrip();
+            if(currentUser.role!=='stud') updateTeacherForm();
         }
 
         function renderGrid(data){
             const grid = document.getElementById('classroom-grid'); if(!grid) return; grid.innerHTML = "";
-            if(!data) return;
+            if(!data) return; // Safety check
+            
             const leftCol = document.createElement('div'); leftCol.className="flex flex-col-reverse gap-6";
             leftCol.innerHTML = `<div class="text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-2 opacity-50 order-last">ALA SINISTRA</div>`;
             for(let i=0; i<4; i++) { const row = document.createElement('div'); row.className="grid grid-cols-2 gap-4"; row.appendChild(createDeskCard(`banco_${String((i*2)+1).padStart(2,'0')}`, data)); row.appendChild(createDeskCard(`banco_${String((i*2)+2).padStart(2,'0')}`, data)); leftCol.appendChild(row); }
@@ -387,23 +417,24 @@
             rightCol.innerHTML = `<div class="text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-2 opacity-50 order-last">ALA DESTRA</div>`;
             for(let i=0; i<4; i++) { const row = document.createElement('div'); row.className="grid grid-cols-2 gap-4"; row.appendChild(createDeskCard(`banco_${String(16+(i*2)).padStart(2,'0')}`, data)); row.appendChild(createDeskCard(`banco_${String(17+(i*2)).padStart(2,'0')}`, data)); rightCol.appendChild(row); }
             grid.appendChild(leftCol); grid.appendChild(centerCol); grid.appendChild(rightCol);
-            let out=null; Object.values(data).forEach(v=>{if(v.status==='bagno')out=v.name;});
+            
+            let out=null;Object.values(data).forEach(v=>{if(v.status==='bagno')out=v.name;});
             document.getElementById('bathroom-bar').innerHTML=out?`<div class="px-6 py-3 rounded-full border border-yellow-500/50 bg-yellow-900/30 flex items-center justify-center gap-3 animate-pulse shadow-lg shadow-yellow-900/20"><div class="w-3 h-3 rounded-full bg-yellow-500"></div><span class="text-xs font-black text-yellow-400 uppercase tracking-widest">BAGNO OCCUPATO: <span class="text-white">${out}</span></span></div>`:`<div class="px-6 py-3 rounded-full border border-green-500/30 bg-green-900/20 flex items-center justify-center gap-3 shadow-lg"><div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-xs font-black text-green-400 uppercase tracking-widest">BAGNO LIBERO</span></div>`;
         }
 
         function createDeskCard(id, data, isSingle = false) {
-            const d = (data && data[id]) ? data[id] : {name: "Libero", status: "assente", last_update: null};
+            const d = data[id] || {name: "Libero", status: "assente", time: "--:--"};
             const div = document.createElement('div'); div.className = isSingle ? "w-[300px]" : "w-full";
             const clickAction = (d.name !== "Libero") ? `onclick="openStudentDetail('${id}')"` : "";
             
-            // Time logic from DB
-            let timeStr = "--:--";
-            if(d.last_update && d.status !== 'assente') {
-                timeStr = new Date(d.last_update).toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+            // TIME FIX: Usa l'orario del DB se disponibile
+            let displayTime = d.time || "--:--";
+            if(d.last_update && d.status !== 'assente' && d.status !== 'presente') {
+                displayTime = new Date(d.last_update).toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
             }
 
             let alertHtml = "";
-            const notes = d.notes || []; 
+            const notes = d.notes || []; // Legge le note dall'oggetto DB
             if(notes.length > 0) {
                 const hasWarning = notes.some(n => n.type === 'warning');
                 const color = hasWarning ? "text-red-500 animate-pulse" : "text-yellow-500";
@@ -411,52 +442,44 @@
             }
             div.innerHTML = `<div ${clickAction} class="relative h-40 w-full rounded-xl p-3 flex flex-col justify-between shadow-lg status-${d.status.replace('_','-')} ${d.name==='Libero'?'opacity-10':'opacity-100'} transition-all cursor-pointer hover:scale-105">
                 ${alertHtml}
-                <div class="flex justify-between items-start"><span class="text-[9px] font-bold opacity-50 font-mono">#${id.split('_')[1]}</span><span class="text-[8px] font-black uppercase tracking-wider opacity-80 py-0.5 px-1.5 rounded bg-black/20">${d.status.replace('_',' ')}</span></div><div class="text-center flex-grow flex items-center justify-center px-1"><h3 class="font-black text-sm leading-tight uppercase w-full break-words text-white/90 group-hover:text-white transition-colors">${d.name}</h3></div><div class="text-center"><span class="text-[9px] font-bold font-mono opacity-60 bg-black/20 px-2 py-0.5 rounded text-white">${timeStr}</span></div></div>`;
+                <div class="flex justify-between items-start"><span class="text-[9px] font-bold opacity-50 font-mono">#${id.split('_')[1]}</span><span class="text-[8px] font-black uppercase tracking-wider opacity-80 py-0.5 px-1.5 rounded bg-black/20">${d.status.replace('_',' ')}</span></div><div class="text-center flex-grow flex items-center justify-center px-1"><h3 class="font-black text-sm leading-tight uppercase w-full break-words text-white/90 group-hover:text-white transition-colors">${d.name}</h3></div><div class="text-center"><span class="text-[9px] font-bold font-mono opacity-60 bg-black/20 px-2 py-0.5 rounded text-white">${displayTime}</span></div></div>`;
             return div;
         }
 
-        // --- ACTIONS (WITH SUPABASE SYNC) ---
-        async function confirmStatusChange(){ 
-            if(!pendingStatus) return; 
-            const db = getSchoolDB();
-            const s = db[currentClass][selectedStudentId]; 
-            const now = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}); 
+        // --- FEATURES (MODIFICATE PER USARE SUPABASE) ---
+        function getGradeColor(v) { if(v>=6) return 'g-green'; if(v>=5) return 'g-orange'; return 'g-red'; }
+        
+        function openGradesModal(){
+            const m=document.getElementById('modal-grades');
+            const list=document.getElementById('grades-list');
+            const student = globalSchoolDB[currentClass][selectedStudentId];
+            const myGrades = student.grades || []; // Usa il campo del DB
             
-            if(pendingStatus==='bagno' && s.status!=='bagno') s.history.push({out:now, in:null}); 
-            if(pendingStatus==='presente' && s.status==='bagno' && s.history.length>0) s.history[s.history.length-1].in=now; 
-            s.status=pendingStatus; 
+            list.innerHTML=""; let subjects={};
+            myGrades.forEach(g=>{if(!subjects[g.subject])subjects[g.subject]=[];subjects[g.subject].push(g);});
             
-            // LOCAL REFRESH
-            renderGrid(db[currentClass]); 
-            openStudentDetail(selectedStudentId); 
-            
-            // SUPABASE PUSH
-            if(supabase) {
-                const nowISO = new Date().toISOString();
-                await supabase.from('students').update({
-                    status: pendingStatus,
-                    last_update: nowISO,
-                    history: s.history
-                }).eq('id', selectedStudentId);
-                syncSupabase(); // refresh cache
-            }
+            if(Object.keys(subjects).length===0)list.innerHTML=`<div class="text-center text-slate-500 mt-10 italic">Nessuna valutazione</div>`;
+            let allV = []; for(let s in subjects) allV = allV.concat(subjects[s].map(g=>g.value));
+            let gAvg = allV.length > 0 ? (allV.reduce((a,b)=>parseFloat(a)+parseFloat(b),0)/allV.length).toFixed(1) : "0.0";
+            const header = document.getElementById('grades-header-bg');
+            if (allV.length === 0 || gAvg >= 6) header.className = "cv-header p-6 pb-8 bg-cv-green";
+            else if (gAvg >= 5) header.className = "cv-header p-6 pb-8 bg-cv-orange";
+            else header.className = "cv-header p-6 pb-8 bg-cv-red";
+            document.getElementById('grades-total-avg').innerText = gAvg;
+            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni`;
+            for(const[subj,votes]of Object.entries(subjects)){
+                let avg=(votes.reduce((a,b)=>parseFloat(a)+parseFloat(b.value),0)/votes.length).toFixed(1);
+                let id = `details-${subj.replace(/\s/g, '')}`;
+                let voteStr = (v) => { let val = parseFloat(v); if(val % 1 === 0.25) return Math.floor(val) + "+"; if(val % 1 === 0.75) return Math.ceil(val) + "-"; if(val % 1 === 0.5) return Math.floor(val) + "½"; return val; };
+                list.innerHTML+=`<div class="mb-3"><div onclick="toggleGradeDetails('${id}')" class="cv-card p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition-colors"><div class="text-white font-bold text-lg">${subj}</div><div class="grade-circle ${getGradeColor(avg)}" style="--percent: ${avg*10}%"><span class="grade-value">${avg}</span></div></div><div id="${id}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl grade-details">${votes.map(v => `<div class="flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0"><div><span class="text-[10px] text-slate-500 font-mono block">${v.date}</span><span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${v.type}</span></div><span class="font-black text-lg ${getGradeColor(v.value).replace('g-','text-g-')}">${voteStr(v.value)}</span></div>`).join('')}</div></div>`;
+            } m.classList.remove('hidden');
         }
-
-        async function addGrade() {
-            const val=document.getElementById('new-grade-value').value; if(!val) return; 
-            const student = localCache[currentClass][selectedStudentId];
-            let grades = student.grades || [];
-            grades.push({subject:TEACHER_SUBJECT_MAP[currentUser.name]||"Generale", value:val, type:document.getElementById('new-grade-type').value, date:new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'})});
-            
-            if(supabase) await supabase.from('students').update({ grades: grades }).eq('id', selectedStudentId);
-            syncSupabase();
-            document.getElementById('new-grade-value').value = "10"; openGradesModal(); 
-        }
-
+        function toggleGradeDetails(id){ document.getElementById(id).classList.toggle('hidden'); }
+        
         function loadTeacherGradesView(){
             const subject=TEACHER_SUBJECT_MAP[currentUser.name]||"Generale";
             const list=document.getElementById('teacher-grades-list');list.innerHTML="";
-            const student = localCache[currentClass][selectedStudentId];
+            const student = globalSchoolDB[currentClass][selectedStudentId];
             if(student && student.grades){
                 const grades = student.grades.filter(g=>g.subject===subject);
                 grades.forEach((g,idx)=>{let color = g.value>=6?'text-green-400':(g.value>=5?'text-orange-400':'text-red-400'); 
@@ -466,32 +489,159 @@
             }document.getElementById('teacher-subject-name').innerText=subject;
         }
 
+        async function addGrade(){
+            const val=document.getElementById('new-grade-value').value; if(!val) return; 
+            const student = globalSchoolDB[currentClass][selectedStudentId];
+            
+            // Crea array se non esiste
+            let grades = student.grades || [];
+            grades.push({subject:TEACHER_SUBJECT_MAP[currentUser.name]||"Generale", value:val, type:document.getElementById('new-grade-type').value, date:new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'})});
+            
+            // Salva su Supabase
+            await supabase.from('students').update({ grades: grades }).eq('id', selectedStudentId);
+            
+            document.getElementById('new-grade-value').value = "10"; 
+            openGradesModal(); // Ricarica visuale
+        }
+
         async function deleteGrade(i){
             if(confirm("Eliminare?")){
-                const student = localCache[currentClass][selectedStudentId];
+                const student = globalSchoolDB[currentClass][selectedStudentId];
                 let grades = student.grades || [];
                 grades.splice(i,1);
-                if(supabase) await supabase.from('students').update({ grades: grades }).eq('id', selectedStudentId);
-                syncSupabase();
-                loadTeacherGradesView();
+                
+                await supabase.from('students').update({ grades: grades }).eq('id', selectedStudentId);
+                loadTeacherGradesView(); // Ricarica visuale
             }
         }
 
-        // --- UTILS (UNCHANGED) ---
-        function logout(){ localStorage.removeItem('SC_USER'); location.reload(); }
-        function hardReset() { localStorage.clear(); location.reload(); }
-        function resetLogin() { document.getElementById('password-container').classList.add('hidden'); document.getElementById('input-username').classList.remove('hidden'); document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('login-error').classList.add('hidden'); }
-        function backToHub(){document.getElementById('view-classroom').classList.add('hidden');document.getElementById('view-hub').classList.remove('hidden');}
-        function resetToToday() { changeDate(getTodayStr()); }
-        function startClock(){setInterval(()=>{const now=new Date();document.getElementById('clock').innerText=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});},1000);}
-        function openListModal() { document.getElementById('modal-class-list').classList.remove('hidden'); filterListModal(); }
-        function filterListModal(){ const db=getSchoolDB(); const ul=document.getElementById('full-student-list'); ul.innerHTML=""; Object.entries(db[currentClass]).forEach(([id,s])=>{ if(s.name!=='Libero') ul.innerHTML+=`<li onclick="openStudentDetail('${id}')" class="p-4 bg-slate-800 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-slate-700"><span>${s.name}</span><span class="text-[10px] uppercase font-bold text-slate-500">${s.status}</span></li>`; }); }
-        function openSignModal(){ document.getElementById('modal-sign').classList.remove('hidden'); } // Signatures are local only for now
-        function openAgendaModal(){document.getElementById('modal-agenda').classList.remove('hidden');} // Agenda is local only for now
-        function toggleNoticeModal(){const m=document.getElementById('modal-notices');if(m.classList.contains('hidden'))m.classList.remove('hidden');else m.classList.add('hidden');}
-        function generateClassInitialState(cls,names){ let data={}; for(let i=1;i<=23;i++){ const id=`banco_${String(i).padStart(2,'0')}`; const name=names[i-1]||"Libero"; data[id]={name, status:name==="Libero"?"assente":"presente", time:name==="Libero"?"--:--":"08:00", history:[]}; } return data; }
+        // NOTES (MODIFICATE PER SUPABASE)
+        function loadNotes(){
+            const list = document.getElementById('notes-list'); list.innerHTML="";
+            const student = globalSchoolDB[currentClass][selectedStudentId];
+            const notes = student.notes || []; // Dal DB
+            
+            if(notes.length===0) list.innerHTML = `<div class="text-center text-slate-500 text-xs py-4">Nessuna nota</div>`;
+            notes.forEach((n, idx) => {
+                const border = n.type === 'warning' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
+                const del = currentUser.role !== 'stud' ? `<button onclick="deleteNote(${idx})" class="text-red-500 text-xs ml-2">Elimina</button>` : '';
+                list.innerHTML += `<div class="bg-slate-800 p-3 rounded mb-2 ${border}"><div class="flex justify-between"><span class="text-[10px] text-slate-400">${n.date} • ${n.teacher}</span>${del}</div><p class="text-sm text-slate-200 mt-1">${n.text}</p></div>`;
+            });
+        }
         
-        // --- DETAIL VIEW ---
+        async function addNote(){
+            const text = document.getElementById('note-text').value; if(!text) return;
+            const type = document.getElementById('note-type').value;
+            const student = globalSchoolDB[currentClass][selectedStudentId];
+            
+            let notes = student.notes || [];
+            notes.push({ text: text, type: type, teacher: currentUser.name, date: new Date().toLocaleDateString('it-IT') });
+            
+            await supabase.from('students').update({ notes: notes }).eq('id', selectedStudentId);
+            
+            document.getElementById('note-text').value = "";
+            loadNotes();
+        }
+
+        async function deleteNote(i){ 
+            if(confirm("Eliminare?")){ 
+                const student = globalSchoolDB[currentClass][selectedStudentId];
+                let notes = student.notes || [];
+                notes.splice(i,1);
+                
+                await supabase.from('students').update({ notes: notes }).eq('id', selectedStudentId);
+                loadNotes(); 
+            } 
+        }
+
+        function startClock(){setInterval(()=>{const now=new Date();document.getElementById('clock').innerText=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const h=now.getHours();const m=now.getMinutes();const totalM=h*60+m;let s="FUORI ORARIO";if(totalM>=505&&totalM<585)s="1° ORA (8:25-9:45)";else if(totalM>=585&&totalM<645)s="2° ORA (9:45-10:45)";else if(totalM>=645&&totalM<705)s="3° ORA (10:45-11:45)";else if(totalM>=705&&totalM<765)s="4° ORA (11:45-12:45)";else if(totalM>=765&&totalM<810)s="5° ORA (12:45-13:30)";document.getElementById('hour-badge').innerText=s;},1000);}
+
+        // UTILS
+        function switchTab(t){
+            document.getElementById('content-presence').classList.toggle('hidden',t!=='presence');
+            document.getElementById('content-grades').classList.toggle('hidden',t!=='grades');
+            document.getElementById('content-notes').classList.toggle('hidden',t!=='notes');
+            
+            const tabs = { 'presence': 'tab-presence', 'grades': 'tab-grades', 'notes': 'tab-notes' };
+            for(const [k,v] of Object.entries(tabs)){
+                const el = document.getElementById(v);
+                if(k===t) { el.classList.add('text-blue-400','border-b-2','border-blue-400'); el.classList.remove('text-slate-500'); }
+                else { el.classList.remove('text-blue-400','border-b-2','border-blue-400'); el.classList.add('text-slate-500'); }
+            }
+            if(t==='grades') loadTeacherGradesView();
+            if(t==='notes') loadNotes();
+        }
+
+        function openAgendaModal(){document.getElementById('modal-agenda').classList.remove('hidden');if(currentUser.role!=='stud')document.getElementById('btn-add-agenda').classList.remove('hidden');renderAgendaList();}
+        function renderAgendaList(){const list=document.getElementById('agenda-list');list.innerHTML="";const db=getAgendaDB();(db[currentClass]||[]).forEach((item,idx)=>{let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; const delBtn = currentUser.role!=='stud'?`<button onclick="deleteAgendaItem(${idx})" class="text-red-500 ml-4"><i class="fa-solid fa-trash"></i></button>`:''; list.innerHTML+=`<div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start"><div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span><p class="text-sm text-slate-300 mt-1">${item.desc}</p></div>${delBtn}</div>`;});}
+        function deleteAgendaItem(idx){ if(confirm("Eliminare?")){ const db=getAgendaDB(); db[currentClass].splice(idx,1); saveAgendaDB(db); renderAgendaList(); } }
+        function openAddAgendaModal(){ document.getElementById('modal-add-agenda').classList.remove('hidden'); const sel = document.getElementById('agenda-subject'); sel.innerHTML = ""; ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`); }
+        function selectAgendaType(t){ pendingAgendaType=t; document.getElementById('btn-type-compito').className=t==='compito'?'btn-selected py-3 bg-green-900/40':'py-3 bg-slate-800'; document.getElementById('btn-type-verifica').className=t==='verifica'?'btn-selected py-3 bg-red-900/40':'py-3 bg-slate-800'; }
+        function saveAgendaEntry(){ if(!pendingAgendaType) return; const d=new Date(document.getElementById('agenda-date').value); const db=getAgendaDB(); if(!db[currentClass]) db[currentClass]=[]; db[currentClass].push({date:`${d.getDate()}/${d.getMonth()+1}`, subject:document.getElementById('agenda-subject').value, type:pendingAgendaType, desc:document.getElementById('agenda-desc').value}); saveAgendaDB(db); document.getElementById('modal-add-agenda').classList.add('hidden'); renderAgendaList(); }
+        function openListModal(){ document.getElementById('modal-class-list').classList.remove('hidden'); filterListModal(); }
+        function filterListModal(){ const db=getSchoolDB(); const ul=document.getElementById('full-student-list'); ul.innerHTML=""; Object.entries(db[currentClass]).forEach(([id,s])=>{ if(s.name!=='Libero') ul.innerHTML+=`<li onclick="openStudentDetail('${id}')" class="p-4 bg-slate-800 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-slate-700"><span>${s.name}</span><span class="text-[10px] uppercase font-bold text-slate-500">${s.status}</span></li>`; }); }
+        
+        // --- CALENDAR & REGISTER (REMAIN LOCAL FOR NOW, AS REQUESTED) ---
+        function openSignModal(){ 
+            const m = document.getElementById('modal-sign'); m.classList.remove('hidden'); 
+            const isStud = currentUser.role === 'stud';
+            if (isStud) {
+                document.getElementById('reg-header-student').classList.remove('hidden');
+                document.getElementById('reg-header-teacher').classList.add('hidden');
+                document.getElementById('new-signature-form').classList.add('hidden');
+            } else {
+                document.getElementById('reg-header-student').classList.add('hidden');
+                document.getElementById('reg-header-teacher').classList.remove('hidden');
+                updateTeacherForm();
+            }
+            renderCalendarStrip(); renderSignaturesList(); 
+        }
+
+        function updateTeacherForm() {
+            const today = getTodayStr();
+            const form = document.getElementById('new-signature-form');
+            if (selectedDate === today) form.classList.remove('hidden'); else form.classList.add('hidden');
+        }
+
+        function renderCalendarStrip() {
+            const container = document.getElementById('cv-calendar-container'); container.innerHTML = "";
+            const days = ['D', 'L', 'M', 'M', 'G', 'V', 'S']; 
+            const today = new Date();
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(today.getDate() - i);
+                const isoDate = d.toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
+                const isSelected = isoDate === selectedDate;
+                const isToday = isoDate === getTodayStr();
+                const isFuture = d > today;
+
+                const div = document.createElement('div');
+                div.className = `cv-day ${isSelected?'active':''} ${isToday?'today':''} ${isFuture?'future':''}`;
+                div.innerHTML = `<span class="cv-day-letter">${days[d.getDay()]}</span><div class="cv-day-number">${d.getDate()}</div>`;
+                if(!isFuture) div.onclick = () => { changeDate(isoDate); }; 
+                container.appendChild(div);
+            }
+        }
+
+        function selectSignHour(h){ selectedSignHour=h; for(let i=1;i<=5;i++) document.getElementById(`hour-btn-${i}`).className=i===h?'hour-selected flex-1 py-1.5 rounded':'flex-1 py-1.5 rounded bg-slate-800'; }
+        function renderSignaturesList(){ 
+            const db=getSignaturesDB(); const list=db[currentClass]||[]; const container=document.getElementById('signatures-list'); container.innerHTML=""; 
+            const dateList = list.filter(s => s.date === selectedDate);
+            if(dateList.length===0){document.getElementById('no-signatures').classList.remove('hidden');}
+            else{
+                document.getElementById('no-signatures').classList.add('hidden');
+                dateList.forEach((sig,index)=>{
+                    const canDelete=currentUser.role==='admin'||currentUser.name===sig.teacher;
+                    const deleteBtn=canDelete?`<button onclick="deleteSignature(${index})" class="text-red-500 hover:text-red-300 p-2 ml-auto"><i class="fa-solid fa-trash"></i></button>`:'';
+                    container.innerHTML+=`<div class="bg-black/40 border border-slate-700/50 p-4 rounded-xl flex flex-col gap-2 relative group"><div class="flex justify-between items-start"><span class="text-[10px] font-black bg-blue-600/20 text-blue-400 px-2 py-1 rounded uppercase tracking-wider">${sig.hour}° ORA • ${sig.subject}</span>${deleteBtn}</div><p class="text-sm font-medium text-slate-200 leading-snug">${sig.topic}</p><div class="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><i class="fa-solid fa-user-tie"></i> ${sig.teacher}</div></div>`;
+                });
+            } 
+        }
+        function deleteSignature(i){ const db=getSignaturesDB(); db[currentClass].splice(i,1); saveSignaturesDB(db); renderSignaturesList(); updateSignatureDisplay(); }
+        function saveSignature(){ if(!selectedSignHour) return; const db=getSignaturesDB(); if(!db[currentClass]) db[currentClass]=[]; db[currentClass].push({date: selectedDate, hour:selectedSignHour, teacher:currentUser.name, subject:document.getElementById('subject-search').value, topic:document.getElementById('sign-argomento').value}); saveSignaturesDB(db); updateSignatureDisplay(); document.getElementById('modal-sign').classList.add('hidden'); }
+        function updateSignatureDisplay(){const db=getSignaturesDB(); const list=db[currentClass]||[]; const todayList = list.filter(s => s.date === selectedDate); const el=document.getElementById('signature-display'); if(todayList.length>0){ const last=todayList[todayList.length-1]; el.innerText=`${last.hour}° ${last.subject}: ${last.topic}`; } else { el.innerText="Clicca per Registro"; }}
+        function filterSubjects(){ const input=document.getElementById('subject-search').value.toLowerCase(); const drop=document.getElementById('subject-dropdown'); drop.innerHTML=""; ALL_SUBJECTS.forEach(s=>{ if(s.toLowerCase().includes(input)){ const div=document.createElement('div'); div.innerText=s; div.className="p-2 hover:bg-blue-600 cursor-pointer"; div.onclick=()=>{ document.getElementById('subject-search').value=s; drop.classList.add('hidden'); }; drop.appendChild(div); } }); drop.classList.remove('hidden'); }
+        
+        // STUDENT DETAIL (MODIFICATO PER SUPABASE UPDATE)
         function openStudentDetail(id) { 
             document.getElementById('modal-class-list').classList.add('hidden'); 
             const db=getSchoolDB(); 
@@ -507,8 +657,11 @@
             else if(student.status==='bagno') color="text-cyan-400 animate-pulse"; 
             else if(student.status==='ritardo') color="text-orange-400"; 
             else if(student.status==='assente') color="text-red-400"; 
+            else if(student.status==='uscita_anticipata') color="text-yellow-400"; 
             statusEl.className=`text-3xl font-black ${color}`; 
             
+            // HISTORY
+            document.getElementById('modal-detail-count').innerText=student.history ? student.history.length : 0; 
             const tbody=document.getElementById('modal-history-body'); tbody.innerHTML=""; 
             if(student.history) student.history.forEach(h=>{ 
                 let durationStr = "";
@@ -527,7 +680,7 @@
             editMode.classList.add('hidden'); 
 
             if(currentUser.role!=='stud'){ 
-                viewMode.onclick = toggleStatusEdit;
+                viewMode.onclick = toggleStatusEdit; // Bind function
                 viewMode.classList.add('cursor-pointer'); 
                 document.getElementById('status-edit-hint').classList.remove('hidden'); 
                 document.getElementById('teacher-note-input').classList.remove('hidden'); 
@@ -545,8 +698,43 @@
             document.getElementById('modal-student-detail').classList.remove('hidden'); 
         }
 
-        function toggleStatusEdit(){ document.getElementById('status-view-mode').classList.add('hidden'); document.getElementById('status-edit-mode').classList.remove('hidden'); const db = getSchoolDB(); selectStatusPreview(db[currentClass][selectedStudentId].status); }
-        function selectStatusPreview(s){ pendingStatus=s; document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('btn-selected')); const btn = document.getElementById(`btn-${s}`); if(btn) btn.classList.add('btn-selected'); }
+        function toggleStatusEdit(){ 
+            document.getElementById('status-view-mode').classList.add('hidden'); 
+            document.getElementById('status-edit-mode').classList.remove('hidden'); 
+            const db = getSchoolDB(); 
+            selectStatusPreview(db[currentClass][selectedStudentId].status); 
+        }
+
+        function selectStatusPreview(s){ 
+            pendingStatus=s; 
+            document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('btn-selected')); 
+            const btn = document.getElementById(`btn-${s}`); 
+            if(btn) btn.classList.add('btn-selected'); 
+        }
+
+        async function confirmStatusChange(){ 
+            if(!pendingStatus) return; 
+            const db=getSchoolDB(); 
+            const s=db[currentClass][selectedStudentId]; 
+            const now=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}); 
+            
+            if(pendingStatus==='bagno' && s.status!=='bagno') s.history.push({out:now, in:null}); 
+            if(pendingStatus==='presente' && s.status==='bagno' && s.history.length>0) s.history[s.history.length-1].in=now; 
+            
+            s.status=pendingStatus; 
+            if(pendingStatus==='presente') s.time="08:00"; else s.time=now; 
+            
+            // INVIO A SUPABASE
+            const nowISO = new Date().toISOString();
+            await supabase.from('students').update({ status: pendingStatus, last_update: nowISO, history: s.history }).eq('id', selectedStudentId);
+
+            // AGGIORNO LOCALE (Feedback immediato)
+            renderGrid(getSchoolDB()[currentClass]); 
+            openStudentDetail(selectedStudentId); 
+        }
+        function toggleNoticeModal(){const m=document.getElementById('modal-notices');if(m.classList.contains('hidden'))m.classList.remove('hidden');else m.classList.add('hidden');}
+        function getHistoryData(cls, date) {const hist=JSON.parse(localStorage.getItem('SCHOOL_HISTORY')||'{}');if(hist[cls]&&hist[cls][date])return hist[cls][date];return generateClassInitialState(cls,STUDENTS_4AEE);}
+        function generateClassInitialState(cls,names){ let data={}; for(let i=1;i<=23;i++){ const id=`banco_${String(i).padStart(2,'0')}`; const name=names[i-1]||"Libero"; data[id]={name, status:name==="Libero"?"assente":"presente", time:name==="Libero"?"--:--":"08:00", history:[]}; } return data; }
     </script>
 </body>
 </html>
