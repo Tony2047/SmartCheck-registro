@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v128 (Final Stable)</title>
+    <title>SmartCheck - School OS v129 (Monolith Live)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,9 +19,11 @@
             background-color: #050b14; 
             -webkit-tap-highlight-color: transparent; 
         }
+        
         .mono { 
             font-family: 'JetBrains Mono', monospace; 
         }
+        
         .glass-panel { 
             background: rgba(20, 27, 45, 0.95); 
             backdrop-filter: blur(20px); 
@@ -29,12 +31,15 @@
             border: 1px solid rgba(255, 255, 255, 0.08); 
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
         }
+        
         .hidden { 
             display: none !important; 
         }
+        
         input[type="date"] { 
             color-scheme: dark; 
         }
+        
         input[type="date"]::-webkit-calendar-picker-indicator { 
             position: absolute; 
             top: 0; 
@@ -46,12 +51,15 @@
             opacity: 0; 
             cursor: pointer; 
         }
+        
         ::-webkit-scrollbar { 
             width: 4px; 
         }
+        
         ::-webkit-scrollbar-track { 
             background: #0f172a; 
         }
+        
         ::-webkit-scrollbar-thumb { 
             background: #334155; 
             border-radius: 4px; 
@@ -62,8 +70,12 @@
             opacity: 0; 
             transform: translateY(10px); 
         }
+        
         @keyframes fadeIn { 
-            to { opacity: 1; transform: translateY(0); } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
         }
 
         /* STATUS COLORS */
@@ -73,32 +85,38 @@
             color: #67e8f9 !important; 
             animation: pulse 2s infinite; 
         }
+        
         .status-presente { 
             border: 1px solid #22c55e !important; 
             background: linear-gradient(145deg, rgba(20, 83, 45, 0.5), rgba(5, 46, 22, 0.7)) !important; 
             color: #4ade80 !important; 
         }
+        
         .status-assente { 
             border: 1px solid #ef4444 !important; 
             background: rgba(127, 29, 29, 0.2) !important; 
             color: #ef4444 !important; 
             opacity: 0.6; 
         }
+        
         .status-ritardo { 
             border: 1px solid #f97316 !important; 
             background: linear-gradient(145deg, rgba(67, 20, 7, 0.6), rgba(124, 45, 18, 0.2)) !important; 
             color: #fdba74 !important; 
         }
+        
         .status-seconda-ora { 
             border: 1px solid #8b5cf6 !important; 
             background: linear-gradient(145deg, rgba(76, 29, 149, 0.6), rgba(109, 40, 217, 0.2)) !important; 
             color: #c4b5fd !important; 
         }
+        
         .status-uscita-anticipata { 
             border: 1px solid #eab308 !important; 
             background: linear-gradient(145deg, rgba(66, 32, 6, 0.6), rgba(113, 63, 18, 0.2)) !important; 
             color: #fde047 !important; 
         }
+        
         @keyframes pulse { 
             0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); } 
             70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); } 
@@ -120,11 +138,13 @@
             cursor: pointer; 
             transition: all 0.2s; 
         }
+        
         .tool-btn:hover { 
             transform: translateY(-4px); 
             border-color: rgba(255,255,255,0.3); 
             background: rgba(30, 41, 59, 1); 
         }
+        
         .tool-btn span { 
             font-family: 'JetBrains Mono', monospace; 
             font-size: 9px; 
@@ -133,6 +153,7 @@
             margin-top: 8px; 
             text-transform: uppercase; 
         }
+        
         .tool-agenda { border-bottom: 3px solid #ec4899; } 
         .tool-bacheca { border-bottom: 3px solid #eab308; } 
         .tool-voti { border-bottom: 3px solid #66cc00; }
@@ -141,6 +162,7 @@
         .cv-header { color: white; transition: background-color 0.4s ease; }
         .cv-card { background: #111; border: 1px solid #333; border-radius: 12px; transition: background 0.2s; }
         .cv-card:hover { background: #1a1a1a; }
+        
         .grade-circle { 
             width: 50px; 
             height: 50px; 
@@ -152,6 +174,7 @@
             color: white; 
             position: relative; 
         }
+        
         .grade-circle::before { 
             content: ''; 
             position: absolute; 
@@ -159,6 +182,7 @@
             background: #111; 
             border-radius: 50%; 
         }
+        
         .grade-value { position: relative; z-index: 10; font-size: 14px; }
         
         .g-green { background: conic-gradient(#22c55e var(--percent), #333 0); } 
@@ -180,23 +204,27 @@
             box-shadow: 0 0 15px rgba(255,255,255,0.2); 
             z-index: 10; 
         }
+        
         .status-btn { 
             opacity: 0.5; 
             transition: all 0.2s; 
             border-width: 1px; 
             transform: scale(0.98); 
         }
+        
         .hour-selected { 
             background-color: #2563eb !important; 
             color: white !important; 
             border-color: #3b82f6 !important; 
         }
+        
         .cv-event { 
             border-left-width: 4px; 
             background: rgba(30, 41, 59, 0.5); 
             transition: transform 0.2s; 
             position: relative; 
         }
+        
         .grade-details { 
             border-top: 1px solid #333; 
             background: #0a0a0a; 
@@ -213,6 +241,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.1); 
             margin-bottom: 20px; 
         }
+        
         .cv-day { 
             display: flex; 
             flex-direction: column; 
@@ -223,9 +252,21 @@
             transition: all 0.3s; 
             opacity: 0.5; 
         }
-        .cv-day.active { opacity: 1; transform: scale(1.1); }
+        
+        .cv-day.active { 
+            opacity: 1; 
+            transform: scale(1.1); 
+        }
+        
         .cv-day.today { opacity: 1; } 
-        .cv-day-letter { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+        
+        .cv-day-letter { 
+            font-size: 10px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            color: #64748b; 
+        }
+        
         .cv-day-number { 
             width: 34px; 
             height: 34px; 
@@ -239,10 +280,28 @@
             transition: all 0.3s; 
             border: 2px solid transparent; 
         }
-        .cv-day.active .cv-day-number { background-color: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-        .cv-day.today:not(.active) .cv-day-number { border: 2px solid #ef4444; color: #ef4444; }
-        .cv-day.future { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
-        .cv-day:not(.active):not(.future):hover .cv-day-number { background-color: rgba(255,255,255,0.1); }
+        
+        .cv-day.active .cv-day-number { 
+            background-color: #ef4444; 
+            color: white; 
+            border-color: #ef4444; 
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); 
+        }
+        
+        .cv-day.today:not(.active) .cv-day-number { 
+            border: 2px solid #ef4444; 
+            color: #ef4444; 
+        }
+        
+        .cv-day.future { 
+            opacity: 0.2; 
+            pointer-events: none; 
+            filter: grayscale(1); 
+        }
+        
+        .cv-day:not(.active):not(.future):hover .cv-day-number { 
+            background-color: rgba(255,255,255,0.1); 
+        }
     </style>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col overflow-x-hidden selection:bg-blue-500">
@@ -250,7 +309,7 @@
     <div id="view-login" class="fixed inset-0 z-[100] bg-[#050b14] flex items-center justify-center p-4">
         <div class="relative z-10 w-full max-w-xl glass-panel rounded-3xl overflow-hidden flex flex-col p-8 shadow-2xl">
             <h1 class="text-4xl font-black text-center text-white mb-2"><span class="text-blue-500">SMART</span>CHECK.</h1>
-            <p class="text-center text-slate-400 text-sm mb-8">School OS v128 • Final Stable</p>
+            <p class="text-center text-slate-400 text-sm mb-8">School OS v129 • Final Monolith</p>
             
             <div id="login-container" class="space-y-5">
                 <div id="step-user">
@@ -282,7 +341,7 @@
             <header class="bg-[#0b1121]/90 backdrop-blur-md border-b border-slate-800 px-8 py-4 flex justify-between items-center sticky top-0 z-40">
                 <div class="flex items-center gap-6">
                     <button id="back-btn" onclick="backToHub()" class="p-2.5 bg-slate-800 rounded-xl hover:bg-slate-700 text-slate-400 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
-                    <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">4AEE</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2" title="Connesso"></div></div></div>
+                    <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">4AEE</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2" title="Connesso"></div></div></div>
                 </div>
                 <div class="relative group mx-4">
                     <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 cursor-pointer border border-slate-700 hover:border-blue-500 transition-all" onclick="resetToToday()">
@@ -343,6 +402,7 @@
         <div id="modal-notices" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic uppercase"><span class="text-yellow-500">Bacheca</span> Istituto</h2><button onclick="toggleNoticeModal()" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div><div class="overflow-y-auto flex-grow space-y-3" id="modal-notices-list"></div></div></div>
         
         <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="bg-[#0f172a] w-full max-w-md h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col"><div id="grades-header-bg" class="cv-header p-6 pb-8 bg-cv-green"><div class="flex justify-between items-start"><h2 class="text-2xl font-black uppercase">Valutazioni</h2><button onclick="document.getElementById('modal-grades').classList.add('hidden')" class="text-white/80 hover:text-white text-xl">✕</button></div><div class="mt-4 flex items-center justify-between"><div><div class="text-sm font-bold opacity-90">Media Generale</div><div class="text-xs opacity-75 mt-1" id="grades-total-count">0 valutazioni</div></div><div class="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center text-3xl font-black bg-white/10" id="grades-total-avg">0.0</div></div></div><div class="bg-[#0f172a] flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar" id="grades-list"></div></div></div>
+        
         <div id="modal-class-list" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[80vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic uppercase tracking-tighter">ELENCO <span id="list-class-name" class="text-blue-500"></span></h2><button onclick="document.getElementById('modal-class-list').classList.add('hidden')" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div><input type="text" id="list-search" placeholder="Cerca studente..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:border-blue-500 outline-none mb-4"><div class="overflow-y-auto flex-grow custom-scrollbar"><ul id="full-student-list" class="space-y-2"></ul></div></div></div>
         
         <div id="modal-sign" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -401,17 +461,16 @@
     </div>
 
     <script>
-        /* --- 1. CONFIGURAZIONE SUPABASE --- */
+        // CONFIGURAZIONE SUPABASE
         const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
         
         let _supabase = null;
         try { 
             _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
-            console.log("Database Connected Successfully.");
-        } catch(e) { console.error("Database Error:", e); }
+            console.log("Supabase Client Initialized");
+        } catch(e) { console.error("Supabase Init Error:", e); }
 
-        /* --- 2. DATI E VARIABILI --- */
         const STUDENTS_4AEE=["Emiliano Calò","Antonio Navarroli","Filippo Agnitti","Ivan Garofalo","Mattia Galli","Lorenzo Esposito","Kristian Methasa","Stefano Spaczil","Federico Pasqualone","Leonardo Pacchione","Oleksandr Tsikhanskyi","Alessio Tofano","Pierpaolo Carosa","Stefano Camassa","Lorenzo Pisone","Abdula Chackari","Ernest Cupi","Matteo Di Michele","Luca Iarossi","Biagio Recchione","Luigi Mirandola","Mattia Raulli","Giuseppe Palombizio"];
         const TEACHERS_NAMES=["Antonini Tania","Caputo Tonino","Cardilli Giuseppina","Centofanti Pietro","Chiarelli Sandra","Consalvo Simone","De Michele Alessandra","Del Fattore Alice","Di Bacco Emilio","Di Cioccio Felicia","Di Giacomo Pierluigi","Di Marzio Cinzia","Di Mascio Stefano","Di Tella Arianna","Fabrizi Paola","Federico Anna Lucia","Giammarco Fulvia","Guadagnoli Francesco","Liberatore Walter","Manna Valeria","Mariani Monica","Marinucci Chiara","Mascio Fabio","Mascitti Valentina","Mazzara Lucia","Natarelli Francesco","Oddi Pasqualina","Paciocco Marco","Pasqua Franca","Perinetti Tullio","Petrilli Antonio","Piccirilli Stefania","Recanati Giulia","Rizzo Sabrina","Roselli Michele","Rucci Piero","Sabatini Leonardo","Sambuco Nazzareno","Santangelo Marco","Santarelli Fabrizio","Santilli Mirco","Scarsella Alessio","Schiavo Marina","Sciarra Santa","Stampone Agata","Trabucco Silvia","Vallera Alessandra","D'Urbano Antonio","De Dominicis Giovanni","Di Bacco Antonio","Di Cesare Paqualino","Di Nino Ivan","Febbo Katia","Liberatore Piergiuseppe","Pace Dino","Tedeschi Diletta","Vallera Villiam"];
         const ALL_SUBJECTS=["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
@@ -437,8 +496,9 @@
         let localGradesDB = {};
         let localNotesDB = {};
 
+        // Inizializzazione
         window.onload = function() {
-            // GLOBAL FUNCTIONS FOR HTML BUTTONS
+            // Bind manuale
             window.verifyUser = verifyUser;
             window.processAuth = processAuth;
             window.resetLogin = resetLogin;
@@ -471,31 +531,27 @@
             }
         };
 
-        // ESP SYNC
-        function syncWithESP() { 
-            // Implementazione Realtime qui se necessario
-        }
+        function syncWithESP() {}
         setInterval(syncWithESP, 5000);
 
         function getSchoolDB(){ return localSchoolDB; }
-        function saveSchoolDB(db){ /* Inutile in modalità DB */ }
+        function saveSchoolDB(db){ }
         function getHistoryData(cls, date) {const hist=JSON.parse(localStorage.getItem('SCHOOL_HISTORY')||'{}');if(hist[cls]&&hist[cls][date])return hist[cls][date];return generateClassInitialState(cls,STUDENTS_4AEE);}
         function generateClassInitialState(cls,names){ let data={}; for(let i=1;i<=23;i++){ const id=`banco_${String(i).padStart(2,'0')}`; const name=names[i-1]||"Libero"; data[id]={name, status:name==="Libero"?"assente":"assente", time:"--:--", history:[]}; } return data; }
-        function getSignaturesDB() { const db = localStorage.getItem('SIGNATURES_DB'); return db ? JSON.parse(db) : {}; }
-        function saveSignaturesDB(db) { localStorage.setItem('SIGNATURES_DB', JSON.stringify(db)); }
-        function getAgendaDB() { const db = localStorage.getItem('AGENDA_DB'); return db ? JSON.parse(db) : {}; }
-        function saveAgendaDB(db) { localStorage.setItem('AGENDA_DB', JSON.stringify(db)); }
+        function getSignaturesDB() { return {}; }
+        function saveSignaturesDB(db) {}
+        function getAgendaDB() { return {}; }
+        function saveAgendaDB(db) {}
         function getGradesDB() { return localGradesDB; }
         function saveGradesDB(db) { localGradesDB = db; } 
         function getNotesDB() { return localNotesDB; }
         function saveNotesDB(db) { localNotesDB = db; } 
 
-        // --- AUTH: SUPABASE CONNECTION ---
+        // --- AUTH ---
         async function verifyUser(){ 
             const input = document.getElementById('input-username').value.trim().toLowerCase();
             const err = document.getElementById('login-error');
             const btn = document.getElementById('btn-next');
-            
             if(!input) { alert("Inserisci utente"); return; }
             btn.innerText = "Verifica...";
 
@@ -511,15 +567,14 @@
                 }
                 resolve(null);
             });
-            const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 2000));
+            const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 3000));
             userFound = await Promise.race([dbPromise, timeoutPromise]);
 
             if(!userFound && input === 'admin') userFound = { u: 'admin', name: 'Amministratore', role: 'admin', pass: 'admin' };
 
             if (userFound) {
                 tempUser = userFound;
-                document.getElementById('input-username').classList.add('hidden');
-                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('login-form-container').querySelector('#step-user').classList.add('hidden');
                 document.getElementById('password-container').classList.remove('hidden');
                 document.getElementById('user-welcome').innerText = userFound.name;
                 setTimeout(() => document.getElementById('input-password').focus(), 100);
@@ -547,7 +602,7 @@
         }
 
         function logout(){ localStorage.removeItem('SC_USER'); location.reload(); }
-        function resetLogin() { document.getElementById('password-container').classList.add('hidden'); document.getElementById('input-username').classList.remove('hidden'); document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('login-error').classList.add('hidden'); document.getElementById('btn-next').innerText="CONTINUA"; }
+        function resetLogin() { document.getElementById('password-container').classList.add('hidden'); document.getElementById('login-form-container').querySelector('#step-user').classList.remove('hidden'); document.getElementById('login-error').classList.add('hidden'); document.getElementById('btn-next').innerText="CONTINUA"; }
         function hardReset() { localStorage.clear(); location.reload(); }
 
         function initHub(){ document.getElementById('view-hub').classList.remove('hidden'); document.getElementById('hub-user-name').innerText=currentUser.name; document.getElementById('hub-role-badge').innerText=currentUser.role==='admin'?"ADMIN":"DOCENTE"; renderClassSelector(); }
@@ -783,8 +838,9 @@
             const g = await _supabase.from('grades').select('*');
             if(g.data) onlineGrades = g.data;
             
-            // Aggiorna vista ma NON apre modale verde
+            // Aggiorna vista ma NON apre modale verde (voti generali) se siamo nel dettaglio studente
             loadTeacherGradesView(); 
+            // openGradesModal();  <-- RIMOSSO QUESTO CHE APRIBA IL POPUP SBAGLIATO
         }
 
         async function addNote(){
