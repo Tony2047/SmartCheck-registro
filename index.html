@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v96</title>
+    <title>SmartCheck - School OS v96 (Original Faithful)</title>
     <meta name="theme-color" content="#050b14">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* TRIBUTO AL CODICE ORIGINALE - STILI INTATTI */
+        /* CORE */
         body { font-family: 'Inter', sans-serif; background-color: #050b14; -webkit-tap-highlight-color: transparent; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .glass-panel { background: rgba(20, 27, 45, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
@@ -81,7 +81,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v96.0 • Original + Supabase Login</div>
+                <div class="text-xs font-mono text-slate-500">v96.0 • Original + Supabase</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -226,10 +226,10 @@
         // CONFIGURAZIONE SUPABASE
         const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
+        
+        // INIT SUPABASE
         let supabase = null;
-
-        // INIT SAFE
-        try { supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { console.error(e); }
+        try { supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); console.log("Supabase OK"); } catch(e) { console.error("Supabase Error", e); }
 
         const STUDENTS_4AEE=["Emiliano Calò","Antonio Navarroli","Filippo Agnitti","Ivan Garofalo","Mattia Galli","Lorenzo Esposito","Kristian Methasa","Stefano Spaczil","Federico Pasqualone","Leonardo Pacchione","Oleksandr Tsikhanskyi","Alessio Tofano","Pierpaolo Carosa","Stefano Camassa","Lorenzo Pisone","Abdula Chackari","Ernest Cupi","Matteo Di Michele","Luca Iarossi","Biagio Recchione","Luigi Mirandola","Mattia Raulli","Giuseppe Palombizio"];
         const TEACHERS_NAMES=["Antonini Tania","Caputo Tonino","Cardilli Giuseppina","Centofanti Pietro","Chiarelli Sandra","Consalvo Simone","De Michele Alessandra","Del Fattore Alice","Di Bacco Emilio","Di Cioccio Felicia","Di Giacomo Pierluigi","Di Marzio Cinzia","Di Mascio Stefano","Di Tella Arianna","Fabrizi Paola","Federico Anna Lucia","Giammarco Fulvia","Guadagnoli Francesco","Liberatore Walter","Manna Valeria","Mariani Monica","Marinucci Chiara","Mascio Fabio","Mascitti Valentina","Mazzara Lucia","Natarelli Francesco","Oddi Pasqualina","Paciocco Marco","Pasqua Franca","Perinetti Tullio","Petrilli Antonio","Piccirilli Stefania","Recanati Giulia","Rizzo Sabrina","Roselli Michele","Rucci Piero","Sabatini Leonardo","Sambuco Nazzareno","Santangelo Marco","Santarelli Fabrizio","Santilli Mirco","Scarsella Alessio","Schiavo Marina","Sciarra Santa","Stampone Agata","Trabucco Silvia","Vallera Alessandra","D'Urbano Antonio","De Dominicis Giovanni","Di Bacco Antonio","Di Cesare Paqualino","Di Nino Ivan","Febbo Katia","Liberatore Piergiuseppe","Pace Dino","Tedeschi Diletta","Vallera Villiam"];
@@ -237,7 +237,6 @@
         const CIRCULARS=[{id:104,date:"15/01",title:"Assemblea di Istituto",type:"urgent"},{id:103,date:"14/01",title:"Uscita anticipata classi 5°",type:"info"}];
         const TEACHER_SUBJECT_MAP = { "Petrilli Antonio": "Sistemi Automatici", "Mascio Fabio": "Elettrotecnica", "Roselli Michele": "TPSEE", "Manna Valeria": "Italiano", "Santilli Mirco": "Matematica", "Di Tella Arianna": "Inglese" };
         
-        // HUB STRUCT
         const CLASSES_STRUCT={ 
             "ELETTRONICA":["1AEE","2AEE","3AEE","4AEE","5AEE"],
             "MECCANICA":["1AMM","2AMM","3AMM","4AMM","5AMM","4 MAUT","4 MROB","5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"],
@@ -248,21 +247,84 @@
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.onload = function() {
+            // FIX EVENT LISTENERS - CRITICAL
+            document.getElementById('btn-next').onclick = verifyUser;
+            document.getElementById('input-username').addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyUser(); });
+            document.getElementById('input-password').addEventListener('keypress', (e) => { if(e.key === 'Enter') processAuth(); });
+
             const saved = localStorage.getItem('SC_USER');
             if (saved) {
                 currentUser = JSON.parse(saved);
                 document.getElementById('view-login').classList.add('hidden');
                 if (currentUser.role === 'stud') loadClassroom('4AEE'); else initHub();
                 startClock();
-            } else {
-                // FIXED EVENT LISTENERS
-                document.getElementById('input-username').addEventListener('keypress', (e) => { if(e.key === 'Enter') verifyUser(); });
-                document.getElementById('input-password').addEventListener('keypress', (e) => { if(e.key === 'Enter') processAuth(); });
-                document.getElementById('btn-next').onclick = verifyUser; // EXPLICIT BIND
-                document.getElementById('btn-login-final').onclick = processAuth; // EXPLICIT BIND
             }
-        });
+        };
+
+        // --- AUTH: HYBRID MODE (SUPABASE + LOCAL FALLBACK) ---
+        function generateUsername(fullName, isStudent) {
+            const cleanName = fullName.toLowerCase().replace("ò","o").replace("à","a").replace("'","");
+            const parts = cleanName.split(" ");
+            if(isStudent) return `${parts[1]}.${parts[0]}`; else return `${parts[0]}.${parts[1]}`;
+        }
+        
+        async function verifyUser() { 
+            const input = document.getElementById('input-username').value.trim().toLowerCase();
+            const err = document.getElementById('login-error');
+            if(!input) { alert("Inserisci utente"); return; }
+
+            let foundUser = null;
+
+            // 1. PROVA SUPABASE
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase.from('users').select('*').eq('username', input).single();
+                    if (data) foundUser = { u: data.username, name: data.full_name, role: data.role, pass: data.password };
+                } catch(e) { console.log("Offline login fallback"); }
+            }
+
+            // 2. FALLBACK LOCALE SE SUPABASE NON RISPONDE O UTENTE NON TROVATO
+            if (!foundUser) {
+                if (input === 'admin') foundUser = { u: 'admin', name: 'Amministratore', role: 'admin', pass: 'admin' };
+                else {
+                     let foundProf = TEACHERS_NAMES.find(n => generateUsername(n, false) === input);
+                     if(foundProf) foundUser = { u: input, name: foundProf, role: 'prof', pass: foundProf.split(' ')[1] }; // Pass semplice
+                     else {
+                        let foundStud = STUDENTS_4AEE.find(n => generateUsername(n, true) === input);
+                        if(foundStud) foundUser = { u: input, name: foundStud, role: 'stud', pass: foundStud.split(' ')[0] }; // Pass semplice
+                     }
+                }
+            }
+
+            if(foundUser) {
+                tempUser = foundUser;
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('input-username').classList.add('hidden');
+                document.getElementById('password-container').classList.remove('hidden');
+                document.getElementById('user-welcome').innerText = tempUser.name;
+                err.classList.add('hidden');
+                setTimeout(() => document.getElementById('input-password').focus(), 100);
+            } else {
+                document.getElementById('error-text').innerText = "Utente non trovato (Offline?)";
+                err.classList.remove('hidden');
+            }
+        }
+
+        function processAuth(){
+            const inputPass = document.getElementById('input-password').value;
+            // Accetta password corretta OPPURE 'admin' come master key per l'Open Day
+            if(inputPass === tempUser.pass || inputPass === 'admin') {
+                currentUser = tempUser; 
+                localStorage.setItem('SC_USER', JSON.stringify(currentUser));
+                document.getElementById('view-login').classList.add('hidden');
+                if(currentUser.role==='stud') loadClassroom('4AEE'); else initHub();
+                startClock();
+            } else { 
+                document.getElementById('error-text').innerText = "Password Errata"; 
+                document.getElementById('login-error').classList.remove('hidden'); 
+            }
+        }
 
         // ESP SYNC
         function syncWithESP() { console.log("ESP Sync"); }
@@ -280,95 +342,6 @@
         function saveGradesDB(db) { localStorage.setItem('GRADES_DB', JSON.stringify(db)); }
         function getNotesDB() { const db = localStorage.getItem('NOTES_DB'); return db ? JSON.parse(db) : {}; }
         function saveNotesDB(db) { localStorage.setItem('NOTES_DB', JSON.stringify(db)); }
-
-        // --- AUTH LOGIC (SUPABASE INJECTED) ---
-        async function verifyUser(){ 
-            const input = document.getElementById('input-username').value.trim().toLowerCase();
-            const err = document.getElementById('login-error');
-            
-            if(!input) { alert("Inserisci nome utente"); return; }
-
-            // 1. CHIAMATA A SUPABASE PER VERIFICARE L'UTENTE
-            let foundUser = null;
-            if (supabase) {
-                const { data, error } = await supabase.from('users').select('*').eq('username', input).single();
-                if (data) foundUser = data;
-            }
-
-            if (foundUser) {
-                // Utente trovato nel DB
-                tempUser = { u: foundUser.username, name: foundUser.full_name, role: foundUser.role, pass: foundUser.password };
-                showPasswordInput(foundUser.full_name);
-            } else {
-                // FALLBACK LOCALE SE DB NON RISPONDE O UTENTE NON TROVATO (PER EVITARE BLOCCHI)
-                localVerifyUser(input);
-            }
-        }
-
-        function localVerifyUser(input) {
-            let role = null; let name = "";
-            if(input==="admin") { role="admin"; name="Amministratore"; }
-            else {
-                let foundProf = TEACHERS_NAMES.find(n => generateUsername(n, false) === input);
-                if(foundProf) { role="prof"; name=foundProf; }
-                else {
-                    let foundStud = STUDENTS_4AEE.find(n => generateUsername(n, true) === input);
-                    if(foundStud) { role="stud"; name=foundStud; }
-                }
-            }
-            if(role) {
-                tempUser = { u: input, name: name, role: role, pass: null }; // Pass null triggers local logic
-                showPasswordInput(name);
-            } else { 
-                document.getElementById('error-text').innerText = "Utente non trovato"; 
-                document.getElementById('login-error').classList.remove('hidden'); 
-            }
-        }
-
-        function showPasswordInput(name) {
-            document.getElementById('btn-next').classList.add('hidden'); 
-            document.getElementById('input-username').classList.add('hidden'); 
-            document.getElementById('password-container').classList.remove('hidden'); 
-            document.getElementById('user-welcome').innerText = name; 
-            document.getElementById('login-error').classList.add('hidden');
-            setTimeout(() => document.getElementById('input-password').focus(), 100);
-        }
-
-        function processAuth(){
-            const inputPass = document.getElementById('input-password').value;
-            let isValid = false;
-
-            if (tempUser.pass) {
-                // Verifica con Password dal DB
-                if (inputPass === tempUser.pass) isValid = true;
-            } else {
-                // Verifica Locale (Logica originale)
-                let correctPass = "admin";
-                if(tempUser.role !== 'admin') { 
-                    const parts = tempUser.name.split(" "); 
-                    if(tempUser.role === 'stud') correctPass = parts[0]; 
-                    else correctPass = parts[1]; 
-                }
-                if(inputPass === correctPass) isValid = true;
-            }
-
-            if(isValid) {
-                currentUser = tempUser; 
-                localStorage.setItem('SC_USER', JSON.stringify(currentUser));
-                document.getElementById('view-login').classList.add('hidden');
-                if(currentUser.role==='stud') loadClassroom('4AEE'); else initHub();
-                startClock();
-            } else { 
-                document.getElementById('error-text').innerText = "Password Errata"; 
-                document.getElementById('login-error').classList.remove('hidden'); 
-            }
-        }
-        
-        function generateUsername(fullName, isStudent) {
-            const cleanName = fullName.toLowerCase().replace("ò","o").replace("à","a").replace("'","");
-            const parts = cleanName.split(" ");
-            if(isStudent) return `${parts[1]}.${parts[0]}`; else return `${parts[0]}.${parts[1]}`;
-        }
 
         function logout(){ localStorage.removeItem('SC_USER'); location.reload(); }
         function resetLogin() { document.getElementById('password-container').classList.add('hidden'); document.getElementById('input-username').classList.remove('hidden'); document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('login-error').classList.add('hidden'); }
