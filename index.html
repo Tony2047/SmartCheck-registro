@@ -33,6 +33,7 @@
         .btn-selected { transform: scale(1.05); border: 2px solid white !important; }
         .tool-btn { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); width: 70px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 18px; cursor: pointer; transition: all 0.2s; }
         .grade-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; position: relative; }
+        .grade-circle::before { content: ''; position: absolute; inset: 6px; background: #111; border-radius: 50%; }
         .g-green { background: conic-gradient(#22c55e var(--percent), #333 0); } .text-g-green { color: #4ade80; } 
         .g-orange { background: conic-gradient(#f97316 var(--percent), #333 0); } .text-g-orange { color: #fb923c; } 
         .g-red { background: conic-gradient(#ef4444 var(--percent), #333 0); } .text-g-red { color: #f87171; } 
@@ -51,14 +52,14 @@
             <div id="login-container" class="space-y-5">
                 <div id="step-user">
                     <input type="text" id="input-username" placeholder="cognome.nome" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl text-center font-bold outline-none focus:border-blue-500 transition-all mb-4">
-                    <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">CONTINUA</button>
+                    <button type="button" id="btn-next" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">CONTINUA</button>
                 </div>
                 
                 <div id="step-pass" class="hidden">
                     <p class="text-center text-sm font-bold text-blue-400 uppercase tracking-widest mb-4" id="user-welcome">--</p>
                     <input type="password" id="input-password" placeholder="Password (Nome)" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center mb-4">
-                    <button type="button" id="btn-entra" onclick="processAuth()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
-                    <button type="button" onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-white underline text-center mt-4">Indietro</button>
+                    <button type="button" id="btn-entra" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
+                    <button type="button" onclick="location.reload()" class="w-full text-xs text-slate-500 hover:text-white underline text-center mt-4">Indietro</button>
                 </div>
             </div>
             <p id="login-error" class="hidden text-center text-red-500 text-xs font-bold mt-4 p-2 rounded border border-red-900/50">Errore</p>
@@ -159,6 +160,7 @@
         </div>
 
         <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="bg-[#0f172a] w-full max-w-3xl rounded-3xl p-8 border border-slate-700 shadow-2xl relative"><div class="flex justify-between items-start mb-6"><div><h2 id="modal-detail-name" class="text-4xl font-black text-white tracking-tight">Nome Cognome</h2><div class="flex gap-4 mt-4 text-xs font-bold uppercase tracking-widest"><button onclick="switchTab('presence')" id="tab-presence" class="text-blue-400 border-b-2 border-blue-400 pb-1">Presenze</button><button onclick="switchTab('grades')" id="tab-grades" class="text-slate-500 hover:text-white pb-1">Voti</button><button onclick="switchTab('notes')" id="tab-notes" class="text-slate-500 hover:text-white pb-1">Note</button></div></div><button onclick="document.getElementById('modal-student-detail').classList.add('hidden')" class="bg-slate-800 p-2 rounded-lg text-slate-400 hover:text-white">✕</button></div>
+        
         <div id="content-presence"><div class="grid grid-cols-2 gap-6 mb-8"><div id="status-card" class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 group transition-all"><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Stato Attuale</div><div id="status-view-mode" class="cursor-pointer"><div id="modal-detail-status" class="text-3xl font-black text-white">--</div><div id="status-edit-hint" class="hidden text-[10px] text-blue-400 mt-2 font-mono items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-pen"></i> CLICCA PER MODIFICARE</div></div><div id="status-edit-mode" class="hidden"><div class="grid grid-cols-2 gap-2 mt-1"><button onclick="selectStatusPreview('presente')" id="btn-presente" class="status-btn py-2 text-xs font-bold bg-green-900/40 text-green-400 border border-green-600/50 rounded">PRESENTE</button><button onclick="selectStatusPreview('bagno')" id="btn-bagno" class="status-btn py-2 text-xs font-bold bg-cyan-900/40 text-cyan-400 border border-cyan-600/50 rounded">BAGNO</button><button onclick="selectStatusPreview('ritardo')" id="btn-ritardo" class="status-btn py-2 text-xs font-bold bg-orange-900/40 text-orange-400 border border-orange-600/50 rounded">RITARDO</button><button onclick="selectStatusPreview('seconda_ora')" id="btn-seconda_ora" class="status-btn py-2 text-xs font-bold bg-violet-900/40 text-violet-400 border border-violet-600/50 rounded">2° ORA</button><button onclick="selectStatusPreview('uscita_anticipata')" id="btn-uscita_anticipata" class="status-btn py-2 text-xs font-bold bg-yellow-900/40 text-yellow-400 border border-yellow-600/50 rounded">USCITA</button><button onclick="selectStatusPreview('assente')" id="btn-assente" class="status-btn py-2 text-xs font-bold bg-red-900/40 text-red-400 border border-red-600/50 rounded">ASSENTE</button></div><div class="flex gap-2 mt-3"><button onclick="confirmStatusChange()" class="flex-grow py-3 bg-blue-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow-lg">APPLICA</button><button onclick="toggleStatusEdit()" class="px-4 py-3 bg-slate-700 text-slate-300 font-bold text-xs rounded-lg">✕</button></div></div></div><div class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center"><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Uscite</div><div id="modal-detail-count" class="text-4xl font-black text-white">0</div></div></div><div class="bg-[#1e293b] rounded-xl overflow-hidden border border-slate-700/50"><table class="w-full text-left text-sm font-mono text-slate-300"><thead class="bg-slate-800 text-[10px] uppercase font-bold text-slate-400"><tr><th class="px-6 py-3">Uscita</th><th class="px-6 py-3">Rientro</th><th class="px-6 py-3 text-right">Stato</th></tr></thead><tbody id="modal-history-body" class="divide-y divide-slate-800"></tbody></table></div></div>
         
         <div id="content-grades" class="hidden"><div id="teacher-subject-block" class="mb-4 text-center"><span class="text-xs font-bold text-slate-500 uppercase">Materia:</span><span id="teacher-subject-name" class="text-green-400 font-bold ml-2">--</span></div><div id="grade-input-area" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6 flex gap-4 items-end"><div class="flex-grow"><label class="text-[10px] text-slate-400 font-bold uppercase">Voto</label>
@@ -185,7 +187,6 @@
         const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
         
-        // Inizializzazione Client
         let _supabase = null;
         try { 
             _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
@@ -217,7 +218,6 @@
         let onlineAgenda = [];
         let onlineSignatures = [];
         
-        // Appoggio
         let localGradesDB = {};
         let localNotesDB = {};
 
@@ -228,12 +228,17 @@
             window.processAuth = processAuth;
             window.resetLogin = resetLogin;
             
+            // Gestione precisa del tasto Enter nel form di login
             document.getElementById('input-username').addEventListener('keydown', (e) => { 
                 if(e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); verifyUser(); } 
             });
             document.getElementById('input-password').addEventListener('keydown', (e) => { 
                 if(e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); processAuth(); } 
             });
+
+            // Assegnazione click ai bottoni esplicita
+            document.getElementById('btn-next').onclick = verifyUser;
+            document.getElementById('btn-entra').onclick = processAuth;
 
             const saved = localStorage.getItem('SC_USER');
             if (saved) {
@@ -321,19 +326,15 @@
             if(!_supabase) return;
             await loadDayData(selectedDate);
             
-            // Grades
             const g = await _supabase.from('grades').select('*');
             if(g.data) { onlineGrades = g.data; organizeGrades(onlineGrades); }
 
-            // Notes
             const n = await _supabase.from('notes').select('*');
             if(n.data) { onlineNotes = n.data; organizeNotes(onlineNotes); }
             
-            // Agenda
             const a = await _supabase.from('agenda').select('*');
             if(a.data) onlineAgenda = a.data;
 
-            // Listeners
             _supabase.channel('public_updates')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, payload => {
                  if(payload.new && payload.new.date === selectedDate) updateLocalCache([payload.new]);
@@ -349,7 +350,7 @@
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, async () => {
                 const n = await _supabase.from('notes').select('*');
-                if(n.data) { onlineNotes = n.data; organizeNotes(onlineNotes); renderGrid(localSchoolDB["4AEE"]); if(selectedStudentId) loadNotes(); }
+                if(n.data) { onlineNotes = n.data; organizeNotes(onlineNotes); renderGrid(localSchoolDB[currentClass]); if(selectedStudentId) loadNotes(); }
             })
             .subscribe();
         }
@@ -460,6 +461,22 @@
             document.getElementById('note-text').value = ""; loadNotes(); renderGrid(localSchoolDB[currentClass]); 
         }
 
+        async function deleteGrade(studentName, id){
+            if(confirm("Eliminare?")){
+                // Simulazione cancellazione
+                 alert("Per sicurezza, la cancellazione è disabilitata in esta demo.");
+            }
+        }
+        
+        async function deleteAgendaItem(id){ 
+            if(confirm("Eliminare?")){ 
+                await _supabase.from('agenda').delete().eq('id', id); 
+                const agendaReq = await _supabase.from('agenda').select('*');
+                if(agendaReq.data) onlineAgenda = agendaReq.data;
+                renderAgendaList(); 
+            } 
+        }
+
         // --- UI UTILS ---
         function logout(){ localStorage.removeItem('SC_USER'); location.reload(); }
         function resetLogin() { document.getElementById('step-pass').classList.add('hidden'); document.getElementById('step-user').classList.remove('hidden'); }
@@ -479,94 +496,6 @@
         function toggleStatusEdit(){ document.getElementById('status-view-mode').classList.add('hidden'); document.getElementById('status-edit-mode').classList.remove('hidden'); const db = getSchoolDB(); selectStatusPreview(db[currentClass][selectedStudentId].status); }
         function selectStatusPreview(s){ pendingStatus=s; document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('btn-selected')); const btn = document.getElementById(`btn-${s}`); if(btn) btn.classList.add('btn-selected'); }
         function toggleNoticeModal(){const m=document.getElementById('modal-notices');if(m.classList.contains('hidden'))m.classList.remove('hidden');else m.classList.add('hidden');}
-        function openGradesModal(){
-            const m=document.getElementById('modal-grades');
-            const list=document.getElementById('grades-list');
-            let targetUser = currentUser.role === 'stud' ? currentUser.name : document.getElementById('modal-detail-name').innerText;
-            const myGrades = onlineGrades.filter(g => g.student_name === targetUser);
-            list.innerHTML="";
-            let subjects={};
-            myGrades.forEach(g=>{if(!subjects[g.subject])subjects[g.subject]=[];subjects[g.subject].push(g);});
-            if(Object.keys(subjects).length===0)list.innerHTML=`<div class="text-center text-slate-500 mt-10 italic">Nessuna valutazione</div>`;
-            let allV = []; for(let s in subjects) allV = allV.concat(subjects[s].map(g=>g.value));
-            let gAvg = allV.length > 0 ? (allV.reduce((a,b)=>parseFloat(a)+parseFloat(b),0)/allV.length).toFixed(1) : "0.0";
-            const header = document.getElementById('grades-header-bg');
-            if (allV.length === 0 || gAvg >= 6) header.className = "cv-header p-6 pb-8 bg-cv-green";
-            else if (gAvg >= 5) header.className = "cv-header p-6 pb-8 bg-cv-orange";
-            else header.className = "cv-header p-6 pb-8 bg-cv-red";
-            document.getElementById('grades-total-avg').innerText = gAvg;
-            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni`;
-            for(const[subj,votes]of Object.entries(subjects)){
-                let avg=(votes.reduce((a,b)=>parseFloat(a)+parseFloat(b.value),0)/votes.length).toFixed(1);
-                let id = `details-${subj.replace(/\s/g, '')}`;
-                let voteStr = (v) => { let val = parseFloat(v); if(val % 1 === 0.25) return Math.floor(val) + "+"; if(val % 1 === 0.75) return Math.ceil(val) + "-"; if(val % 1 === 0.5) return Math.floor(val) + "½"; return val; };
-                list.innerHTML+=`<div class="mb-3"><div onclick="toggleGradeDetails('${id}')" class="cv-card p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition-colors"><div class="text-white font-bold text-lg">${subj}</div><div class="grade-circle ${getGradeColor(avg)}" style="--percent: ${avg*10}%"><span class="grade-value">${avg}</span></div></div><div id="${id}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl grade-details">${votes.map(v => `<div class="flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0"><div><span class="text-[10px] text-slate-500 font-mono block">${v.date}</span><span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${v.type}</span></div><span class="font-black text-lg ${getGradeColor(v.value).replace('g-','text-g-')}">${voteStr(v.value)}</span></div>`).join('')}</div></div>`;
-            } m.classList.remove('hidden');
-        }
-        function loadTeacherGradesView(){
-            const subject=TEACHER_SUBJECT_MAP[currentUser.name]||"Generale";
-            const list=document.getElementById('teacher-grades-list');
-            list.innerHTML="";
-            const studentName=document.getElementById('modal-detail-name').innerText;
-            const grades = onlineGrades.filter(g => g.student_name === studentName && g.subject === subject);
-            grades.forEach((g,idx)=>{
-                let color = g.value>=6?'text-green-400':(g.value>=5?'text-orange-400':'text-red-400');
-                let disp = parseFloat(g.value);
-                if(disp%1===0.25) disp=Math.floor(disp)+"+"; else if(disp%1===0.75) disp=Math.ceil(disp)+"-"; else if(disp%1===0.5) disp=Math.floor(disp)+"½";
-                list.innerHTML+=`<tr><td class="px-6 py-3">${g.date}</td><td class="px-6 py-3 uppercase text-[10px]">${g.type}</td><td class="px-6 py-3 text-right font-bold ${color}">${disp}</td><td class="px-6 py-3 text-right"></td></tr>`;
-            });
-            document.getElementById('teacher-subject-name').innerText=subject;
-        }
-        function renderAgendaList(){
-            const list=document.getElementById('agenda-list');list.innerHTML="";
-            onlineAgenda.forEach((item,idx)=>{
-                let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; 
-                list.innerHTML+=`<div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start"><div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span><p class="text-sm text-slate-300 mt-1">${item.description}</p></div></div>`;
-            });
-        }
-        function renderSignaturesList(){ 
-            const container=document.getElementById('signatures-list'); container.innerHTML=""; 
-            if(onlineSignatures.length===0){document.getElementById('no-signatures').classList.remove('hidden');}
-            else{
-                document.getElementById('no-signatures').classList.add('hidden');
-                onlineSignatures.forEach((sig,index)=>{
-                    container.innerHTML+=`<div class="bg-black/40 border border-slate-700/50 p-4 rounded-xl flex flex-col gap-2 relative group"><div class="flex justify-between items-start"><span class="text-[10px] font-black bg-blue-600/20 text-blue-400 px-2 py-1 rounded uppercase tracking-wider">${sig.hour}° ORA • ${sig.subject}</span></div><p class="text-sm font-medium text-slate-200 leading-snug">${sig.topic}</p><div class="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><i class="fa-solid fa-user-tie"></i> ${sig.teacher}</div></div>`;
-                });
-            } 
-        }
-        function updateSignatureDisplay(){
-             const todayList = onlineSignatures; 
-             const el=document.getElementById('signature-display'); 
-             if(todayList.length>0){ 
-                 const last=todayList[todayList.length-1]; 
-                 el.innerText=`${last.hour}° ${last.subject}: ${last.topic}`; 
-             } else { el.innerText="Clicca per Registro"; }
-        }
-        function loadNotes(){
-            const list = document.getElementById('notes-list'); list.innerHTML="";
-            const name = document.getElementById('modal-detail-name').innerText;
-            const notes = onlineNotes.filter(n => n.student_name === name);
-            if(notes.length===0) list.innerHTML = `<div class="text-center text-slate-500 text-xs py-4">Nessuna nota</div>`;
-            notes.forEach((n) => {
-                const border = n.type === 'warning' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
-                list.innerHTML += `<div class="bg-slate-800 p-3 rounded mb-2 ${border}"><div class="flex justify-between"><span class="text-[10px] text-slate-400">${n.date} • ${n.teacher_name}</span></div><p class="text-sm text-slate-200 mt-1">${n.text}</p></div>`;
-            });
-        }
-        function startClock(){setInterval(()=>{const now=new Date();document.getElementById('clock').innerText=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const h=now.getHours();const m=now.getMinutes();const totalM=h*60+m;let s="FUORI ORARIO";if(totalM>=505&&totalM<585)s="1° ORA (8:25-9:45)";else if(totalM>=585&&totalM<645)s="2° ORA (9:45-10:45)";else if(totalM>=645&&totalM<705)s="3° ORA (10:45-11:45)";else if(totalM>=705&&totalM<765)s="4° ORA (11:45-12:45)";else if(totalM>=765&&totalM<810)s="5° ORA (12:45-13:30)";document.getElementById('hour-badge').innerText=s;},1000);}
-        function switchTab(t){
-            document.getElementById('content-presence').classList.toggle('hidden',t!=='presence');
-            document.getElementById('content-grades').classList.toggle('hidden',t!=='grades');
-            document.getElementById('content-notes').classList.toggle('hidden',t!=='notes');
-            const tabs = { 'presence': 'tab-presence', 'grades': 'tab-grades', 'notes': 'tab-notes' };
-            for(const [k,v] of Object.entries(tabs)){
-                const el = document.getElementById(v);
-                if(k===t) { el.classList.add('text-blue-400','border-b-2','border-blue-400'); el.classList.remove('text-slate-500'); }
-                else { el.classList.remove('text-blue-400','border-b-2','border-blue-400'); el.classList.add('text-slate-500'); }
-            }
-            if(t==='grades') loadTeacherGradesView();
-            if(t==='notes') loadNotes();
-        }
-        function deleteAgendaItem(idx){} function deleteSignature(i){} function deleteGrade(i){} function deleteNote(i){}
         function getSignaturesDB() { return {}; } function saveSignaturesDB(db) {}
         function getAgendaDB() { return {}; } function saveAgendaDB(db) {}
         function getGradesDB() { return localGradesDB; } function saveGradesDB(db) { localGradesDB = db; } 
