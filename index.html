@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v133 (Final)</title>
+    <title>SmartCheck - School OS v134 (Gold Master)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,7 @@
             color-scheme: dark; 
             background-color: transparent;
             position: relative; 
-            z-index: 20; /* Assicura che sia cliccabile */
+            z-index: 20; 
         }
         input[type="date"]::-webkit-calendar-picker-indicator { 
             filter: invert(1); 
@@ -73,7 +73,6 @@
 
         .btn-selected { opacity: 1 !important; transform: scale(1.05) !important; border: 2px solid white !important; box-shadow: 0 0 15px rgba(255,255,255,0.2); z-index: 10; }
         .status-btn { opacity: 0.5; transition: all 0.2s; border-width: 1px; transform: scale(0.98); }
-        .hour-selected { background-color: #2563eb !important; color: white !important; border-color: #3b82f6 !important; }
         .cv-event { border-left-width: 4px; background: rgba(30, 41, 59, 0.5); transition: transform 0.2s; position: relative; }
         .grade-details { border-top: 1px solid #333; background: #0a0a0a; border-radius: 0 0 12px 12px; overflow: hidden; }
 
@@ -100,7 +99,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v133.0 • Final Definitive</div>
+                <div class="text-xs font-mono text-slate-500">v134.0 • Gold Master</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -761,8 +760,11 @@
         }
         
         async function deleteAgendaItem(id){ 
-            if(confirm("Eliminare?")){ 
+            if(confirm("Eliminare questo impegno?")){ 
+                // Passiamo ID come stringa per sicurezza
                 await _supabase.from('agenda').delete().eq('id', id); 
+                
+                // Refresh
                 const agendaReq = await _supabase.from('agenda').select('*');
                 if(agendaReq.data) onlineAgenda = agendaReq.data;
                 renderAgendaList(); 
@@ -839,7 +841,29 @@
         }
 
         function openAgendaModal(){document.getElementById('modal-agenda').classList.remove('hidden');if(currentUser.role!=='stud')document.getElementById('btn-add-agenda').classList.remove('hidden');renderAgendaList();}
-        function renderAgendaList(){const list=document.getElementById('agenda-list');list.innerHTML="";const db=getAgendaDB();(db[currentClass]||[]).forEach((item,idx)=>{let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; const delBtn = currentUser.role!=='stud'?`<button onclick="deleteAgendaItem(${item.id})" class="text-red-500 ml-4"><i class="fa-solid fa-trash"></i></button>`:''; list.innerHTML+=`<div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start"><div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span><p class="text-sm text-slate-300 mt-1">${item.description}</p></div>${delBtn}</div>`;});}
+        
+        // UPDATED RENDER LIST WITH FIXED DELETE BUTTON
+        function renderAgendaList(){
+            const list=document.getElementById('agenda-list'); list.innerHTML="";
+            
+            onlineAgenda.forEach((item,idx)=>{
+                let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; 
+                
+                // TASTO ELIMINA MIGLIORATO
+                // Aggiunto stopPropagation per sicurezza e stile migliore
+                const delBtn = currentUser.role !== 'stud' ? 
+                    `<button onclick="event.stopPropagation(); deleteAgendaItem('${item.id}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors ml-4 z-50 flex-shrink-0"><i class="fa-solid fa-trash"></i></button>` : ''; 
+                
+                list.innerHTML+=`
+                    <div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span>
+                            <p class="text-sm text-slate-300 mt-1">${item.description}</p>
+                        </div>
+                        ${delBtn}
+                    </div>`;
+            });
+        }
         function openAddAgendaModal(){ document.getElementById('modal-add-agenda').classList.remove('hidden'); const sel = document.getElementById('agenda-subject'); sel.innerHTML = ""; ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`); }
         function selectAgendaType(t){ pendingAgendaType=t; document.getElementById('btn-type-compito').className=t==='compito'?'btn-selected py-3 bg-green-900/40':'py-3 bg-slate-800'; document.getElementById('btn-type-verifica').className=t==='verifica'?'btn-selected py-3 bg-red-900/40':'py-3 bg-slate-800'; }
         function saveAgendaEntry(){ if(!pendingAgendaType) return; const d=new Date(document.getElementById('agenda-date').value); const db=getAgendaDB(); if(!db[currentClass]) db[currentClass]=[]; db[currentClass].push({date:`${d.getDate()}/${d.getMonth()+1}`, subject:document.getElementById('agenda-subject').value, type:pendingAgendaType, desc:document.getElementById('agenda-desc').value}); saveAgendaDB(db); document.getElementById('modal-add-agenda').classList.add('hidden'); renderAgendaList(); }
@@ -1077,7 +1101,8 @@
             // Filter onlineAgenda by current Class if needed (assuming all are 4AEE for now)
             onlineAgenda.forEach((item,idx)=>{
                 let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; 
-                const delBtn = currentUser.role!=='stud'?`<button onclick="deleteAgendaItem(${item.id})" class="text-red-500 ml-4"><i class="fa-solid fa-trash"></i></button>`:''; 
+                // FIXED DELETE BUTTON
+                const delBtn = currentUser.role!=='stud'?`<button onclick="event.stopPropagation(); deleteAgendaItem('${item.id}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors ml-4 z-50 flex-shrink-0"><i class="fa-solid fa-trash"></i></button>`:''; 
                 list.innerHTML+=`<div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start"><div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span><p class="text-sm text-slate-300 mt-1">${item.description}</p></div>${delBtn}</div>`;
             });
         }
