@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   const body = req.body || req.query;
   const tagID = body.tagID;
-  const inputType = body.type || 'short'; 
+  const inputType = body.type || 'short'; // 'short', 'bath', 'exit'
 
   if (!tagID) return res.status(400).json({ error: 'Manca tagID' });
 
@@ -43,53 +43,47 @@ export default async function handler(req, res) {
 
     let newStatus = 'presente';
     let ledColor = 'verde';
-    let msg = 'Benvenuto';
+    let msg = 'Operazione Completata';
 
-    // --- LOGICA AGGIORNATA (FIX ASSENTE) ---
+    // --- LOGICA TEMPORALE PRECISA ---
 
-    if (inputType === 'long') {
-        // --- LOGICA BAGNO ---
-        // Se è assente e fa un tocco lungo, lo facciamo entrare direttamente (caso raro ma possibile)
+    if (inputType === 'exit') {
+        // --- USCITA ANTICIPATA (Hold > 3 sec) ---
+        // Forza sempre l'uscita anticipata
+        newStatus = 'uscita_anticipata';
+        ledColor = 'uscita';
+        msg = 'Uscita Anticipata';
+    } 
+    else if (inputType === 'bath') {
+        // --- BAGNO (Hold 1.5 - 3 sec) ---
         if (currentRecord && currentRecord.status === 'bagno') {
-            newStatus = 'presente';
+            newStatus = 'presente'; // Rientro
             ledColor = 'verde';
-            msg = 'Rientrato dal Bagno';
+            msg = 'Rientro dal Bagno';
         } else {
-            newStatus = 'bagno';
+            newStatus = 'bagno'; // Vado
             ledColor = 'blu';
             msg = 'Uscita Bagno';
         }
-    } else {
-        // --- LOGICA ENTRATA / USCITA ---
+    } 
+    else {
+        // --- ENTRATA (Short Tap < 1.5 sec) ---
         
-        // FIX QUI: Se non esiste record OPPURE se lo stato è 'assente' -> È UNA NUOVA ENTRATA
-        if (!currentRecord || currentRecord.status === 'assente') {
-            
-            if (minutes < 520) { 
-                newStatus = 'presente'; ledColor = 'verde'; msg = 'Entrata Regolare';
-            } 
-            else if (minutes >= 520 && minutes < 525) { 
-                newStatus = 'ritardo'; ledColor = 'giallo'; msg = 'Entrata in Ritardo';
-            } 
-            else { 
-                newStatus = 'seconda_ora'; ledColor = 'viola'; msg = 'Entrata 2° Ora';
-            }
+        // SICUREZZA: Se è già presente/bagno/uscita, IGNORA il tocco corto.
+        // Accetta il tocco corto SOLO se non c'è record o se è assente.
+        if (currentRecord && currentRecord.status !== 'assente') {
+            return res.status(200).json({ success: true, message: 'Già Presente (Nessuna modifica)', color: 'verde_f', status: currentRecord.status });
+        }
 
-        } else {
-            // --- UTENTE GIÀ DENTRO (USCITA ANTICIPATA) ---
-            if (minutes > 600 && currentRecord.status !== 'uscita_anticipata') {
-                newStatus = 'uscita_anticipata';
-                ledColor = 'uscita'; 
-                msg = 'Uscita Anticipata';
-            } 
-            else if (currentRecord.status === 'bagno') {
-                newStatus = 'presente'; 
-                ledColor = 'verde';
-                msg = 'Rientro (da Bagno)';
-            } 
-            else {
-                return res.status(200).json({ success: true, message: 'Già presente', color: 'verde_f', status: currentRecord.status });
-            }
+        // Se siamo qui, è la PRIMA timbrata (o rientro da assente)
+        if (minutes < 520) { 
+            newStatus = 'presente'; ledColor = 'verde'; msg = 'Entrata Regolare';
+        } 
+        else if (minutes >= 520 && minutes < 525) { 
+            newStatus = 'ritardo'; ledColor = 'giallo'; msg = 'Entrata in Ritardo';
+        } 
+        else { 
+            newStatus = 'seconda_ora'; ledColor = 'viola'; msg = 'Entrata 2° Ora';
         }
     }
 
