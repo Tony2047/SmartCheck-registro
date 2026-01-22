@@ -34,7 +34,7 @@
 
             try {
                 // NOTA: Se usi Vercel, l'URL sarà '/api/timbra'. In locale potrebbe essere diverso.
-                const response = await fetch('/api/timbra', {
+                const response = await fetch('api/timbra', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ tagID: tagID })
