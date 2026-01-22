@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v121 (FIXED)</title>
+    <title>SmartCheck - School OS v132 (Definitive)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* STILI ORIGINALI INTATTI */
+        /* STILI ORIGINALI INTATTI (v110) */
         body { font-family: 'Inter', sans-serif; background-color: #050b14; -webkit-tap-highlight-color: transparent; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .glass-panel { background: rgba(20, 27, 45, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
@@ -83,7 +83,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v121.0 • Stable Release</div>
+                <div class="text-xs font-mono text-slate-500">v132.0 • Final Definitive</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -95,11 +95,11 @@
                         <div id="password-container" class="hidden space-y-5">
                             <p class="text-center text-sm font-bold text-blue-400 uppercase tracking-widest" id="user-welcome">--</p>
                             <input type="password" id="input-password" placeholder="Password (Il tuo Nome)" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center">
-                            <button id="btn-entra" onclick="processAuth()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
-                            <button onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-white underline">Indietro</button>
+                            <button type="button" id="btn-entra" onclick="processAuth()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
+                            <button type="button" onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-white underline">Indietro</button>
                         </div>
                         
-                        <button id="btn-next" onclick="verifyUser()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                        <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
                     </div>
 
                     <p id="login-error" class="text-red-400 text-xs font-bold text-center hidden bg-red-900/20 p-2 rounded border border-red-900/50"><i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="error-text">Credenziali Errate</span></p>
@@ -168,23 +168,8 @@
     </div>
 
     <div id="modal-agenda" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic"><span class="text-pink-500">AGENDA</span> CLASSE</h2><div class="flex gap-3"><button id="btn-add-agenda" onclick="openAddAgendaModal()" class="hidden px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider">Nuovo +</button><button onclick="document.getElementById('modal-agenda').classList.add('hidden')" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div></div><div class="flex gap-4 mb-4"><div class="bg-slate-800 px-4 py-2 rounded text-xs font-bold text-slate-300 border-l-4 border-green-500 uppercase">Compiti</div><div class="bg-slate-800 px-4 py-2 rounded text-xs font-bold text-slate-300 border-l-4 border-red-500 uppercase">Verifiche</div></div><div class="overflow-y-auto flex-grow custom-scrollbar"><div id="agenda-list" class="space-y-3"></div></div></div></div>
-    
-    <div id="modal-add-agenda" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-md p-8 rounded-3xl shadow-2xl relative">
-            <button onclick="document.getElementById('modal-add-agenda').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white text-xl z-50">✕</button>
-            <h2 class="text-xl font-bold text-white mb-6 uppercase">Nuovo Impegno</h2>
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4"><button onclick="selectAgendaType('compito')" id="btn-type-compito" class="py-3 bg-slate-800 border border-green-500/30 text-green-400 font-bold rounded-xl hover:bg-green-900/20 transition">COMPITO</button><button onclick="selectAgendaType('verifica')" id="btn-type-verifica" class="py-3 bg-slate-800 border border-red-500/30 text-red-400 font-bold rounded-xl hover:bg-red-900/20 transition">VERIFICA</button></div>
-                <div><label class="text-[10px] text-slate-500 uppercase font-bold">Data</label><input type="date" id="agenda-date" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1"></div>
-                <div><label class="text-[10px] text-slate-500 uppercase font-bold">Materia</label><select id="agenda-subject" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1"></select></div>
-                <div><label class="text-[10px] text-slate-500 uppercase font-bold">Descrizione</label><textarea id="agenda-desc" rows="3" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1" placeholder="Cosa studiare..."></textarea></div>
-                <div class="flex gap-2 mt-4"><button onclick="saveAgendaEntry()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-500">SALVA</button></div>
-            </div>
-        </div>
-    </div>
-    
+    <div id="modal-add-agenda" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="glass-panel w-full max-w-md p-8 rounded-3xl shadow-2xl relative"><button onclick="document.getElementById('modal-add-agenda').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white text-xl z-50">✕</button><h2 class="text-xl font-bold text-white mb-6 uppercase">Nuovo Impegno</h2><div class="space-y-4"><div class="grid grid-cols-2 gap-4"><button onclick="selectAgendaType('compito')" id="btn-type-compito" class="py-3 bg-slate-800 border border-green-500/30 text-green-400 font-bold rounded-xl hover:bg-green-900/20 transition">COMPITO</button><button onclick="selectAgendaType('verifica')" id="btn-type-verifica" class="py-3 bg-slate-800 border border-red-500/30 text-red-400 font-bold rounded-xl hover:bg-red-900/20 transition">VERIFICA</button></div><div><label class="text-[10px] text-slate-500 uppercase font-bold">Data</label><input type="date" id="agenda-date" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1"></div><div><label class="text-[10px] text-slate-500 uppercase font-bold">Materia</label><select id="agenda-subject" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1"></select></div><div><label class="text-[10px] text-slate-500 uppercase font-bold">Descrizione</label><textarea id="agenda-desc" rows="3" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl mt-1" placeholder="Cosa studiare..."></textarea></div><div class="flex gap-2 mt-4"><button onclick="saveAgendaEntry()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-500">SALVA</button></div></div></div></div>
     <div id="modal-notices" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic uppercase"><span class="text-yellow-500">Bacheca</span> Istituto</h2><button onclick="toggleNoticeModal()" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div><div class="overflow-y-auto flex-grow space-y-3" id="modal-notices-list"></div></div></div>
-    
     <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="bg-[#0f172a] w-full max-w-md h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col"><div id="grades-header-bg" class="cv-header p-6 pb-8 bg-cv-green"><div class="flex justify-between items-start"><h2 class="text-2xl font-black uppercase">Valutazioni</h2><button onclick="document.getElementById('modal-grades').classList.add('hidden')" class="text-white/80 hover:text-white text-xl">✕</button></div><div class="mt-4 flex items-center justify-between"><div><div class="text-sm font-bold opacity-90">Media Generale</div><div class="text-xs opacity-75 mt-1" id="grades-total-count">0 valutazioni</div></div><div class="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center text-3xl font-black bg-white/10" id="grades-total-avg">0.0</div></div></div><div class="bg-[#0f172a] flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar" id="grades-list"></div></div></div>
     <div id="modal-class-list" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[80vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic uppercase tracking-tighter">ELENCO <span id="list-class-name" class="text-blue-500"></span></h2><button onclick="document.getElementById('modal-class-list').classList.add('hidden')" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div><input type="text" id="list-search" placeholder="Cerca studente..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:border-blue-500 outline-none mb-4"><div class="overflow-y-auto flex-grow custom-scrollbar"><ul id="full-student-list" class="space-y-2"></ul></div></div></div>
     
@@ -255,7 +240,13 @@
         const ALL_SUBJECTS=["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
         const CIRCULARS=[{id:104,date:"15/01",title:"Assemblea di Istituto",type:"urgent"},{id:103,date:"14/01",title:"Uscita anticipata classi 5°",type:"info"}];
         const TEACHER_SUBJECT_MAP = { "Petrilli Antonio": "Sistemi Automatici", "Mascio Fabio": "Elettrotecnica", "Roselli Michele": "TPSEE", "Manna Valeria": "Italiano", "Santilli Mirco": "Matematica", "Di Tella Arianna": "Inglese" };
-        const CLASSES_STRUCT={ "ELETTRONICA":["1AEE","2AEE","3AEE","4AEE","5AEE"], "MECCANICA":["1AMM","2AMM","3AMM","4AMM","5AMM"], "CHIMICA":["1ACM","2ACM","3ACM","4ACM","5ACM"] };
+        
+        // HUB STRUCT
+        const CLASSES_STRUCT={ 
+            "ELETTRONICA":["1AEE","2AEE","3AEE","4AEE","5AEE"],
+            "MECCANICA":["1AMM","2AMM","3AMM","4AMM","5AMM","4 MAUT","4 MROB","5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"],
+            "CHIMICA":["1ACM","2ACM","3ACM","4ACM","5ACM"]
+        };
         
         let currentUser=null; let tempUser=null; let currentClass=null; let selectedStudentId=null; let pendingStatus=null; let selectedSignHour=null; let pendingAgendaType=null;
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
@@ -266,28 +257,71 @@
         let onlineNotes = [];
         let onlineAgenda = [];
         let onlineSignatures = [];
+        
+        // Strutture di appoggio per il frontend
         let localGradesDB = {};
         let localNotesDB = {};
 
-        // INIZIALIZZAZIONE GLOBALE
+        // ESPOSIZIONE GLOBALE (FIX PER "NON CLICCA")
         window.verifyUser = verifyUser;
         window.processAuth = processAuth;
         window.resetLogin = resetLogin;
-        window.openStudentDetail = openStudentDetail; // EXPOSE PER HTML
+        window.openStudentDetail = openStudentDetail;
+        window.toggleStatusEdit = toggleStatusEdit;
+        window.selectStatusPreview = selectStatusPreview;
+        window.confirmStatusChange = confirmStatusChange;
+        window.saveSignature = saveSignature;
+        window.selectSignHour = selectSignHour;
+        window.saveAgendaEntry = saveAgendaEntry;
+        window.selectAgendaType = selectAgendaType;
+        window.addGrade = addGrade;
+        window.addNote = addNote;
+        window.deleteNote = deleteNote;
+        window.deleteGrade = deleteGrade;
+        window.deleteAgendaItem = deleteAgendaItem;
+        window.deleteSignature = deleteSignature;
+        window.logout = logout;
+        window.initHub = initHub;
+        window.renderClassSelector = renderClassSelector;
+        window.loadClassroom = loadClassroom;
+        window.backToHub = backToHub;
+        window.resetToToday = resetToToday;
+        window.changeDate = changeDate;
+        window.renderGrid = renderGrid;
+        window.createDeskCard = createDeskCard;
+        window.openSignModal = openSignModal;
+        window.updateTeacherForm = updateTeacherForm;
+        window.renderCalendarStrip = renderCalendarStrip;
+        window.renderSignaturesList = renderSignaturesList;
+        window.updateSignatureDisplay = updateSignatureDisplay;
+        window.filterSubjects = filterSubjects;
+        window.openAgendaModal = openAgendaModal;
+        window.renderAgendaList = renderAgendaList;
+        window.openAddAgendaModal = openAddAgendaModal;
+        window.openListModal = openListModal;
+        window.filterListModal = filterListModal;
+        window.openGradesModal = openGradesModal;
+        window.toggleGradeDetails = toggleGradeDetails;
+        window.loadTeacherGradesView = loadTeacherGradesView;
+        window.loadNotes = loadNotes;
+        window.switchTab = switchTab;
+        window.toggleNoticeModal = toggleNoticeModal;
+        window.hardReset = hardReset;
 
         window.onload = function() {
+            // FIX TASTI - ASSEGNAZIONE MANUALE
             const btnNext = document.getElementById('btn-next');
             if(btnNext) btnNext.onclick = verifyUser;
             
-            // Fix per trovare il bottone ENTRA dentro il div nascosto
-            const btnEntra = document.querySelector('#password-container button.bg-green-600');
-            if(btnEntra) btnEntra.onclick = processAuth;
+            // Il codice originale non ha btn-entra nel DOM, ma ha un bottone dentro password-container. 
+            const passBtn = document.querySelector('#password-container button.bg-green-600');
+            if(passBtn) passBtn.onclick = processAuth;
 
             document.getElementById('input-username').addEventListener('keydown', (e) => { 
-                if(e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); verifyUser(); } 
+                if(e.key === 'Enter') { e.preventDefault(); verifyUser(); } 
             });
             document.getElementById('input-password').addEventListener('keydown', (e) => { 
-                if(e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); processAuth(); } 
+                if(e.key === 'Enter') { e.preventDefault(); processAuth(); } 
             });
 
             const saved = localStorage.getItem('SC_USER');
@@ -300,60 +334,64 @@
             }
         };
 
-        function syncWithESP() {}
+        // ESP SYNC
+        function syncWithESP() { 
+            // Implementazione Realtime qui se necessario
+        }
         setInterval(syncWithESP, 5000);
 
         function getSchoolDB(){ return localSchoolDB; }
-        function saveSchoolDB(db){ }
+        function saveSchoolDB(db){ /* Inutile in modalità DB */ }
         function getHistoryData(cls, date) {const hist=JSON.parse(localStorage.getItem('SCHOOL_HISTORY')||'{}');if(hist[cls]&&hist[cls][date])return hist[cls][date];return generateClassInitialState(cls,STUDENTS_4AEE);}
         function generateClassInitialState(cls,names){ let data={}; for(let i=1;i<=23;i++){ const id=`banco_${String(i).padStart(2,'0')}`; const name=names[i-1]||"Libero"; data[id]={name, status:name==="Libero"?"assente":"assente", time:"--:--", history:[]}; } return data; }
         
-        function getSignaturesDB() { return {}; }
-        function saveSignaturesDB(db) {}
-        function getAgendaDB() { return {}; }
-        function saveAgendaDB(db) {}
+        function getSignaturesDB() { const db = localStorage.getItem('SIGNATURES_DB'); return db ? JSON.parse(db) : {}; }
+        function saveSignaturesDB(db) { localStorage.setItem('SIGNATURES_DB', JSON.stringify(db)); }
+        function getAgendaDB() { const db = localStorage.getItem('AGENDA_DB'); return db ? JSON.parse(db) : {}; }
+        function saveAgendaDB(db) { localStorage.setItem('AGENDA_DB', JSON.stringify(db)); }
         function getGradesDB() { return localGradesDB; }
         function saveGradesDB(db) { localGradesDB = db; } 
         function getNotesDB() { return localNotesDB; }
         function saveNotesDB(db) { localNotesDB = db; } 
 
-        // --- AUTH ---
+        // --- AUTH: SUPABASE CONNECTION ---
         async function verifyUser(){ 
             const input = document.getElementById('input-username').value.trim().toLowerCase();
             const err = document.getElementById('login-error');
             const btn = document.getElementById('btn-next');
             
             if(!input) { alert("Inserisci utente"); return; }
+            
             btn.innerText = "Verifica...";
 
-            let userFound = null;
-            
-            // TIMEOUT DI SICUREZZA
-            const dbPromise = new Promise(async (resolve) => {
-                if (_supabase) {
-                    try {
-                        const { data } = await _supabase.from('registry').select('*').eq('username', input).single();
-                        if (data) resolve({ u: data.username, name: data.full_name, role: data.role, pass: data.password });
-                    } catch(e) { console.error("Login DB Error", e); }
-                }
-                resolve(null);
-            });
-            const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 2000));
-            userFound = await Promise.race([dbPromise, timeoutPromise]);
+            // Chiede al database
+            const { data, error } = await _supabase.from('registry').select('*').eq('username', input).single();
 
-            if(!userFound && input === 'admin') userFound = { u: 'admin', name: 'Amministratore', role: 'admin', pass: 'admin' };
-
-            if (userFound) {
-                tempUser = userFound;
+            if (data) {
+                // Utente trovato nel DB
+                tempUser = { u: data.username, name: data.full_name, role: data.role, pass: data.password };
+                
                 document.getElementById('input-username').classList.add('hidden');
                 document.getElementById('btn-next').classList.add('hidden');
                 document.getElementById('password-container').classList.remove('hidden');
-                document.getElementById('user-welcome').innerText = userFound.name;
+                document.getElementById('user-welcome').innerText = data.full_name;
+                err.classList.add('hidden');
                 setTimeout(() => document.getElementById('input-password').focus(), 100);
             } else {
-                document.getElementById('login-error').innerText = "Utente non trovato";
-                document.getElementById('login-error').classList.remove('hidden');
-                btn.innerText = "CONTINUA";
+                // Utente non trovato (Prova locale per admin)
+                if (input === 'admin') {
+                    tempUser = { u: 'admin', name: 'Amministratore', role: 'admin', pass: 'admin' };
+                    document.getElementById('input-username').classList.add('hidden');
+                    document.getElementById('btn-next').classList.add('hidden');
+                    document.getElementById('password-container').classList.remove('hidden');
+                    document.getElementById('user-welcome').innerText = "Amministratore";
+                    err.classList.add('hidden');
+                    setTimeout(() => document.getElementById('input-password').focus(), 100);
+                } else {
+                    document.getElementById('error-text').innerText = "Utente non trovato";
+                    err.classList.remove('hidden');
+                    btn.innerText = "CONTINUA";
+                }
             }
         }
 
@@ -365,7 +403,7 @@
                 document.getElementById('view-login').classList.add('hidden');
                 if(currentUser.role==='stud') loadClassroom('4AEE'); else initHub();
                 startClock();
-                initRealtime(); 
+                initRealtime(); // Avvia Sync
             } else { 
                 document.getElementById('error-text').innerText = "Password Errata"; 
                 document.getElementById('login-error').classList.remove('hidden'); 
@@ -377,29 +415,75 @@
         function hardReset() { localStorage.clear(); location.reload(); }
 
         function initHub(){ document.getElementById('view-hub').classList.remove('hidden'); document.getElementById('hub-user-name').innerText=currentUser.name; document.getElementById('hub-role-badge').innerText=currentUser.role==='admin'?"ADMIN":"DOCENTE"; renderClassSelector(); }
-        function renderClassSelector(){ const container=document.getElementById('classes-container'); container.innerHTML=""; for(const[dept,classes]of Object.entries(CLASSES_STRUCT)){ const col=document.createElement('div'); col.className="min-w-[200px]"; col.innerHTML=`<div class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-4 border-b border-slate-700 pb-1 text-center">${dept}</div><div class="space-y-3"></div>`; const list = col.querySelector('div:last-child'); classes.forEach(cls=>{ list.innerHTML+=`<button onclick="loadClassroom('${cls}')" class="w-full h-16 bg-[#1e293b] border border-slate-700/50 rounded-xl hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all text-lg font-black shadow-lg tracking-widest group">${cls}</button>`; }); container.appendChild(col); } }
-        function loadClassroom(cls){ currentClass=cls; document.getElementById('view-hub').classList.add('hidden'); document.getElementById('view-classroom').classList.remove('hidden'); document.getElementById('class-header-name').innerText=cls; const today = getTodayStr(); document.getElementById('date-picker').value = today; changeDate(today); if(currentUser.role==='stud'){ document.getElementById('back-btn').classList.add('hidden'); document.getElementById('sign-btn').classList.add('hidden'); document.getElementById('dock-right').classList.remove('hidden'); document.getElementById('role-badge').innerText="STUDENTE"; document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-green-900/50 text-green-300 border border-green-700/50 uppercase tracking-widest"; } else { document.getElementById('back-btn').classList.remove('hidden'); document.getElementById('sign-btn').classList.remove('hidden'); document.getElementById('dock-right').classList.add('hidden'); document.getElementById('role-badge').innerText=currentUser.role.toUpperCase(); document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest"; } }
+        function renderClassSelector(){ 
+            const container=document.getElementById('classes-container'); container.innerHTML=""; 
+            for(const[dept,classes]of Object.entries(CLASSES_STRUCT)){ 
+                const col=document.createElement('div'); col.className="min-w-[200px]";
+                col.innerHTML=`<div class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-4 border-b border-slate-700 pb-1 text-center">${dept}</div><div class="space-y-3"></div>`;
+                const list = col.querySelector('div:last-child');
+                classes.forEach(cls=>{ list.innerHTML+=`<button onclick="loadClassroom('${cls}')" class="w-full h-16 bg-[#1e293b] border border-slate-700/50 rounded-xl hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all text-lg font-black shadow-lg tracking-widest group">${cls}</button>`; });
+                container.appendChild(col);
+            } 
+        }
+        function loadClassroom(cls){ currentClass=cls; document.getElementById('view-hub').classList.add('hidden'); document.getElementById('view-classroom').classList.remove('hidden'); document.getElementById('class-header-name').innerText=cls; const today = getTodayStr(); document.getElementById('date-picker').value = today; changeDate(today); if(currentUser.role==='stud'){ document.getElementById('back-btn').classList.add('hidden'); document.getElementById('sign-btn').classList.add('hidden'); document.getElementById('dock-right').classList.remove('hidden'); document.getElementById('role-badge').innerText="STUDENTE"; document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-green-900/50 text-green-300 border border-green-700/50 uppercase tracking-widest"; } else { document.getElementById('back-btn').classList.remove('hidden'); document.getElementById('sign-btn').classList.remove('hidden'); document.getElementById('dock-right').classList.add('hidden'); document.getElementById('role-badge').innerText=currentUser.role.toUpperCase(); document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest"; } updateSignatureDisplay(); }
         function backToHub(){document.getElementById('view-classroom').classList.add('hidden');document.getElementById('view-hub').classList.remove('hidden');}
         
         function resetToToday() { changeDate(getTodayStr()); }
 
-        // --- SYNC ENGINE ---
+        async function changeDate(val) { 
+            selectedDate = val; 
+            const today = getTodayStr(); 
+            const isToday = (val === today); 
+            document.getElementById('date-display').innerText = isToday ? "OGGI" : new Date(val).toLocaleDateString('it-IT'); 
+            const bathBar = document.getElementById('bathroom-bar');
+            
+            // CARICA STORICO
+            await loadDayData(val);
+
+            if(isToday) { 
+                document.getElementById('history-warning').classList.add('hidden'); 
+                document.getElementById('signature-display').parentElement.classList.remove('hidden'); 
+                bathBar.classList.remove('hidden'); 
+            } else { 
+                document.getElementById('history-warning').classList.remove('hidden'); 
+                document.getElementById('signature-display').parentElement.classList.add('hidden'); 
+                bathBar.classList.add('hidden'); 
+            } 
+            
+            renderGrid(localSchoolDB["4AEE"]);
+            renderSignaturesList(); 
+            renderCalendarStrip();
+            if(currentUser.role!=='stud') updateTeacherForm();
+        }
+
+        // --- REALTIME SYNC (IL PONTE) ---
         async function initRealtime() {
-            if(!_supabase) return;
+            // 1. SCARICA TUTTO
             await loadDayData(selectedDate);
-            
-            const g = await _supabase.from('grades').select('*');
-            if(g.data) { onlineGrades = g.data; organizeGrades(onlineGrades); }
 
-            const n = await _supabase.from('notes').select('*');
-            if(n.data) { onlineNotes = n.data; organizeNotes(onlineNotes); }
-            
-            const a = await _supabase.from('agenda').select('*');
-            if(a.data) onlineAgenda = a.data;
+            // Carica voti e note globali (non dipendono dalla data)
+            const gradesData = await _supabase.from('grades').select('*');
+            if(gradesData.data) {
+                onlineGrades = gradesData.data;
+                organizeGrades(onlineGrades); // Organizza per l'interfaccia
+            }
 
-            _supabase.channel('public_updates')
+            const notesData = await _supabase.from('notes').select('*');
+            if(notesData.data) {
+                onlineNotes = notesData.data;
+                organizeNotes(onlineNotes); // Organizza per l'interfaccia
+            }
+            
+            const agendaData = await _supabase.from('agenda').select('*');
+            if(agendaData.data) onlineAgenda = agendaData.data;
+
+            // 2. ASCOLTA MODIFICHE (Aggiornamento automatico)
+            _supabase.channel('public_changes')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, payload => {
-                 if(payload.new && payload.new.date === selectedDate) updateLocalCache([payload.new]);
+                 // Ricarica solo se riguarda la data selezionata
+                 if(payload.new && payload.new.date === selectedDate) {
+                     updateLocalCache([payload.new]);
+                 }
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'signatures' }, () => loadDayData(selectedDate))
             .on('postgres_changes', { event: '*', schema: 'public', table: 'agenda' }, async () => {
@@ -408,36 +492,72 @@
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'grades' }, async () => {
                 const g = await _supabase.from('grades').select('*');
-                if(g.data) { onlineGrades = g.data; organizeGrades(onlineGrades); if(!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModal(); loadTeacherGradesView(); }
+                if(g.data) { 
+                    onlineGrades = g.data;
+                    organizeGrades(onlineGrades);
+                    // Se il modale è aperto, ricarica la vista
+                    if(!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModal();
+                    // Se il dettaglio studente è aperto, ricarica tabella
+                    loadTeacherGradesView();
+                }
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, async () => {
                 const n = await _supabase.from('notes').select('*');
-                if(n.data) { onlineNotes = n.data; organizeNotes(onlineNotes); renderGrid(localSchoolDB[currentClass]); if(selectedStudentId) loadNotes(); }
+                if(n.data) { 
+                    onlineNotes = n.data; 
+                    organizeNotes(onlineNotes);
+                    renderGrid(localSchoolDB[currentClass]); // Aggiorna icone note
+                    // Se il modale dettaglio studente è aperto, ricarica note
+                    if(selectedStudentId) loadNotes();
+                } 
             })
             .subscribe();
         }
 
+        // FUNZIONI DI ORGANIZZAZIONE DATI (NECESSARIE PER L'INTERFACCIA v58)
+        function organizeGrades(rawData) {
+            localGradesDB = {}; // Resetta
+            rawData.forEach(g => {
+                if(!localGradesDB[g.class]) localGradesDB[g.class] = {};
+                if(!localGradesDB[g.class][g.student_name]) localGradesDB[g.class][g.student_name] = [];
+                // Adatta formato DB a formato locale
+                localGradesDB[g.class][g.student_name].push(g);
+            });
+        }
+
+        function organizeNotes(rawData) {
+            localNotesDB = {}; // Resetta
+            rawData.forEach(n => {
+                if(!localNotesDB[n.class]) localNotesDB[n.class] = {};
+                if(!localNotesDB[n.class][n.student_name]) localNotesDB[n.class][n.student_name] = [];
+                localNotesDB[n.class][n.student_name].push(n);
+            });
+        }
+
         async function loadDayData(dateStr) {
+            // 1. PRESENZE
             const attReq = await _supabase.from('attendance').select('*').eq('date', dateStr);
             if (attReq.data) {
+                // Reset to default
                 localSchoolDB["4AEE"] = generateClassInitialState("4AEE", STUDENTS_4AEE);
+                // Apply changes
                 attReq.data.forEach(row => {
-                    for(let id in localSchoolDB["4AEE"]) {
+                     for(let id in localSchoolDB["4AEE"]) {
                         if(localSchoolDB["4AEE"][id].name === row.student_name) {
                             localSchoolDB["4AEE"][id].status = row.status;
                             localSchoolDB["4AEE"][id].time = row.time;
                         }
                     }
                 });
-                renderGrid(localSchoolDB["4AEE"]);
             }
-            
+
+            // 2. FIRME
             const sigReq = await _supabase.from('signatures').select('*').eq('date', dateStr);
-            if(sigReq.data) {
-                onlineSignatures = sigReq.data;
-                renderSignaturesList();
-                updateSignatureDisplay();
-            }
+            onlineSignatures = sigReq.data || [];
+
+            // 3. AGENDA (Compiti per quel giorno)
+            // Filtriamo localmente l'agenda globale per semplicità di visualizzazione
+            // (La logica originale non filtrava per data nel render, ma qui è meglio averli tutti disponibili)
         }
 
         function updateLocalCache(users) {
@@ -452,50 +572,7 @@
             if(currentClass === '4AEE') renderGrid(localSchoolDB["4AEE"]);
         }
 
-        function changeDate(val) { 
-            selectedDate = val; 
-            const today = getTodayStr(); 
-            const isToday = (val === today); 
-            document.getElementById('date-display').innerText = isToday ? "OGGI" : new Date(val).toLocaleDateString('it-IT'); 
-            const bathBar = document.getElementById('bathroom-bar');
-            
-            loadDayData(val);
-
-            if(isToday) { 
-                document.getElementById('history-warning').classList.add('hidden'); 
-                document.getElementById('signature-display').parentElement.classList.remove('hidden'); 
-                bathBar.classList.remove('hidden'); 
-            } else { 
-                document.getElementById('history-warning').classList.remove('hidden'); 
-                document.getElementById('signature-display').parentElement.classList.add('hidden'); 
-                bathBar.classList.add('hidden'); 
-            } 
-            
-            renderGrid(localSchoolDB["4AEE"]);
-            renderSignaturesList(); 
-            renderCalendarStrip();
-            if(currentUser.role!=='stud') updateTeacherForm();
-        }
-
-        function organizeGrades(rawData) {
-            localGradesDB = {};
-            rawData.forEach(g => {
-                if(!localGradesDB[g.class]) localGradesDB[g.class] = {};
-                if(!localGradesDB[g.class][g.student_name]) localGradesDB[g.class][g.student_name] = [];
-                localGradesDB[g.class][g.student_name].push(g);
-            });
-        }
-
-        function organizeNotes(rawData) {
-            localNotesDB = {};
-            rawData.forEach(n => {
-                if(!localNotesDB[n.class]) localNotesDB[n.class] = {};
-                if(!localNotesDB[n.class][n.student_name]) localNotesDB[n.class][n.student_name] = [];
-                localNotesDB[n.class][n.student_name].push(n);
-            });
-            renderGrid(localSchoolDB["4AEE"]);
-        }
-
+        // GRID WITH ALERT LOGIC
         function renderGrid(data){
             const grid = document.getElementById('classroom-grid'); if(!grid) return; grid.innerHTML = "";
             const leftCol = document.createElement('div'); leftCol.className="flex flex-col-reverse gap-6";
@@ -515,7 +592,7 @@
         function createDeskCard(id, data, isSingle = false) {
             const d = data[id] || {name: "Libero", status: "assente", time: "--:--"};
             const div = document.createElement('div'); div.className = isSingle ? "w-[300px]" : "w-full";
-            const clickAction = (d.name !== "Libero") ? `onclick="window.openStudentDetail('${id}')"` : "";
+            const clickAction = (d.name !== "Libero") ? `onclick="openStudentDetail('${id}')"` : "";
             let alertHtml = "";
             const hasNotes = onlineNotes.filter(n => n.student_name === d.name).length > 0;
             if(hasNotes) {
@@ -528,60 +605,57 @@
             return div;
         }
 
-        // --- ACTIONS ---
-        async function confirmStatusChange(){ 
-            if(!pendingStatus) return; 
-            const s = localSchoolDB[currentClass][selectedStudentId]; 
-            const now = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}); 
+        function getGradeColor(v) { if(v>=6) return 'g-green'; if(v>=5) return 'g-orange'; return 'g-red'; }
+        
+        function openGradesModal(){
+            const m=document.getElementById('modal-grades');
+            const list=document.getElementById('grades-list');
             
-            // Feedback immediato
-            s.status = pendingStatus; 
-            s.time = (pendingStatus === 'presente') ? '08:00' : (pendingStatus === 'assente' ? '--:--' : now);
-            
-            renderGrid(localSchoolDB[currentClass]); 
-            openStudentDetail(selectedStudentId);
+            // Filtra i voti online per l'utente corrente o per lo studente selezionato
+            let targetUser = currentUser.role === 'stud' ? currentUser.name : document.getElementById('modal-detail-name').innerText;
+            const myGrades = onlineGrades.filter(g => g.student_name === targetUser);
 
-            if(_supabase) {
-                await _supabase.from('attendance').upsert({ 
-                    student_name: s.name, 
-                    date: selectedDate, 
-                    status: pendingStatus, 
-                    time: s.time 
-                }, { onConflict: 'student_name, date' });
-            }
+            list.innerHTML="";
+            let subjects={};
+            myGrades.forEach(g=>{if(!subjects[g.subject])subjects[g.subject]=[];subjects[g.subject].push(g);});
+            
+            if(Object.keys(subjects).length===0)list.innerHTML=`<div class="text-center text-slate-500 mt-10 italic">Nessuna valutazione</div>`;
+            
+            let allV = []; for(let s in subjects) allV = allV.concat(subjects[s].map(g=>g.value));
+            let gAvg = allV.length > 0 ? (allV.reduce((a,b)=>parseFloat(a)+parseFloat(b),0)/allV.length).toFixed(1) : "0.0";
+            
+            const header = document.getElementById('grades-header-bg');
+            if (allV.length === 0 || gAvg >= 6) header.className = "cv-header p-6 pb-8 bg-cv-green";
+            else if (gAvg >= 5) header.className = "cv-header p-6 pb-8 bg-cv-orange";
+            else header.className = "cv-header p-6 pb-8 bg-cv-red";
+            
+            document.getElementById('grades-total-avg').innerText = gAvg;
+            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni`;
+            
+            for(const[subj,votes]of Object.entries(subjects)){
+                let avg=(votes.reduce((a,b)=>parseFloat(a)+parseFloat(b.value),0)/votes.length).toFixed(1);
+                let id = `details-${subj.replace(/\s/g, '')}`;
+                let voteStr = (v) => { let val = parseFloat(v); if(val % 1 === 0.25) return Math.floor(val) + "+"; if(val % 1 === 0.75) return Math.ceil(val) + "-"; if(val % 1 === 0.5) return Math.floor(val) + "½"; return val; };
+                list.innerHTML+=`<div class="mb-3"><div onclick="toggleGradeDetails('${id}')" class="cv-card p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition-colors"><div class="text-white font-bold text-lg">${subj}</div><div class="grade-circle ${getGradeColor(avg)}" style="--percent: ${avg*10}%"><span class="grade-value">${avg}</span></div></div><div id="${id}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl grade-details">${votes.map(v => `<div class="flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0"><div><span class="text-[10px] text-slate-500 font-mono block">${v.date}</span><span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${v.type}</span></div><span class="font-black text-lg ${getGradeColor(v.value).replace('g-','text-g-')}">${voteStr(v.value)}</span></div>`).join('')}</div></div>`;
+            } m.classList.remove('hidden');
         }
 
-        async function saveSignature(){ 
-            if(!selectedSignHour) return; 
-            await _supabase.from('signatures').insert([{
-                date: selectedDate, 
-                hour:selectedSignHour, 
-                teacher:currentUser.name, 
-                subject:document.getElementById('subject-search').value, 
-                topic:document.getElementById('sign-argomento').value,
-                class: currentClass
-            }]);
-            await loadDayData(selectedDate);
-            document.getElementById('modal-sign').classList.add('hidden'); 
-        }
-
-        async function saveAgendaEntry(){ 
-            if(!pendingAgendaType) return; 
-            const d=new Date(document.getElementById('agenda-date').value); 
-            const dateStr = `${d.getDate()}/${d.getMonth()+1}`; // Semplice formato G/M
+        function toggleGradeDetails(id){ document.getElementById(id).classList.toggle('hidden'); }
+        
+        function loadTeacherGradesView(){
+            const subject=TEACHER_SUBJECT_MAP[currentUser.name]||"Generale";
+            const list=document.getElementById('teacher-grades-list');
+            list.innerHTML="";
+            const studentName=document.getElementById('modal-detail-name').innerText;
+            const grades=onlineGrades.filter(g=>g.student_name===studentName && g.subject===subject);
             
-            await _supabase.from('agenda').insert([{
-                date: dateStr, 
-                subject: document.getElementById('agenda-subject').value, 
-                type: pendingAgendaType, 
-                description: document.getElementById('agenda-desc').value,
-                class: currentClass
-            }]);
-            
-            const agendaReq = await _supabase.from('agenda').select('*');
-            if(agendaReq.data) onlineAgenda = agendaReq.data;
-            renderAgendaList();
-            document.getElementById('modal-add-agenda').classList.add('hidden'); 
+            grades.forEach((g,idx)=>{
+                let color = g.value>=6?'text-green-400':(g.value>=5?'text-orange-400':'text-red-400'); 
+                let disp = parseFloat(g.value);
+                if(disp%1===0.25) disp=Math.floor(disp)+"+"; else if(disp%1===0.75) disp=Math.ceil(disp)+"-"; else if(disp%1===0.5) disp=Math.floor(disp)+"½";
+                list.innerHTML+=`<tr><td class="px-6 py-3">${g.date}</td><td class="px-6 py-3 uppercase text-[10px]">${g.type}</td><td class="px-6 py-3 text-right font-bold ${color}">${disp}</td><td class="px-6 py-3 text-right"><button onclick="deleteGrade('${studentName}', ${g.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            });
+            document.getElementById('teacher-subject-name').innerText=subject;
         }
 
         async function addGrade(){
@@ -599,18 +673,54 @@
                 class: currentClass
             };
             
-            // Salva
             await _supabase.from('grades').insert([newGrade]);
-            
-            // Ricarica
+            // Refresh immediato
             const g = await _supabase.from('grades').select('*');
-            if(g.data) onlineGrades = g.data;
+            if(g.data) {
+                onlineGrades = g.data;
+                organizeGrades(onlineGrades);
+            }
             
-            // Aggiorna vista ma NON apre modale verde
-            organizeGrades(onlineGrades);
             loadTeacherGradesView(); 
+            document.getElementById('new-grade-value').value = "10"; 
+            // NON apre più il modale verde, resta nel dettaglio studente
         }
 
+        async function deleteGrade(studentName, id){
+            if(confirm("Eliminare?")){
+                await _supabase.from('grades').delete().eq('id', id);
+                // Refresh
+                const g = await _supabase.from('grades').select('*');
+                if(g.data) {
+                    onlineGrades = g.data;
+                    organizeGrades(onlineGrades);
+                }
+                loadTeacherGradesView();
+            }
+        }
+        
+        async function deleteAgendaItem(id){ 
+            if(confirm("Eliminare?")){ 
+                await _supabase.from('agenda').delete().eq('id', id); 
+                const agendaReq = await _supabase.from('agenda').select('*');
+                if(agendaReq.data) onlineAgenda = agendaReq.data;
+                renderAgendaList(); 
+            } 
+        }
+
+        // NOTES
+        function loadNotes(){
+            const list = document.getElementById('notes-list'); list.innerHTML="";
+            const name = document.getElementById('modal-detail-name').innerText;
+            const notes = onlineNotes.filter(n => n.student_name === name);
+            
+            if(notes.length===0) list.innerHTML = `<div class="text-center text-slate-500 text-xs py-4">Nessuna nota</div>`;
+            notes.forEach((n, idx) => {
+                const border = n.type === 'warning' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
+                const del = currentUser.role !== 'stud' ? `<button onclick="deleteNote(${n.id})" class="text-red-500 text-xs ml-2">Elimina</button>` : '';
+                list.innerHTML += `<div class="bg-slate-800 p-3 rounded mb-2 ${border}"><div class="flex justify-between"><span class="text-[10px] text-slate-400">${n.date} • ${n.teacher_name}</span>${del}</div><p class="text-sm text-slate-200 mt-1">${n.text}</p></div>`;
+            });
+        }
         async function addNote(){
             const text = document.getElementById('note-text').value; if(!text) return;
             const type = document.getElementById('note-type').value;
@@ -627,79 +737,302 @@
             
             await _supabase.from('notes').insert([newNote]);
             const n = await _supabase.from('notes').select('*');
-            if(n.data) onlineNotes = n.data;
+            if(n.data) {
+                onlineNotes = n.data;
+                organizeNotes(onlineNotes);
+            }
 
             document.getElementById('note-text').value = "";
-            organizeNotes(onlineNotes);
             loadNotes();
             renderGrid(localSchoolDB[currentClass]); 
         }
-
-        async function deleteNote(id){
-            if(confirm("Eliminare questa nota?")){
-                await _supabase.from('notes').delete().eq('id', id);
-                // Refresh rapido
-                const n = await _supabase.from('notes').select('*');
-                if(n.data) onlineNotes = n.data;
-                organizeNotes(onlineNotes);
-                loadNotes();
-                renderGrid(localSchoolDB[currentClass]); 
-            }
-        }
-        
-        async function deleteAgendaItem(id){ 
+        async function deleteNote(id){ 
             if(confirm("Eliminare?")){ 
-                await _supabase.from('agenda').delete().eq('id', id); 
-                const agendaReq = await _supabase.from('agenda').select('*');
-                if(agendaReq.data) onlineAgenda = agendaReq.data;
-                renderAgendaList(); 
+                 await _supabase.from('notes').delete().eq('id', id);
+                 const n = await _supabase.from('notes').select('*');
+                 if(n.data) {
+                    onlineNotes = n.data;
+                    organizeNotes(onlineNotes);
+                 }
+                 loadNotes();
+                 renderGrid(localSchoolDB["4AEE"]);
             } 
         }
+
+        function startClock(){setInterval(()=>{const now=new Date();document.getElementById('clock').innerText=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const h=now.getHours();const m=now.getMinutes();const totalM=h*60+m;let s="FUORI ORARIO";if(totalM>=505&&totalM<585)s="1° ORA (8:25-9:45)";else if(totalM>=585&&totalM<645)s="2° ORA (9:45-10:45)";else if(totalM>=645&&totalM<705)s="3° ORA (10:45-11:45)";else if(totalM>=705&&totalM<765)s="4° ORA (11:45-12:45)";else if(totalM>=765&&totalM<810)s="5° ORA (12:45-13:30)";document.getElementById('hour-badge').innerText=s;},1000);}
+
+        // UTILS
+        function switchTab(t){
+            document.getElementById('content-presence').classList.toggle('hidden',t!=='presence');
+            document.getElementById('content-grades').classList.toggle('hidden',t!=='grades');
+            document.getElementById('content-notes').classList.toggle('hidden',t!=='notes');
+             
+            const tabs = { 'presence': 'tab-presence', 'grades': 'tab-grades', 'notes': 'tab-notes' };
+            for(const [k,v] of Object.entries(tabs)){
+                const el = document.getElementById(v);
+                if(k===t) { el.classList.add('text-blue-400','border-b-2','border-blue-400'); el.classList.remove('text-slate-500'); }
+                else { el.classList.remove('text-blue-400','border-b-2','border-blue-400'); el.classList.add('text-slate-500'); }
+            }
+            if(t==='grades') loadTeacherGradesView();
+            if(t==='notes') loadNotes();
+        }
+
+        function openAgendaModal(){document.getElementById('modal-agenda').classList.remove('hidden');if(currentUser.role!=='stud')document.getElementById('btn-add-agenda').classList.remove('hidden');renderAgendaList();}
+        function renderAgendaList(){const list=document.getElementById('agenda-list');list.innerHTML="";const db=getAgendaDB();(db[currentClass]||[]).forEach((item,idx)=>{let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; const delBtn = currentUser.role!=='stud'?`<button onclick="deleteAgendaItem(${item.id})" class="text-red-500 ml-4"><i class="fa-solid fa-trash"></i></button>`:''; list.innerHTML+=`<div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start"><div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span><p class="text-sm text-slate-300 mt-1">${item.description}</p></div>${delBtn}</div>`;});}
+        function openAddAgendaModal(){ document.getElementById('modal-add-agenda').classList.remove('hidden'); const sel = document.getElementById('agenda-subject'); sel.innerHTML = ""; ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`); }
+        function selectAgendaType(t){ pendingAgendaType=t; document.getElementById('btn-type-compito').className=t==='compito'?'btn-selected py-3 bg-green-900/40':'py-3 bg-slate-800'; document.getElementById('btn-type-verifica').className=t==='verifica'?'btn-selected py-3 bg-red-900/40':'py-3 bg-slate-800'; }
+        function saveAgendaEntry(){ if(!pendingAgendaType) return; const d=new Date(document.getElementById('agenda-date').value); const db=getAgendaDB(); if(!db[currentClass]) db[currentClass]=[]; db[currentClass].push({date:`${d.getDate()}/${d.getMonth()+1}`, subject:document.getElementById('agenda-subject').value, type:pendingAgendaType, desc:document.getElementById('agenda-desc').value}); saveAgendaDB(db); document.getElementById('modal-add-agenda').classList.add('hidden'); renderAgendaList(); }
+        function openListModal(){ document.getElementById('modal-class-list').classList.remove('hidden'); filterListModal(); }
+        function filterListModal(){ const db=getSchoolDB(); const ul=document.getElementById('full-student-list'); ul.innerHTML=""; Object.entries(db[currentClass]).forEach(([id,s])=>{ if(s.name!=='Libero') ul.innerHTML+=`<li onclick="openStudentDetail('${id}')" class="p-4 bg-slate-800 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-slate-700"><span>${s.name}</span><span class="text-[10px] uppercase font-bold text-slate-500">${s.status}</span></li>`; }); }
         
-        async function deleteGrade(studentName, id){
-             if(confirm("Eliminare questo voto?")){
-                await _supabase.from('grades').delete().eq('id', id);
-                const g = await _supabase.from('grades').select('*');
-                if(g.data) onlineGrades = g.data;
-                organizeGrades(onlineGrades);
-                loadTeacherGradesView();
+        // --- CALENDAR & REGISTER ---
+        function openSignModal(){ 
+            const m = document.getElementById('modal-sign'); m.classList.remove('hidden'); 
+            const isStud = currentUser.role === 'stud';
+            if (isStud) {
+                document.getElementById('reg-header-student').classList.remove('hidden');
+                document.getElementById('reg-header-teacher').classList.add('hidden');
+                document.getElementById('new-signature-form').classList.add('hidden');
+            } else {
+                document.getElementById('reg-header-student').classList.add('hidden');
+                document.getElementById('reg-header-teacher').classList.remove('hidden');
+                updateTeacherForm();
+            }
+            renderCalendarStrip(); renderSignaturesList(); 
+        }
+
+        function updateTeacherForm() {
+            const today = getTodayStr();
+            const form = document.getElementById('new-signature-form');
+            if (selectedDate === today) form.classList.remove('hidden'); else form.classList.add('hidden');
+        }
+
+        function renderCalendarStrip() {
+            const container = document.getElementById('cv-calendar-container'); container.innerHTML = "";
+            const days = ['D', 'L', 'M', 'M', 'G', 'V', 'S']; 
+            const today = new Date();
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(today.getDate() - i);
+                const isoDate = d.toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
+                const isSelected = isoDate === selectedDate;
+                const isToday = isoDate === getTodayStr();
+                const isFuture = d > today;
+
+                const div = document.createElement('div');
+                div.className = `cv-day ${isSelected?'active':''} ${isToday?'today':''} ${isFuture?'future':''}`;
+                div.innerHTML = `<span class="cv-day-letter">${days[d.getDay()]}</span><div class="cv-day-number">${d.getDate()}</div>`;
+                if(!isFuture) div.onclick = () => { changeDate(isoDate); }; 
+                container.appendChild(div);
             }
         }
 
-        // --- FUNZIONI GRAFICHE E DI SUPPORTO (ORIGINALI) ---
-        function getGradeColor(v) { if(v>=6) return 'g-green'; if(v>=5) return 'g-orange'; return 'g-red'; }
-        function openGradesModal(){const m=document.getElementById('modal-grades');const list=document.getElementById('grades-list');const db=getGradesDB();const myGrades=db[currentClass]&&db[currentClass][currentUser.name]?db[currentClass][currentUser.name]:[];list.innerHTML="";let subjects={};myGrades.forEach(g=>{if(!subjects[g.subject])subjects[g.subject]=[];subjects[g.subject].push(g);});
-            if(Object.keys(subjects).length===0)list.innerHTML=`<div class="text-center text-slate-500 mt-10 italic">Nessuna valutazione</div>`;
-            let allV = []; for(let s in subjects) allV = allV.concat(subjects[s].map(g=>g.value));
-            let gAvg = allV.length > 0 ? (allV.reduce((a,b)=>parseFloat(a)+parseFloat(b),0)/allV.length).toFixed(1) : "0.0";
-            const header = document.getElementById('grades-header-bg');
-            if (allV.length === 0 || gAvg >= 6) header.className = "cv-header p-6 pb-8 bg-cv-green";
-            else if (gAvg >= 5) header.className = "cv-header p-6 pb-8 bg-cv-orange";
-            else header.className = "cv-header p-6 pb-8 bg-cv-red";
-            document.getElementById('grades-total-avg').innerText = gAvg;
-            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni`;
-            for(const[subj,votes]of Object.entries(subjects)){
-                let avg=(votes.reduce((a,b)=>parseFloat(a)+parseFloat(b.value),0)/votes.length).toFixed(1);
-                let id = `details-${subj.replace(/\s/g, '')}`;
-                let voteStr = (v) => { let val = parseFloat(v); if(val % 1 === 0.25) return Math.floor(val) + "+"; if(val % 1 === 0.75) return Math.ceil(val) + "-"; if(val % 1 === 0.5) return Math.floor(val) + "½"; return val; };
-                list.innerHTML+=`<div class="mb-3"><div onclick="toggleGradeDetails('${id}')" class="cv-card p-4 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition-colors"><div class="text-white font-bold text-lg">${subj}</div><div class="grade-circle ${getGradeColor(avg)}" style="--percent: ${avg*10}%"><span class="grade-value">${avg}</span></div></div><div id="${id}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl grade-details">${votes.map(v => `<div class="flex justify-between items-center py-3 border-b border-slate-700/50 last:border-0"><div><span class="text-[10px] text-slate-500 font-mono block">${v.date}</span><span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">${v.type}</span></div><span class="font-black text-lg ${getGradeColor(v.value).replace('g-','text-g-')}">${voteStr(v.value)}</span></div>`).join('')}</div></div>`;
-            } m.classList.remove('hidden');
-        }
-        function toggleGradeDetails(id){ document.getElementById(id).classList.toggle('hidden'); }
-        function loadTeacherGradesView(){const subject=TEACHER_SUBJECT_MAP[currentUser.name]||"Generale";const list=document.getElementById('teacher-grades-list');list.innerHTML="";const db=getGradesDB();const studentName=document.getElementById('modal-detail-name').innerText;if(db[currentClass]&&db[currentClass][studentName]){const grades=db[currentClass][studentName].filter(g=>g.subject===subject);grades.forEach((g,idx)=>{let color = g.value>=6?'text-green-400':(g.value>=5?'text-orange-400':'text-red-400'); 
-            let disp = parseFloat(g.value);
-            if(disp%1===0.25) disp=Math.floor(disp)+"+"; else if(disp%1===0.75) disp=Math.ceil(disp)+"-"; else if(disp%1===0.5) disp=Math.floor(disp)+"½";
-            list.innerHTML+=`<tr><td class="px-6 py-3">${g.date}</td><td class="px-6 py-3 uppercase text-[10px]">${g.type}</td><td class="px-6 py-3 text-right font-bold ${color}">${disp}</td><td class="px-6 py-3 text-right"><button onclick="deleteGrade('${studentName}', ${g.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;});}document.getElementById('teacher-subject-name').innerText=subject;}
         function selectSignHour(h){ selectedSignHour=h; for(let i=1;i<=5;i++) document.getElementById(`hour-btn-${i}`).className=i===h?'hour-selected flex-1 py-1.5 rounded':'flex-1 py-1.5 rounded bg-slate-800'; }
+        function renderSignaturesList(){ 
+            const container=document.getElementById('signatures-list'); container.innerHTML=""; 
+            
+            // USE ONLINE SIGNATURES
+            if(onlineSignatures.length===0){document.getElementById('no-signatures').classList.remove('hidden');}
+            else{
+                document.getElementById('no-signatures').classList.add('hidden');
+                onlineSignatures.forEach((sig,index)=>{
+                    const canDelete=currentUser.role==='admin'||currentUser.name===sig.teacher;
+                    const deleteBtn=canDelete?`<button onclick="deleteSignature(${sig.id})" class="text-red-500 hover:text-red-300 p-2 ml-auto"><i class="fa-solid fa-trash"></i></button>`:'';
+                    container.innerHTML+=`<div class="bg-black/40 border border-slate-700/50 p-4 rounded-xl flex flex-col gap-2 relative group"><div class="flex justify-between items-start"><span class="text-[10px] font-black bg-blue-600/20 text-blue-400 px-2 py-1 rounded uppercase tracking-wider">${sig.hour}° ORA • ${sig.subject}</span>${deleteBtn}</div><p class="text-sm font-medium text-slate-200 leading-snug">${sig.topic}</p><div class="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><i class="fa-solid fa-user-tie"></i> ${sig.teacher}</div></div>`;
+                });
+            } 
+        }
+        function deleteSignature(i){ const db=getSignaturesDB(); db[currentClass].splice(i,1); saveSignaturesDB(db); renderSignaturesList(); updateSignatureDisplay(); }
+        function saveSignature(){ if(!selectedSignHour) return; const db=getSignaturesDB(); if(!db[currentClass]) db[currentClass]=[]; db[currentClass].push({date: selectedDate, hour:selectedSignHour, teacher:currentUser.name, subject:document.getElementById('subject-search').value, topic:document.getElementById('sign-argomento').value}); saveSignaturesDB(db); updateSignatureDisplay(); document.getElementById('modal-sign').classList.add('hidden'); }
+        function updateSignatureDisplay(){const db=getSignaturesDB(); const list=db[currentClass]||[]; const todayList = list.filter(s => s.date === selectedDate); const el=document.getElementById('signature-display'); if(todayList.length>0){ const last=todayList[todayList.length-1]; el.innerText=`${last.hour}° ${last.subject}: ${last.topic}`; } else { el.innerText="Clicca per Registro"; }}
         function filterSubjects(){ const input=document.getElementById('subject-search').value.toLowerCase(); const drop=document.getElementById('subject-dropdown'); drop.innerHTML=""; ALL_SUBJECTS.forEach(s=>{ if(s.toLowerCase().includes(input)){ const div=document.createElement('div'); div.innerText=s; div.className="p-2 hover:bg-blue-600 cursor-pointer"; div.onclick=()=>{ document.getElementById('subject-search').value=s; drop.classList.add('hidden'); }; drop.appendChild(div); } }); drop.classList.remove('hidden'); }
         
-        function toggleStatusEdit(){ document.getElementById('status-view-mode').classList.add('hidden'); document.getElementById('status-edit-mode').classList.remove('hidden'); const db = getSchoolDB(); selectStatusPreview(db[currentClass][selectedStudentId].status); }
-        function selectStatusPreview(s){ pendingStatus=s; document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('btn-selected')); const btn = document.getElementById(`btn-${s}`); if(btn) btn.classList.add('btn-selected'); }
+        // STUDENT DETAIL (FIXED CLICK HANDLER)
+        function openStudentDetail(id) { 
+            document.getElementById('modal-class-list').classList.add('hidden'); 
+            const db=getSchoolDB(); 
+            const student=db[currentClass][id]; 
+            selectedStudentId=id; 
+             
+            document.getElementById('modal-detail-name').innerText=student.name; 
+            const statusEl=document.getElementById('modal-detail-status'); 
+            statusEl.innerText=student.status.toUpperCase().replace('_',' '); 
+             
+            let color="text-white"; 
+            if(student.status==='presente') color="text-green-400"; 
+            else if(student.status==='bagno') color="text-cyan-400 animate-pulse"; 
+            else if(student.status==='ritardo') color="text-orange-400"; 
+            else if(student.status==='assente') color="text-red-400"; 
+            else if(student.status==='uscita_anticipata') color="text-yellow-400"; 
+            statusEl.className=`text-3xl font-black ${color}`; 
+             
+            document.getElementById('modal-detail-count').innerText=student.history.length; 
+            const tbody=document.getElementById('modal-history-body'); tbody.innerHTML=""; 
+            student.history.forEach(h=>{ 
+                let durationStr = "";
+                if(h.in) {
+                   const [h1, m1] = h.out.split(':').map(Number);
+                   const [h2, m2] = h.in.split(':').map(Number);
+                   let diff = (h2*60+m2) - (h1*60+m1);
+                   durationStr = `<span class="text-[10px] text-slate-500 ml-2">(${diff} min)</span>`;
+                }
+                tbody.innerHTML+=`<tr><td class="px-6 py-4 font-bold text-cyan-400">${h.out}</td><td class="px-6 py-4 font-bold text-green-400">${h.in||'--'} ${durationStr}</td><td class="px-6 py-4 text-right text-slate-500">${h.in?'Chiusa':'In corso'}</td></tr>`;
+            }); 
+             
+            const viewMode=document.getElementById('status-view-mode'); 
+            const editMode=document.getElementById('status-edit-mode'); 
+             
+            // IMPORTANT: Reset view state
+            viewMode.classList.remove('hidden'); 
+            editMode.classList.add('hidden'); 
+
+            // IMPORTANT: Assign Click Handler
+            if(currentUser.role!=='stud'){ 
+                viewMode.onclick = toggleStatusEdit; // Bind function
+                viewMode.classList.add('cursor-pointer'); 
+                document.getElementById('status-edit-hint').classList.remove('hidden'); 
+                document.getElementById('teacher-note-input').classList.remove('hidden'); 
+            } else { 
+                viewMode.onclick = null; 
+                viewMode.classList.remove('cursor-pointer'); 
+                document.getElementById('status-edit-hint').classList.add('hidden'); 
+                document.getElementById('teacher-note-input').classList.add('hidden'); 
+            } 
+             
+            switchTab('presence'); 
+            if(currentUser.role==='stud'){ document.getElementById('tab-presence').parentElement.classList.add('hidden'); } 
+            else { document.getElementById('tab-presence').parentElement.classList.remove('hidden'); } 
+             
+            document.getElementById('modal-student-detail').classList.remove('hidden'); 
+        }
+
+        function toggleStatusEdit(){ 
+            document.getElementById('status-view-mode').classList.add('hidden'); 
+            document.getElementById('status-edit-mode').classList.remove('hidden'); 
+            const db = getSchoolDB(); 
+            selectStatusPreview(db[currentClass][selectedStudentId].status); 
+        }
+
+        function selectStatusPreview(s){ 
+            pendingStatus=s; 
+            document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('btn-selected')); 
+            const btn = document.getElementById(`btn-${s}`); 
+            if(btn) btn.classList.add('btn-selected'); 
+        }
+
+        async function confirmStatusChange(){ 
+            if(!pendingStatus) return; 
+            const s = localSchoolDB[currentClass][selectedStudentId]; 
+            const now = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}); 
+             
+            s.status = pendingStatus; 
+            s.time = (pendingStatus === 'presente') ? '08:00' : (pendingStatus === 'assente' ? '--:--' : now);
+             
+            renderGrid(localSchoolDB[currentClass]); 
+            openStudentDetail(selectedStudentId);
+
+            // INVIA A SUPABASE (Upsert)
+            // Se esiste per quella data/studente aggiorna, altrimenti inserisce
+            await _supabase.from('attendance').upsert({ 
+                student_name: s.name, 
+                date: selectedDate, 
+                status: pendingStatus, 
+                time: s.time 
+            }, { onConflict: 'student_name, date' });
+        }
+
+        async function saveSignature(){ 
+            if(!selectedSignHour) return; 
+             
+            await _supabase.from('signatures').insert([{
+                date: selectedDate, 
+                hour:selectedSignHour, 
+                teacher:currentUser.name, 
+                subject:document.getElementById('subject-search').value, 
+                topic:document.getElementById('sign-argomento').value,
+                class: currentClass
+            }]);
+             
+            await loadDayData(selectedDate);
+            renderSignaturesList(); updateSignatureDisplay(); document.getElementById('modal-sign').classList.add('hidden'); 
+        }
+         
+        function updateSignatureDisplay(){
+             // Filtra le firme online per la data selezionata
+             const todayList = onlineSignatures; 
+             const el=document.getElementById('signature-display'); 
+             if(todayList.length>0){ 
+                 const last=todayList[todayList.length-1]; 
+                 el.innerText=`${last.hour}° ${last.subject}: ${last.topic}`; 
+             } else { el.innerText="Clicca per Registro"; }
+        }
+         
+        function renderSignaturesList(){ 
+            const container=document.getElementById('signatures-list'); container.innerHTML=""; 
+             
+            // USE ONLINE SIGNATURES
+            if(onlineSignatures.length===0){document.getElementById('no-signatures').classList.remove('hidden');}
+            else{
+                document.getElementById('no-signatures').classList.add('hidden');
+                onlineSignatures.forEach((sig,index)=>{
+                    const canDelete=currentUser.role==='admin'||currentUser.name===sig.teacher;
+                    const deleteBtn=canDelete?`<button onclick="deleteSignature(${sig.id})" class="text-red-500 hover:text-red-300 p-2 ml-auto"><i class="fa-solid fa-trash"></i></button>`:'';
+                    container.innerHTML+=`<div class="bg-black/40 border border-slate-700/50 p-4 rounded-xl flex flex-col gap-2 relative group"><div class="flex justify-between items-start"><span class="text-[10px] font-black bg-blue-600/20 text-blue-400 px-2 py-1 rounded uppercase tracking-wider">${sig.hour}° ORA • ${sig.subject}</span>${deleteBtn}</div><p class="text-sm font-medium text-slate-200 leading-snug">${sig.topic}</p><div class="text-[10px] text-slate-500 flex items-center gap-1 mt-1"><i class="fa-solid fa-user-tie"></i> ${sig.teacher}</div></div>`;
+                });
+            } 
+        }
+         
+        async function deleteSignature(id){ 
+             await _supabase.from('signatures').delete().eq('id', id);
+             await loadDayData(selectedDate);
+             renderSignaturesList(); 
+             updateSignatureDisplay(); 
+        }
+         
+        async function saveAgendaEntry(){ 
+            if(!pendingAgendaType) return; 
+            const d=new Date(document.getElementById('agenda-date').value); 
+            const dateStr = `${d.getDate()}/${d.getMonth()+1}`;
+             
+            await _supabase.from('agenda').insert([{
+                date: dateStr, 
+                subject: document.getElementById('agenda-subject').value, 
+                type: pendingAgendaType, 
+                description: document.getElementById('agenda-desc').value,
+                class: currentClass
+            }]);
+             
+            // Refresh
+            const agendaReq = await _supabase.from('agenda').select('*');
+            if(agendaReq.data) onlineAgenda = agendaReq.data;
+            renderAgendaList();
+            document.getElementById('modal-add-agenda').classList.add('hidden'); 
+        }
+         
+        function renderAgendaList(){
+            const list=document.getElementById('agenda-list');list.innerHTML="";
+            // Filter onlineAgenda by current Class if needed (assuming all are 4AEE for now)
+            onlineAgenda.forEach((item,idx)=>{
+                let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; 
+                const delBtn = currentUser.role!=='stud'?`<button onclick="deleteAgendaItem(${item.id})" class="text-red-500 ml-4"><i class="fa-solid fa-trash"></i></button>`:''; 
+                list.innerHTML+=`<div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start"><div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span><p class="text-sm text-slate-300 mt-1">${item.description}</p></div>${delBtn}</div>`;
+            });
+        }
+         
+        async function deleteAgendaItem(id){ 
+            if(confirm("Eliminare?")){ 
+                await _supabase.from('agenda').delete().eq('id', id); 
+                const agendaReq = await _supabase.from('agenda').select('*');
+                if(agendaReq.data) onlineAgenda = agendaReq.data;
+                renderAgendaList(); 
+            } 
+        }
         function toggleNoticeModal(){const m=document.getElementById('modal-notices');if(m.classList.contains('hidden'))m.classList.remove('hidden');else m.classList.add('hidden');}
+
+        // --- DUMMY FUNCTIONS TO AVOID ERRORS ---
         function getSignaturesDB() { return {}; } function saveSignaturesDB(db) {}
         function getAgendaDB() { return {}; } function saveAgendaDB(db) {}
-        function getGradesDB() { return localGradesDB; } function saveGradesDB(db) { localGradesDB = db; } 
-        function getNotesDB() { return localNotesDB; } function saveNotesDB(db) { localNotesDB = db; } 
+        function getGradesDB() { return {}; } function saveGradesDB(db) {}
+        function getNotesDB() { return {}; } function saveNotesDB(db) {}
     </script>
 </body>
 </html>
