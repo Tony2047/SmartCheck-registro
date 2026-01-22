@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v110 (LIVE PATCHED)</title>
+    <title>SmartCheck - School OS v121 (FIXED)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* STILI ORIGINALI INTATTI - COPIATI DALLA TUA V110 */
+        /* STILI ORIGINALI INTATTI */
         body { font-family: 'Inter', sans-serif; background-color: #050b14; -webkit-tap-highlight-color: transparent; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .glass-panel { background: rgba(20, 27, 45, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
@@ -83,7 +83,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v110.0 • Database Fix</div>
+                <div class="text-xs font-mono text-slate-500">v121.0 • Stable Release</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -95,11 +95,11 @@
                         <div id="password-container" class="hidden space-y-5">
                             <p class="text-center text-sm font-bold text-blue-400 uppercase tracking-widest" id="user-welcome">--</p>
                             <input type="password" id="input-password" placeholder="Password (Il tuo Nome)" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center">
-                            <button type="button" id="btn-entra" onclick="processAuth()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
-                            <button type="button" onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-white underline">Indietro</button>
+                            <button id="btn-entra" onclick="processAuth()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
+                            <button onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-white underline">Indietro</button>
                         </div>
                         
-                        <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                        <button id="btn-next" onclick="verifyUser()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
                     </div>
 
                     <p id="login-error" class="text-red-400 text-xs font-bold text-center hidden bg-red-900/20 p-2 rounded border border-red-900/50"><i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="error-text">Credenziali Errate</span></p>
@@ -247,13 +247,8 @@
         const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
         
-        let _supabase = null;
-        try { 
-            _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
-            console.log("Supabase Client Initialized");
-        } catch(e) { 
-            console.error("Supabase Init Error:", e); 
-        }
+        // Uso un nome diverso per evitare conflitti con la variabile locale della libreria
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const STUDENTS_4AEE=["Emiliano Calò","Antonio Navarroli","Filippo Agnitti","Ivan Garofalo","Mattia Galli","Lorenzo Esposito","Kristian Methasa","Stefano Spaczil","Federico Pasqualone","Leonardo Pacchione","Oleksandr Tsikhanskyi","Alessio Tofano","Pierpaolo Carosa","Stefano Camassa","Lorenzo Pisone","Abdula Chackari","Ernest Cupi","Matteo Di Michele","Luca Iarossi","Biagio Recchione","Luigi Mirandola","Mattia Raulli","Giuseppe Palombizio"];
         const TEACHERS_NAMES=["Antonini Tania","Caputo Tonino","Cardilli Giuseppina","Centofanti Pietro","Chiarelli Sandra","Consalvo Simone","De Michele Alessandra","Del Fattore Alice","Di Bacco Emilio","Di Cioccio Felicia","Di Giacomo Pierluigi","Di Marzio Cinzia","Di Mascio Stefano","Di Tella Arianna","Fabrizi Paola","Federico Anna Lucia","Giammarco Fulvia","Guadagnoli Francesco","Liberatore Walter","Manna Valeria","Mariani Monica","Marinucci Chiara","Mascio Fabio","Mascitti Valentina","Mazzara Lucia","Natarelli Francesco","Oddi Pasqualina","Paciocco Marco","Pasqua Franca","Perinetti Tullio","Petrilli Antonio","Piccirilli Stefania","Recanati Giulia","Rizzo Sabrina","Roselli Michele","Rucci Piero","Sabatini Leonardo","Sambuco Nazzareno","Santangelo Marco","Santarelli Fabrizio","Santilli Mirco","Scarsella Alessio","Schiavo Marina","Sciarra Santa","Stampone Agata","Trabucco Silvia","Vallera Alessandra","D'Urbano Antonio","De Dominicis Giovanni","Di Bacco Antonio","Di Cesare Paqualino","Di Nino Ivan","Febbo Katia","Liberatore Piergiuseppe","Pace Dino","Tedeschi Diletta","Vallera Villiam"];
@@ -262,13 +257,7 @@
         const TEACHER_SUBJECT_MAP = { "Petrilli Antonio": "Sistemi Automatici", "Mascio Fabio": "Elettrotecnica", "Roselli Michele": "TPSEE", "Manna Valeria": "Italiano", "Santilli Mirco": "Matematica", "Di Tella Arianna": "Inglese" };
         const CLASSES_STRUCT={ "ELETTRONICA":["1AEE","2AEE","3AEE","4AEE","5AEE"], "MECCANICA":["1AMM","2AMM","3AMM","4AMM","5AMM"], "CHIMICA":["1ACM","2ACM","3ACM","4ACM","5ACM"] };
         
-        let currentUser=null; 
-        let tempUser=null; 
-        let currentClass=null; 
-        let selectedStudentId=null; 
-        let pendingStatus=null; 
-        let selectedSignHour=null; 
-        let pendingAgendaType=null;
+        let currentUser=null; let tempUser=null; let currentClass=null; let selectedStudentId=null; let pendingStatus=null; let selectedSignHour=null; let pendingAgendaType=null;
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
 
@@ -280,23 +269,20 @@
         let localGradesDB = {};
         let localNotesDB = {};
 
-        // Inizializzazione
-        window.onload = function() {
-            // GLOBAL FUNCTIONS FOR HTML BUTTONS
-            window.verifyUser = verifyUser;
-            window.processAuth = processAuth;
-            window.resetLogin = resetLogin;
-            window.openStudentDetail = openStudentDetail; 
-            window.addGrade = addGrade;
-            window.addNote = addNote;
-            window.saveSignature = saveSignature;
-            window.saveAgendaEntry = saveAgendaEntry;
-            window.deleteNote = deleteNote;
-            window.deleteGrade = deleteGrade;
-            window.deleteAgendaItem = deleteAgendaItem;
-            window.deleteSignature = deleteSignature;
+        // INIZIALIZZAZIONE GLOBALE
+        window.verifyUser = verifyUser;
+        window.processAuth = processAuth;
+        window.resetLogin = resetLogin;
+        window.openStudentDetail = openStudentDetail; // EXPOSE PER HTML
 
-            // FIX ENTER KEY
+        window.onload = function() {
+            const btnNext = document.getElementById('btn-next');
+            if(btnNext) btnNext.onclick = verifyUser;
+            
+            // Fix per trovare il bottone ENTRA dentro il div nascosto
+            const btnEntra = document.querySelector('#password-container button.bg-green-600');
+            if(btnEntra) btnEntra.onclick = processAuth;
+
             document.getElementById('input-username').addEventListener('keydown', (e) => { 
                 if(e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); verifyUser(); } 
             });
@@ -304,22 +290,11 @@
                 if(e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); processAuth(); } 
             });
 
-            // Assegnazione Click bottoni
-            document.getElementById('btn-next').onclick = verifyUser;
-            const btnEntra = document.querySelector('#password-container button.bg-green-600');
-            if(btnEntra) btnEntra.onclick = processAuth;
-
             const saved = localStorage.getItem('SC_USER');
             if (saved) {
                 currentUser = JSON.parse(saved);
                 document.getElementById('view-login').classList.add('hidden');
-                document.getElementById('app-content').classList.remove('hidden');
-                
-                if (currentUser.role === 'stud') loadClassroom('4AEE'); 
-                else { 
-                    document.getElementById('view-hub').classList.remove('hidden'); 
-                    renderClassSelector(); 
-                }
+                if (currentUser.role === 'stud') loadClassroom('4AEE'); else initHub();
                 startClock();
                 initRealtime(); 
             }
@@ -332,6 +307,7 @@
         function saveSchoolDB(db){ }
         function getHistoryData(cls, date) {const hist=JSON.parse(localStorage.getItem('SCHOOL_HISTORY')||'{}');if(hist[cls]&&hist[cls][date])return hist[cls][date];return generateClassInitialState(cls,STUDENTS_4AEE);}
         function generateClassInitialState(cls,names){ let data={}; for(let i=1;i<=23;i++){ const id=`banco_${String(i).padStart(2,'0')}`; const name=names[i-1]||"Libero"; data[id]={name, status:name==="Libero"?"assente":"assente", time:"--:--", history:[]}; } return data; }
+        
         function getSignaturesDB() { return {}; }
         function saveSignaturesDB(db) {}
         function getAgendaDB() { return {}; }
@@ -387,7 +363,6 @@
                 currentUser = tempUser; 
                 localStorage.setItem('SC_USER', JSON.stringify(currentUser));
                 document.getElementById('view-login').classList.add('hidden');
-                document.getElementById('app-content').classList.remove('hidden');
                 if(currentUser.role==='stud') loadClassroom('4AEE'); else initHub();
                 startClock();
                 initRealtime(); 
@@ -631,9 +606,9 @@
             const g = await _supabase.from('grades').select('*');
             if(g.data) onlineGrades = g.data;
             
-            // Aggiorna vista ma NON apre modale verde (voti generali) se siamo nel dettaglio studente
+            // Aggiorna vista ma NON apre modale verde
+            organizeGrades(onlineGrades);
             loadTeacherGradesView(); 
-            // openGradesModal();  <-- RIMOSSO QUESTO CHE APRIBA IL POPUP SBAGLIATO
         }
 
         async function addNote(){
@@ -655,6 +630,7 @@
             if(n.data) onlineNotes = n.data;
 
             document.getElementById('note-text').value = "";
+            organizeNotes(onlineNotes);
             loadNotes();
             renderGrid(localSchoolDB[currentClass]); 
         }
@@ -665,6 +641,7 @@
                 // Refresh rapido
                 const n = await _supabase.from('notes').select('*');
                 if(n.data) onlineNotes = n.data;
+                organizeNotes(onlineNotes);
                 loadNotes();
                 renderGrid(localSchoolDB[currentClass]); 
             }
@@ -684,6 +661,7 @@
                 await _supabase.from('grades').delete().eq('id', id);
                 const g = await _supabase.from('grades').select('*');
                 if(g.data) onlineGrades = g.data;
+                organizeGrades(onlineGrades);
                 loadTeacherGradesView();
             }
         }
