@@ -1,13 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Collegamento al Database
 const supabase = createClient(
   'https://axlfuzksfpfwdvjawlmf.supabase.co', 
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg'
 )
 
 export default async function handler(req, res) {
-  // Configurazione CORS
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -28,7 +26,7 @@ export default async function handler(req, res) {
 
     if (userError || !user) return res.status(404).json({ error: 'Badge sconosciuto', color: 'rosso' });
 
-    // 2. Calcola Ora Italiana
+    // 2. Calcola Ora
     const now = new Date();
     const italyTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Rome"}));
     const minutes = italyTime.getHours() * 60 + italyTime.getMinutes(); 
@@ -49,23 +47,45 @@ export default async function handler(req, res) {
     let msg = 'Operazione Completata';
     let updateDb = true; 
 
-    // --- LOGICA ORARIA E STATI ---
+    // --- LOGICA AGGIORNATA PER OPEN DAY ---
 
-    // A. POMERIGGIO (> 15:00) -> Riapertura (900 minuti)
+    // A. POMERIGGIO (> 15:00) -> MODALITÀ DEMO COMPLETAMENTE SBLOCCATA
+    // Permettiamo di cambiare stato liberamente per mostrare che funziona
     if (minutes >= 900) {
-        newStatus = 'presente';
-        ledColor = 'verde';
-        msg = 'Ingresso Pomeridiano';
+        if (inputType === 'bath') {
+            // Se sono in bagno torno presente, se sono presente vado in bagno
+            // Indipendentemente da cosa ho fatto la mattina
+            if (currentRecord && currentRecord.status === 'bagno') {
+                newStatus = 'presente';
+                ledColor = 'verde';
+                msg = 'Rientro Demo';
+            } else {
+                newStatus = 'bagno';
+                ledColor = 'blu';
+                msg = 'Uscita Bagno Demo';
+            }
+        } 
+        else if (inputType === 'exit') {
+             newStatus = 'uscita_anticipata';
+             ledColor = 'uscita';
+             msg = 'Uscita Demo';
+        }
+        else {
+            // Tocco corto (Entrata/Presente)
+            newStatus = 'presente';
+            ledColor = 'verde';
+            msg = 'Ingresso Demo';
+            // Se era già presente, lo forziamo a rimanere presente (o aggiorniamo l'ora)
+        }
     }
     // B. SCUOLA CHIUSA (13:35 - 15:00) -> STATO CONGELATO
-    // 13:35 = 815 minuti
     else if (minutes >= 815 && minutes < 900) {
-        updateDb = false; // NON aggiorniamo il DB
-        ledColor = 'verde_f'; // Feedback "Letto OK"
+        updateDb = false; 
+        ledColor = 'verde_f'; 
         msg = 'Scuola Chiusa - Stato Salvato';
         newStatus = currentRecord ? currentRecord.status : 'assente';
     }
-    // C. MATTINA (Fino alle 13:35)
+    // C. MATTINA (Normale)
     else {
         if (inputType === 'exit') {
             newStatus = 'uscita_anticipata';
@@ -84,24 +104,19 @@ export default async function handler(req, res) {
             }
         } 
         else {
-            // ENTRATA (Tocco Corto)
+            // ENTRATA
             if (currentRecord && currentRecord.status !== 'assente') {
-                 // Già presente -> Ignora
                  updateDb = false;
                  ledColor = 'verde_f'; 
                  msg = 'Già Presente';
                  newStatus = currentRecord.status;
             } else {
-                // PRIMA TIMBRATA
-                // < 08:40 (520 min)
                 if (minutes < 520) { 
                     newStatus = 'presente'; ledColor = 'verde'; msg = 'Entrata Regolare';
                 } 
-                // 08:40 - 09:35 (520 - 575 min)
                 else if (minutes >= 520 && minutes < 575) { 
                     newStatus = 'ritardo'; ledColor = 'giallo'; msg = 'Entrata in Ritardo';
                 } 
-                // 09:35 - 13:35 (575 - 815 min)
                 else { 
                     newStatus = 'seconda_ora'; ledColor = 'viola'; msg = 'Entrata 2° Ora';
                 }
