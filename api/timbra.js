@@ -6,6 +6,7 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
+  // CORS Setup
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -13,58 +14,99 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
 
-  // Leggi tagID e TYPE (tipo di timbrata)
   const body = req.body || req.query;
   const tagID = body.tagID;
-  let type = body.type || 'auto'; // 'bagno', 'ingresso', o 'auto'
+  const inputType = body.type || 'short'; // 'short' (normale) o 'long' (bagno)
 
   if (!tagID) return res.status(400).json({ error: 'Manca tagID' });
 
   try {
-    // 1. Cerca studente
+    // 1. Identifica Studente
     const { data: user, error: userError } = await supabase
       .from('registry').select('*').eq('nfc_id', tagID).single();
 
-    if (userError || !user) return res.status(404).json({ error: 'Badge sconosciuto' });
+    if (userError || !user) return res.status(404).json({ error: 'Badge sconosciuto', color: 'rosso' });
 
-    // 2. Calcola Data e Ora Server
+    // 2. Calcola Orario Italiano Corrente
     const now = new Date();
-    // Aggiusta orario Italia (UTC+1 o +2) approssimativo per il server
     const italyTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Rome"}));
-    
+    const minutes = italyTime.getHours() * 60 + italyTime.getMinutes(); // Minuti totali da mezzanotte
     const dateStr = italyTime.toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-'); 
     const timeStr = italyTime.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
-    
-    // Calcola minuti totali per logica ritardi lato server (backup)
-    const minutes = italyTime.getHours() * 60 + italyTime.getMinutes(); // es. 8:30 = 510
 
-    // 3. Determina lo status da salvare
-    let statusToSave = 'presente'; // default
+    // 3. Controlla lo stato attuale nel Database per oggi
+    const { data: currentRecord } = await supabase
+      .from('attendance')
+      .select('status')
+      .eq('student_name', user.full_name)
+      .eq('date', dateStr)
+      .single();
 
-    if (type === 'bagno') {
-        statusToSave = 'bagno';
+    let newStatus = 'presente';
+    let ledColor = 'verde';
+    let msg = 'Benvenuto';
+
+    // --- LOGICA INTELLIGENTE ---
+
+    if (inputType === 'long') {
+        // --- LOGICA BAGNO (Pressione Lunga) ---
+        // Se era in bagno, torna presente. Se era presente, va in bagno.
+        if (currentRecord && currentRecord.status === 'bagno') {
+            newStatus = 'presente'; // Rientro dal bagno
+            ledColor = 'verde';
+            msg = 'Rientrato dal Bagno';
+        } else {
+            newStatus = 'bagno'; // Vado al bagno
+            ledColor = 'blu';
+            msg = 'Uscita Bagno';
+        }
     } else {
-        // Logica oraria automatica se non specificata dall'ESP
-        if (minutes >= 585) statusToSave = 'seconda_ora'; // Dopo 9:45
-        else if (minutes >= 520) statusToSave = 'ritardo'; // Dopo 8:40
-        else statusToSave = 'presente'; // Prima delle 8:40
+        // --- LOGICA ENTRATA / USCITA (Pressione Corta) ---
+        
+        if (!currentRecord) {
+            // PRIMA TIMBRATA DEL GIORNO (ENTRATA)
+            if (minutes < 520) { // Prima delle 8:40
+                newStatus = 'presente';
+                ledColor = 'verde';
+                msg = 'Entrata Regolare';
+            } else if (minutes >= 520 && minutes < 585) { // 8:40 - 9:45
+                newStatus = 'ritardo';
+                ledColor = 'giallo';
+                msg = 'Entrata in Ritardo';
+            } else { // Dopo le 9:45
+                newStatus = 'seconda_ora';
+                ledColor = 'viola';
+                msg = 'Entrata 2° Ora';
+            }
+        } else {
+            // UTENTE GIÀ DENTRO -> STA USCENTDO PRIMA?
+            // Blocchiamo doppi passaggi accidentali (es. ripasso dopo 1 minuto)
+            // L'uscita anticipata è valida solo se, per esempio, sono passate le 10:00 (600 min)
+            if (minutes > 600 && currentRecord.status !== 'uscita_anticipata') {
+                newStatus = 'uscita_anticipata';
+                ledColor = 'uscita'; // Giallo/Arancio
+                msg = 'Uscita Anticipata';
+            } else if (currentRecord.status === 'bagno') {
+                newStatus = 'presente'; // Se timbra corto mentre è in bagno, lo facciamo rientrare
+                ledColor = 'verde';
+                msg = 'Rientro (da Bagno)';
+            } else {
+                return res.status(200).json({ success: true, message: 'Già presente', color: 'verde_f', status: currentRecord.status });
+            }
+        }
     }
 
     // 4. Salva su Database
-    const { error: attError } = await supabase
-      .from('attendance')
-      .upsert({
+    await supabase.from('attendance').upsert({
         student_name: user.full_name,
         date: dateStr,
-        status: statusToSave,
+        status: newStatus,
         time: timeStr
-      }, { onConflict: 'student_name, date' });
+    }, { onConflict: 'student_name, date' });
 
-    if (attError) throw attError;
-
-    return res.status(200).json({ success: true, message: `Status: ${statusToSave}`, status: statusToSave });
+    return res.status(200).json({ success: true, message: msg, status: newStatus, color: ledColor });
 
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message, color: 'rosso' });
   }
 }
