@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v134 (Gold Master)</title>
+    <title>SmartCheck - School OS v135 (Final Polish)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,7 +48,6 @@
         .status-ritardo { border: 1px solid #f97316 !important; background: linear-gradient(145deg, rgba(67, 20, 7, 0.6), rgba(124, 45, 18, 0.2)) !important; color: #fdba74 !important; }
         .status-seconda-ora { border: 1px solid #8b5cf6 !important; background: linear-gradient(145deg, rgba(76, 29, 149, 0.6), rgba(109, 40, 217, 0.2)) !important; color: #c4b5fd !important; }
         .status-uscita-anticipata { border: 1px solid #eab308 !important; background: linear-gradient(145deg, rgba(66, 32, 6, 0.6), rgba(113, 63, 18, 0.2)) !important; color: #fde047 !important; }
-        /* NEW STATUS: FUORI AULA */
         .status-fuori-aula { border: 1px solid #6366f1 !important; background: linear-gradient(145deg, rgba(49, 46, 129, 0.9), rgba(67, 56, 202, 0.4)) !important; color: #a5b4fc !important; }
 
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); } 70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
@@ -99,7 +98,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v134.0 • Gold Master</div>
+                <div class="text-xs font-mono text-slate-500">v135.0 • Final Polish</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -760,7 +759,7 @@
         }
         
         async function deleteAgendaItem(id){ 
-            if(confirm("Eliminare questo impegno?")){ 
+            if(confirm("Eliminare?")){ 
                 // Passiamo ID come stringa per sicurezza
                 await _supabase.from('agenda').delete().eq('id', id); 
                 
@@ -868,7 +867,70 @@
         function selectAgendaType(t){ pendingAgendaType=t; document.getElementById('btn-type-compito').className=t==='compito'?'btn-selected py-3 bg-green-900/40':'py-3 bg-slate-800'; document.getElementById('btn-type-verifica').className=t==='verifica'?'btn-selected py-3 bg-red-900/40':'py-3 bg-slate-800'; }
         function saveAgendaEntry(){ if(!pendingAgendaType) return; const d=new Date(document.getElementById('agenda-date').value); const db=getAgendaDB(); if(!db[currentClass]) db[currentClass]=[]; db[currentClass].push({date:`${d.getDate()}/${d.getMonth()+1}`, subject:document.getElementById('agenda-subject').value, type:pendingAgendaType, desc:document.getElementById('agenda-desc').value}); saveAgendaDB(db); document.getElementById('modal-add-agenda').classList.add('hidden'); renderAgendaList(); }
         function openListModal(){ document.getElementById('modal-class-list').classList.remove('hidden'); filterListModal(); }
-        function filterListModal(){ const db=getSchoolDB(); const ul=document.getElementById('full-student-list'); ul.innerHTML=""; Object.entries(db[currentClass]).forEach(([id,s])=>{ if(s.name!=='Libero') ul.innerHTML+=`<li onclick="openStudentDetail('${id}')" class="p-4 bg-slate-800 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-slate-700"><span>${s.name}</span><span class="text-[10px] uppercase font-bold text-slate-500">${s.status}</span></li>`; }); }
+        
+        // NEW FILTER LIST MODAL (SORT BY LASTNAME)
+        function filterListModal() {
+            const db = getSchoolDB();
+            const ul = document.getElementById('full-student-list');
+            ul.innerHTML = "";
+            
+            const searchText = document.getElementById('list-search').value.toLowerCase();
+
+            // 1. Convertiamo l'oggetto in un array per poterlo ordinare
+            let studentsArray = [];
+            Object.entries(db[currentClass]).forEach(([id, s]) => {
+                if (s.name !== 'Libero') {
+                    // Logica per separare Nome e Cognome
+                    // Assumiamo formato "Nome Cognome" (es. "Antonio Navarroli")
+                    const parts = s.name.split(' ');
+                    const firstName = parts[0]; 
+                    const lastName = parts.slice(1).join(' '); // Prende tutto il resto come cognome
+                    
+                    studentsArray.push({
+                        id: id,
+                        originalName: s.name,
+                        firstName: firstName,
+                        lastName: lastName, // Per ordinamento
+                        status: s.status
+                    });
+                }
+            });
+
+            // 2. Ordiniamo per Cognome (Alfabetico)
+            studentsArray.sort((a, b) => a.lastName.localeCompare(b.lastName));
+
+            // 3. Filtriamo (ricerca) e Renderizziamo
+            studentsArray.forEach(s => {
+                // Filtro ricerca
+                if (!s.originalName.toLowerCase().includes(searchText) && 
+                    !s.lastName.toLowerCase().includes(searchText)) return;
+
+                // Formattazione: COGNOME Nome
+                const displayName = `<span class="font-black text-white">${s.lastName.toUpperCase()}</span> <span class="text-slate-400">${s.firstName}</span>`;
+
+                // Colore Stato
+                let statusColor = "text-slate-500";
+                let statusBg = "bg-slate-700/30 border-slate-600";
+                
+                if(s.status === 'presente') { statusColor = "text-green-400"; statusBg = "bg-green-900/20 border-green-500/30"; }
+                else if(s.status === 'assente') { statusColor = "text-red-400"; statusBg = "bg-red-900/20 border-red-500/30"; }
+                else if(s.status === 'bagno') { statusColor = "text-cyan-400"; statusBg = "bg-cyan-900/20 border-cyan-500/30 animate-pulse"; }
+                else if(s.status === 'ritardo') { statusColor = "text-orange-400"; statusBg = "bg-orange-900/20 border-orange-500/30"; }
+                else if(s.status === 'uscita_anticipata') { statusColor = "text-yellow-400"; statusBg = "bg-yellow-900/20 border-yellow-500/30"; }
+                else if(s.status === 'fuori_aula') { statusColor = "text-indigo-400"; statusBg = "bg-indigo-900/20 border-indigo-500/30"; }
+
+                // HTML
+                ul.innerHTML += `
+                    <li onclick="openStudentDetail('${s.id}')" class="p-3 bg-slate-800/50 border border-slate-700 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition-all group">
+                        <div class="text-sm group-hover:translate-x-1 transition-transform">
+                            ${displayName}
+                        </div>
+                        <div class="px-3 py-1 rounded text-[10px] uppercase font-black tracking-widest border ${statusBg} ${statusColor}">
+                            ${s.status.replace('_', ' ')}
+                        </div>
+                    </li>`;
+            });
+        }
         
         // --- CALENDAR & REGISTER ---
         function openSignModal(){ 
