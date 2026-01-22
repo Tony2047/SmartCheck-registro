@@ -6,7 +6,6 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
-  // CORS Setup
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -16,7 +15,7 @@ export default async function handler(req, res) {
 
   const body = req.body || req.query;
   const tagID = body.tagID;
-  const inputType = body.type || 'short'; // 'short' (normale) o 'long' (bagno)
+  const inputType = body.type || 'short'; 
 
   if (!tagID) return res.status(400).json({ error: 'Manca tagID' });
 
@@ -27,14 +26,14 @@ export default async function handler(req, res) {
 
     if (userError || !user) return res.status(404).json({ error: 'Badge sconosciuto', color: 'rosso' });
 
-    // 2. Calcola Orario Italiano Corrente
+    // 2. Calcola Orario
     const now = new Date();
     const italyTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Rome"}));
-    const minutes = italyTime.getHours() * 60 + italyTime.getMinutes(); // Minuti totali da mezzanotte
+    const minutes = italyTime.getHours() * 60 + italyTime.getMinutes(); 
     const dateStr = italyTime.toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-'); 
     const timeStr = italyTime.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
 
-    // 3. Controlla lo stato attuale nel Database per oggi
+    // 3. Controlla stato attuale
     const { data: currentRecord } = await supabase
       .from('attendance')
       .select('status')
@@ -46,60 +45,49 @@ export default async function handler(req, res) {
     let ledColor = 'verde';
     let msg = 'Benvenuto';
 
-    // --- LOGICA INTELLIGENTE AGGIORNATA ---
+    // --- LOGICA AGGIORNATA (FIX ASSENTE) ---
 
     if (inputType === 'long') {
-        // --- LOGICA BAGNO (Pressione Lunga) ---
+        // --- LOGICA BAGNO ---
+        // Se è assente e fa un tocco lungo, lo facciamo entrare direttamente (caso raro ma possibile)
         if (currentRecord && currentRecord.status === 'bagno') {
-            newStatus = 'presente'; // Rientro dal bagno
+            newStatus = 'presente';
             ledColor = 'verde';
             msg = 'Rientrato dal Bagno';
         } else {
-            newStatus = 'bagno'; // Vado al bagno
+            newStatus = 'bagno';
             ledColor = 'blu';
             msg = 'Uscita Bagno';
         }
     } else {
-        // --- LOGICA ENTRATA / USCITA (Pressione Corta) ---
+        // --- LOGICA ENTRATA / USCITA ---
         
-        if (!currentRecord) {
-            // --- PRIMA TIMBRATA (ENTRATA) ---
+        // FIX QUI: Se non esiste record OPPURE se lo stato è 'assente' -> È UNA NUOVA ENTRATA
+        if (!currentRecord || currentRecord.status === 'assente') {
             
             if (minutes < 520) { 
-                // Prima delle 08:40 -> PRESENTE
-                newStatus = 'presente';
-                ledColor = 'verde';
-                msg = 'Entrata Regolare';
+                newStatus = 'presente'; ledColor = 'verde'; msg = 'Entrata Regolare';
             } 
             else if (minutes >= 520 && minutes < 525) { 
-                // Tra 08:40 e 08:45 -> RITARDO (5 min di tolleranza)
-                newStatus = 'ritardo';
-                ledColor = 'giallo';
-                msg = 'Entrata in Ritardo';
+                newStatus = 'ritardo'; ledColor = 'giallo'; msg = 'Entrata in Ritardo';
             } 
             else { 
-                // Dopo le 08:45 -> SECONDA ORA (Viola)
-                // Questo copre dalle 08:45 fino all'infinito (quindi anche alle 10:00)
-                newStatus = 'seconda_ora';
-                ledColor = 'viola';
-                msg = 'Entrata 2° Ora';
+                newStatus = 'seconda_ora'; ledColor = 'viola'; msg = 'Entrata 2° Ora';
             }
+
         } else {
             // --- UTENTE GIÀ DENTRO (USCITA ANTICIPATA) ---
-            
-            // L'uscita anticipata è valida solo dopo le 10:00 (600 minuti)
             if (minutes > 600 && currentRecord.status !== 'uscita_anticipata') {
                 newStatus = 'uscita_anticipata';
-                ledColor = 'uscita'; // Giallo/Arancio
+                ledColor = 'uscita'; 
                 msg = 'Uscita Anticipata';
             } 
             else if (currentRecord.status === 'bagno') {
-                newStatus = 'presente'; // Se timbra corto mentre è in bagno, lo facciamo rientrare
+                newStatus = 'presente'; 
                 ledColor = 'verde';
                 msg = 'Rientro (da Bagno)';
             } 
             else {
-                // Se ripassa il badge prima delle 10:00 e non è in bagno
                 return res.status(200).json({ success: true, message: 'Già presente', color: 'verde_f', status: currentRecord.status });
             }
         }
