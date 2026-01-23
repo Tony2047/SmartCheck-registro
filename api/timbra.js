@@ -1,65 +1,180 @@
-mport { createClient } from '@supabase/supabase-js'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// CONFIGURAZIONE SUPABASE
 const supabase = createClient(
-  'https://axlfuzksfpfwdvjawlmf.supabase.co',
+  'https://axlfuzksfpfwdvjawlmf.supabase.co', 
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg'
 )
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  const body = req.body;
-  const tagID = body.tagID;
-  const type = body.type; // Usiamo direttamente il type mandato dall'ESP
-  const pressioneMS = body.pressioneMS || 0;
-
-  if (!tagID) return res.status(400).json({ error: 'Manca tagID' });
+export default async function handler(req) {
+  // 1. GESTIONE CORS (Per permettere chiamate da ovunque)
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      }
+    })
+  }
 
   try {
-    const { data: user } = await supabase.from('registry').select('*').eq('nfc_id', tagID).single();
-    if (!user) return res.status(404).json({ error: 'Badge sconosciuto' });
+    // 2. LETTURA DATI IN INGRESSO (Dal lettore NFC)
+    const { tagID, pressioneMS } = await req.json();
 
-    const italyTime = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Rome"}));
-    const minutes = italyTime.getHours() * 60 + italyTime.getMinutes();
-    const dateStr = italyTime.toISOString().split('T')[0];
-    const timeStr = italyTime.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
-
-    const { data: currentRecord } = await supabase.from('attendance')
-      .select('status').eq('student_name', user.full_name).eq('date', dateStr).single();
-
-    let newStatus = 'presente';
-    let updateDb = true;
-
-    // --- LOGICA CORRETTA ---
-    // 1. Se il comando è BAGNO o USCITA, deve funzionare SEMPRE se lo studente non è assente
-    if (currentRecord && currentRecord.status !== 'assente') {
-        if (type === 'bath' || pressioneMS >= 2000 && pressioneMS < 5000) {
-            newStatus = (currentRecord.status === 'bagno') ? 'presente' : 'bagno';
-        } else if (type === 'exit' || pressioneMS >= 5000) {
-            newStatus = 'uscita_anticipata';
-        } else {
-            // Tocco corto ma già presente: non fare nulla
-            updateDb = false;
-            newStatus = currentRecord.status;
-        }
-    }
-    // 2. Se è assente, registra l'entrata (Ritardo, 2° ora o normale)
-    else {
-        if (minutes < 520) newStatus = 'presente';
-        else if (minutes < 575) newStatus = 'ritardo';
-        else newStatus = 'seconda_ora';
+    if (!tagID) {
+      return new Response(JSON.stringify({ error: 'Manca tagID' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    if (updateDb) {
-      await supabase.from('attendance').upsert({
-        student_name: user.full_name,
-        date: dateStr,
-        status: newStatus,
-        time: timeStr
+    // 3. DETERMINA L'INTENZIONE IN BASE ALLA PRESSIONE (Il "Mix")
+    let inputType = 'short'; // Default: Entrata
+
+    if (pressioneMS >= 5000) {
+        inputType = 'exit'; // Pressione lunga (> 5 sec) -> Uscita
+    } else if (pressioneMS >= 2000) {
+        inputType = 'bath'; // Pressione media (> 2 sec) -> Bagno
+    }
+    // Altrimenti resta 'short' (Entrata)
+
+    // 4. IDENTIFICA STUDENTE DAL DB
+    const { data: user, error: userError } = await supabase
+      .from('registry')
+      .select('*')
+      .eq('nfc_id', tagID)
+      .single();
+
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Badge sconosciuto', color: 'rosso' }), { 
+        status: 404, 
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
       });
     }
 
-    return res.status(200).json({ success: true, status: newStatus });
+    // 5. CALCOLA ORA ITALIANA
+    const now = new Date();
+    const italyTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Rome"}));
+    const minutes = italyTime.getHours() * 60 + italyTime.getMinutes(); 
+    const dateStr = italyTime.toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-'); 
+    const timeStr = italyTime.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+
+    // 6. RECUPERA STATO ATTUALE (Se esiste)
+    const { data: currentRecord } = await supabase
+      .from('attendance')
+      .select('status')
+      .eq('student_name', user.full_name)
+      .eq('date', dateStr)
+      .single();
+
+    let newStatus = 'presente';
+    let ledColor = 'verde';
+    let msg = 'Operazione Completata';
+    let updateDb = true; 
+
+    // --- LOGICA DI BUSINESS (ORARI E REGOLE) ---
+
+    // A. POMERIGGIO (> 15:00) -> MODALITÀ DEMO/TEST
+    if (minutes >= 900) {
+        if (inputType === 'bath') {
+            // Toggle Bagno
+            if (currentRecord && currentRecord.status === 'bagno') {
+                newStatus = 'presente';
+                ledColor = 'verde';
+                msg = 'Rientro Demo';
+            } else {
+                newStatus = 'bagno';
+                ledColor = 'blu';
+                msg = 'Uscita Bagno Demo';
+            }
+        } 
+        else if (inputType === 'exit') {
+             newStatus = 'uscita_anticipata';
+             ledColor = 'uscita'; // O arancione/rosso
+             msg = 'Uscita Demo';
+        }
+        else {
+            // Entrata
+            newStatus = 'presente';
+            ledColor = 'verde';
+            msg = 'Ingresso Demo';
+        }
+    }
+    // B. SCUOLA CHIUSA (13:35 - 15:00) -> NESSUNA AZIONE
+    else if (minutes >= 815 && minutes < 900) {
+        updateDb = false; 
+        ledColor = 'verde_f'; // Verde fisso o lampeggio rapido per dire "Ricevuto ma ignorato"
+        msg = 'Scuola Chiusa';
+        newStatus = currentRecord ? currentRecord.status : 'assente';
+    }
+    // C. MATTINA (Orario Scolastico)
+    else {
+        if (inputType === 'exit') {
+            newStatus = 'uscita_anticipata';
+            ledColor = 'uscita';
+            msg = 'Uscita Anticipata';
+        } 
+        else if (inputType === 'bath') {
+            // Logica Bagno
+            if (currentRecord && currentRecord.status === 'bagno') {
+                newStatus = 'presente'; 
+                ledColor = 'verde';
+                msg = 'Rientro dal Bagno';
+            } else {
+                newStatus = 'bagno'; 
+                ledColor = 'blu';
+                msg = 'Uscita Bagno';
+            }
+        } 
+        else {
+            // ENTRATA (Short Press)
+            if (currentRecord && currentRecord.status !== 'assente') {
+                 // Se è già presente, non facciamo nulla (evita doppi ingressi)
+                 updateDb = false;
+                 ledColor = 'verde_f'; 
+                 msg = 'Già Presente';
+                 newStatus = currentRecord.status;
+            } else {
+                // Calcolo Ritardi
+                if (minutes < 520) { // Prima delle 8:40
+                    newStatus = 'presente'; ledColor = 'verde'; msg = 'Entrata Regolare';
+                } 
+                else if (minutes >= 520 && minutes < 575) { // Tra 8:40 e 9:35
+                    newStatus = 'ritardo'; ledColor = 'giallo'; msg = 'Entrata in Ritardo';
+                } 
+                else { // Dopo le 9:35
+                    newStatus = 'seconda_ora'; ledColor = 'viola'; msg = 'Entrata 2° Ora';
+                }
+            }
+        }
+    }
+
+    // 7. SALVATAGGIO SU SUPABASE
+    if (updateDb) {
+        const { error: upsertError } = await supabase
+            .from('attendance')
+            .upsert({
+                student_name: user.full_name,
+                date: dateStr,
+                status: newStatus,
+                time: timeStr
+            }, { onConflict: 'student_name, date' });
+            
+        if (upsertError) throw upsertError;
+    }
+
+    // 8. RISPOSTA ALL'ESP32
+    return new Response(JSON.stringify({ 
+        success: true, 
+        message: msg, 
+        status: newStatus, 
+        color: ledColor 
+    }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return new Response(JSON.stringify({ error: error.message, color: 'rosso' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   }
 }
