@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v135 (Final Polish)</title>
+    <title>SmartCheck - School OS v139 (GOLD MASTER)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,6 +48,7 @@
         .status-ritardo { border: 1px solid #f97316 !important; background: linear-gradient(145deg, rgba(67, 20, 7, 0.6), rgba(124, 45, 18, 0.2)) !important; color: #fdba74 !important; }
         .status-seconda-ora { border: 1px solid #8b5cf6 !important; background: linear-gradient(145deg, rgba(76, 29, 149, 0.6), rgba(109, 40, 217, 0.2)) !important; color: #c4b5fd !important; }
         .status-uscita-anticipata { border: 1px solid #eab308 !important; background: linear-gradient(145deg, rgba(66, 32, 6, 0.6), rgba(113, 63, 18, 0.2)) !important; color: #fde047 !important; }
+        /* NEW STATUS: FUORI AULA */
         .status-fuori-aula { border: 1px solid #6366f1 !important; background: linear-gradient(145deg, rgba(49, 46, 129, 0.9), rgba(67, 56, 202, 0.4)) !important; color: #a5b4fc !important; }
 
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); } 70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
@@ -98,7 +99,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v135.0 • Final Polish</div>
+                <div class="text-xs font-mono text-slate-500">v139.0 • Final Edition</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -138,10 +139,10 @@
                 <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div></div></div>
             </div>
             <div class="relative group mx-4">
-                <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 cursor-pointer border border-slate-700 hover:border-blue-500 transition-all" onclick="resetToToday()">
+                <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 cursor-pointer border border-slate-700 hover:border-blue-500 transition-all relative" onclick="resetToToday()">
                     <i class="fa-regular fa-calendar text-blue-400 text-lg"></i>
                     <div class="flex flex-col text-right"><span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DATA</span><span id="date-display" class="font-mono text-sm font-bold text-white leading-none uppercase">Oggi</span></div>
-                    <input type="date" id="date-picker" class="absolute inset-0 opacity-0 cursor-pointer" onchange="changeDate(this.value)">
+                    <input type="date" id="date-picker" class="absolute inset-0 opacity-0 cursor-pointer z-50" onchange="changeDate(this.value)">
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -266,7 +267,7 @@
 
     <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="bg-[#0f172a] w-full max-w-3xl rounded-3xl p-8 border border-slate-700 shadow-2xl relative"><div class="flex justify-between items-start mb-6"><div><h2 id="modal-detail-name" class="text-4xl font-black text-white tracking-tight">Nome Cognome</h2><div class="flex gap-4 mt-4 text-xs font-bold uppercase tracking-widest"><button onclick="switchTab('presence')" id="tab-presence" class="text-blue-400 border-b-2 border-blue-400 pb-1">Presenze</button><button onclick="switchTab('grades')" id="tab-grades" class="text-slate-500 hover:text-white pb-1">Voti</button><button onclick="switchTab('notes')" id="tab-notes" class="text-slate-500 hover:text-white pb-1">Note</button></div></div><button onclick="document.getElementById('modal-student-detail').classList.add('hidden')" class="bg-slate-800 p-2 rounded-lg text-slate-400 hover:text-white">✕</button></div>
     
-    <div id="content-presence"><div class="grid grid-cols-2 gap-6 mb-8"><div id="status-card" class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 group transition-all"><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Stato Attuale</div><div id="status-view-mode" class="cursor-pointer"><div id="modal-detail-status" class="text-3xl font-black text-white">--</div><div id="status-edit-hint" class="hidden text-[10px] text-blue-400 mt-2 font-mono items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-pen"></i> CLICCA PER MODIFICARE</div></div><div id="status-edit-mode" class="hidden"><div class="grid grid-cols-2 gap-2 mt-1"><button onclick="selectStatusPreview('presente')" id="btn-presente" class="status-btn py-2 text-xs font-bold bg-green-900/40 text-green-400 border border-green-600/50 rounded">PRESENTE</button><button onclick="selectStatusPreview('bagno')" id="btn-bagno" class="status-btn py-2 text-xs font-bold bg-cyan-900/40 text-cyan-400 border border-cyan-600/50 rounded">BAGNO</button><button onclick="selectStatusPreview('ritardo')" id="btn-ritardo" class="status-btn py-2 text-xs font-bold bg-orange-900/40 text-orange-400 border border-orange-600/50 rounded">RITARDO</button><button onclick="selectStatusPreview('seconda_ora')" id="btn-seconda_ora" class="status-btn py-2 text-xs font-bold bg-violet-900/40 text-violet-400 border border-violet-600/50 rounded">2° ORA</button><button onclick="selectStatusPreview('uscita_anticipata')" id="btn-uscita_anticipata" class="status-btn py-2 text-xs font-bold bg-yellow-900/40 text-yellow-400 border border-yellow-600/50 rounded">USCITA</button><button onclick="selectStatusPreview('assente')" id="btn-assente" class="status-btn py-2 text-xs font-bold bg-red-900/40 text-red-400 border border-red-600/50 rounded">ASSENTE</button><button onclick="selectStatusPreview('fuori_aula')" id="btn-fuori_aula" class="status-btn py-2 text-xs font-bold bg-indigo-900/40 text-indigo-400 border border-indigo-600/50 rounded col-span-2">FUORI AULA</button></div><div class="flex gap-2 mt-3"><button onclick="confirmStatusChange()" class="flex-grow py-3 bg-blue-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow-lg">APPLICA</button><button onclick="toggleStatusEdit()" class="px-4 py-3 bg-slate-700 text-slate-300 font-bold text-xs rounded-lg">✕</button></div></div></div><div class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center"><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Uscite</div><div id="modal-detail-count" class="text-4xl font-black text-white">0</div></div></div><div class="bg-[#1e293b] rounded-xl overflow-hidden border border-slate-700/50"><table class="w-full text-left text-sm font-mono text-slate-300"><thead class="bg-slate-800 text-[10px] uppercase font-bold text-slate-400"><tr><th class="px-6 py-3">Uscita</th><th class="px-6 py-3">Rientro</th><th class="px-6 py-3 text-right">Stato</th></tr></thead><tbody id="modal-history-body" class="divide-y divide-slate-800"></tbody></table></div></div>
+    <div id="content-presence"><div class="grid grid-cols-2 gap-6 mb-8"><div id="status-card" class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 group transition-all"><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Stato Attuale</div><div id="status-view-mode" class="cursor-pointer"><div id="modal-detail-status" class="text-3xl font-black text-white">--</div><div id="status-edit-hint" class="hidden text-[10px] text-blue-400 mt-2 font-mono items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-pen"></i> CLICCA PER MODIFICARE</div></div><div id="status-edit-mode" class="hidden"><div class="grid grid-cols-2 gap-2 mt-1"><button onclick="selectStatusPreview('presente')" id="btn-presente" class="status-btn py-2 text-xs font-bold bg-green-900/40 text-green-400 border border-green-600/50 rounded">PRESENTE</button><button onclick="selectStatusPreview('bagno')" id="btn-bagno" class="status-btn py-2 text-xs font-bold bg-cyan-900/40 text-cyan-400 border border-cyan-600/50 rounded">BAGNO</button><button onclick="selectStatusPreview('ritardo')" id="btn-ritardo" class="status-btn py-2 text-xs font-bold bg-orange-900/40 text-orange-400 border border-orange-600/50 rounded">RITARDO</button><button onclick="selectStatusPreview('seconda_ora')" id="btn-seconda_ora" class="status-btn py-2 text-xs font-bold bg-violet-900/40 text-violet-400 border border-violet-600/50 rounded">2° ORA</button><button onclick="selectStatusPreview('uscita_anticipata')" id="btn-uscita_anticipata" class="status-btn py-2 text-xs font-bold bg-yellow-900/40 text-yellow-400 border border-yellow-600/50 rounded">USCITA</button><button onclick="selectStatusPreview('assente')" id="btn-assente" class="status-btn py-2 text-xs font-bold bg-red-900/40 text-red-400 border border-red-600/50 rounded">ASSENTE</button><button onclick="selectStatusPreview('fuori_aula')" id="btn-fuori_aula" class="status-btn py-2 text-xs font-bold bg-indigo-900/40 text-indigo-400 border border-indigo-600/50 rounded col-span-2">FUORI AULA</button></div><div class="flex gap-2 mt-3"><button onclick="confirmStatusChange()" class="flex-grow py-3 bg-blue-600 text-white font-bold text-xs rounded-lg uppercase tracking-wider shadow-lg">APPLICA</button><button onclick="toggleStatusEdit()" class="px-4 py-3 bg-slate-700 text-slate-300 font-bold text-xs rounded-lg">✕</button></div></div></div><div class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center"><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Uscite</div><div id="modal-detail-count" class="text-4xl font-black text-white">0</div></div></div><div class="bg-[#1e293b] rounded-xl overflow-hidden border border-slate-700/50"><table class="w-full text-left text-sm font-mono text-slate-300"><thead class="bg-slate-800 text-[10px] uppercase font-bold text-slate-400"><tr><th class="px-6 py-3">Uscita</th><th class="px-6 py-3">Rientro</th><th class="px-6 py-3 text-right">Durata</th></tr></thead><tbody id="modal-history-body" class="divide-y divide-slate-800"></tbody></table></div></div>
     
     <div id="content-grades" class="hidden"><div id="teacher-subject-block" class="mb-4 text-center"><span class="text-xs font-bold text-slate-500 uppercase">Materia:</span><span id="teacher-subject-name" class="text-green-400 font-bold ml-2">--</span></div><div id="grade-input-area" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6 flex gap-4 items-end"><div class="flex-grow"><label class="text-[10px] text-slate-400 font-bold uppercase">Voto</label>
         <select id="new-grade-value" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 font-mono font-bold text-sm">
@@ -285,87 +286,27 @@
         <div class="bg-[#1e293b] rounded-xl border border-slate-700/50 max-h-64 overflow-y-auto"><div id="notes-list" class="p-4 space-y-3"></div></div>
     </div>
     </div></div>
-
     <script>
-        // CONFIGURAZIONE SUPABASE
         const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
-        
-        // Uso un nome diverso per evitare conflitti con la variabile locale della libreria
         const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const STUDENTS_4AEE=["Emiliano Calò","Antonio Navarroli","Filippo Agnitti","Ivan Garofalo","Mattia Galli","Lorenzo Esposito","Kristian Methasa","Stefano Spaczil","Federico Pasqualone","Leonardo Pacchione","Oleksandr Tsikhanskyi","Alessio Tofano","Pierpaolo Carosa","Stefano Camassa","Lorenzo Pisone","Abdula Chackari","Ernest Cupi","Matteo Di Michele","Luca Iarossi","Biagio Recchione","Luigi Mirandola","Mattia Raulli","Giuseppe Palombizio"];
         const TEACHERS_NAMES=["Antonini Tania","Caputo Tonino","Cardilli Giuseppina","Centofanti Pietro","Chiarelli Sandra","Consalvo Simone","De Michele Alessandra","Del Fattore Alice","Di Bacco Emilio","Di Cioccio Felicia","Di Giacomo Pierluigi","Di Marzio Cinzia","Di Mascio Stefano","Di Tella Arianna","Fabrizi Paola","Federico Anna Lucia","Giammarco Fulvia","Guadagnoli Francesco","Liberatore Walter","Manna Valeria","Mariani Monica","Marinucci Chiara","Mascio Fabio","Mascitti Valentina","Mazzara Lucia","Natarelli Francesco","Oddi Pasqualina","Paciocco Marco","Pasqua Franca","Perinetti Tullio","Petrilli Antonio","Piccirilli Stefania","Recanati Giulia","Rizzo Sabrina","Roselli Michele","Rucci Piero","Sabatini Leonardo","Sambuco Nazzareno","Santangelo Marco","Santarelli Fabrizio","Santilli Mirco","Scarsella Alessio","Schiavo Marina","Sciarra Santa","Stampone Agata","Trabucco Silvia","Vallera Alessandra","D'Urbano Antonio","De Dominicis Giovanni","Di Bacco Antonio","Di Cesare Paqualino","Di Nino Ivan","Febbo Katia","Liberatore Piergiuseppe","Pace Dino","Tedeschi Diletta","Vallera Villiam"];
         const ALL_SUBJECTS=["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
-        const CIRCULARS=[{id:104,date:"15/01",title:"Assemblea di Istituto",type:"urgent"},{id:103,date:"14/01",title:"Uscita anticipata classi 5°",type:"info"}];
         const TEACHER_SUBJECT_MAP = { "Petrilli Antonio": "Sistemi Automatici", "Mascio Fabio": "Elettrotecnica", "Roselli Michele": "TPSEE", "Manna Valeria": "Italiano", "Santilli Mirco": "Matematica", "Di Tella Arianna": "Inglese" };
-        
-        // HUB STRUCT
-        const CLASSES_STRUCT={ 
-            "ELETTRONICA":["1AEE","2AEE","3AEE","4AEE","5AEE"],
-            "MECCANICA":["1AMM","2AMM","3AMM","4AMM","5AMM","4 MAUT","4 MROB","5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"],
-            "CHIMICA":["1ACM","2ACM","3ACM","4ACM","5ACM"]
-        };
+        const CLASSES_STRUCT={ "ELETTRONICA":["1AEE","2AEE","3AEE","4AEE","5AEE"], "MECCANICA":["1AMM","2AMM","3AMM","4AMM","5AMM","4 MAUT","4 MROB","5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"], "CHIMICA":["1ACM","2ACM","3ACM","4ACM","5ACM"] };
         
         let currentUser=null; let tempUser=null; let currentClass=null; let selectedStudentId=null; let pendingStatus=null; let selectedSignHour=null; let pendingAgendaType=null;
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
 
         let localSchoolDB = { "4AEE": generateClassInitialState("4AEE", STUDENTS_4AEE) };
-        let onlineGrades = [];
-        let onlineNotes = [];
-        let onlineAgenda = [];
-        let onlineSignatures = [];
-        
-        // Strutture di appoggio per il frontend
-        let localGradesDB = {};
-        let localNotesDB = {};
+        let onlineGrades = [], onlineNotes = [], onlineAgenda = [], onlineSignatures = [];
+        let localGradesDB = {}, localNotesDB = {};
 
-        // ESPOSIZIONE GLOBALE (FIX PER "NON CLICCA")
-        window.verifyUser = verifyUser;
-        window.processAuth = processAuth;
-        window.resetLogin = resetLogin;
-        window.openStudentDetail = openStudentDetail;
-        window.toggleStatusEdit = toggleStatusEdit;
-        window.selectStatusPreview = selectStatusPreview;
-        window.confirmStatusChange = confirmStatusChange;
-        window.saveSignature = saveSignature;
-        window.selectSignHour = selectSignHour;
-        window.saveAgendaEntry = saveAgendaEntry;
-        window.selectAgendaType = selectAgendaType;
-        window.addGrade = addGrade;
-        window.addNote = addNote;
-        window.deleteNote = deleteNote;
-        window.deleteGrade = deleteGrade;
-        window.deleteAgendaItem = deleteAgendaItem;
-        window.deleteSignature = deleteSignature;
-        window.logout = logout;
-        window.initHub = initHub;
-        window.renderClassSelector = renderClassSelector;
-        window.loadClassroom = loadClassroom;
-        window.backToHub = backToHub;
-        window.resetToToday = resetToToday;
-        window.changeDate = changeDate;
-        window.renderGrid = renderGrid;
-        window.createDeskCard = createDeskCard;
-        window.openSignModal = openSignModal;
-        window.updateTeacherForm = updateTeacherForm;
-        window.renderCalendarStrip = renderCalendarStrip;
-        window.renderSignaturesList = renderSignaturesList;
-        window.updateSignatureDisplay = updateSignatureDisplay;
-        window.filterSubjects = filterSubjects;
-        window.openAgendaModal = openAgendaModal;
-        window.renderAgendaList = renderAgendaList;
-        window.openAddAgendaModal = openAddAgendaModal;
-        window.openListModal = openListModal;
-        window.filterListModal = filterListModal;
-        window.openGradesModal = openGradesModal;
-        window.toggleGradeDetails = toggleGradeDetails;
-        window.loadTeacherGradesView = loadTeacherGradesView;
-        window.loadNotes = loadNotes;
-        window.switchTab = switchTab;
-        window.toggleNoticeModal = toggleNoticeModal;
-        window.hardReset = hardReset;
+        // EXPORTS
+        window.verifyUser = verifyUser; window.processAuth = processAuth; window.resetLogin = resetLogin; window.openStudentDetail = openStudentDetail; window.toggleStatusEdit = toggleStatusEdit; window.selectStatusPreview = selectStatusPreview; window.confirmStatusChange = confirmStatusChange; window.saveSignature = saveSignature; window.selectSignHour = selectSignHour; window.saveAgendaEntry = saveAgendaEntry; window.selectAgendaType = selectAgendaType; window.addGrade = addGrade; window.addNote = addNote; window.deleteNote = deleteNote; window.deleteGrade = deleteGrade; window.deleteAgendaItem = deleteAgendaItem; window.deleteSignature = deleteSignature; window.logout = logout; window.initHub = initHub; window.renderClassSelector = renderClassSelector; window.loadClassroom = loadClassroom; window.backToHub = backToHub; window.resetToToday = resetToToday; window.changeDate = changeDate; window.renderGrid = renderGrid; window.createDeskCard = createDeskCard; window.openSignModal = openSignModal; window.updateTeacherForm = updateTeacherForm; window.renderCalendarStrip = renderCalendarStrip; window.renderSignaturesList = renderSignaturesList; window.updateSignatureDisplay = updateSignatureDisplay; window.filterSubjects = filterSubjects; window.openAgendaModal = openAgendaModal; window.renderAgendaList = renderAgendaList; window.openAddAgendaModal = openAddAgendaModal; window.openListModal = openListModal; window.filterListModal = filterListModal; window.openGradesModal = openGradesModal; window.toggleGradeDetails = toggleGradeDetails; window.loadTeacherGradesView = loadTeacherGradesView; window.loadNotes = loadNotes; window.switchTab = switchTab; window.toggleNoticeModal = toggleNoticeModal; window.hardReset = hardReset;
 
         window.onload = function() {
             // FIX TASTI - ASSEGNAZIONE MANUALE
@@ -387,7 +328,7 @@
             if (saved) {
                 currentUser = JSON.parse(saved);
                 document.getElementById('view-login').classList.add('hidden');
-                if (currentUser.role === 'stud') loadClassroom('4AEE'); else initHub();
+                if (currentUser.role === 'studente') loadClassroom('4AEE'); else initHub();
                 startClock();
                 initRealtime(); 
             }
@@ -412,6 +353,24 @@
         function saveGradesDB(db) { localGradesDB = db; } 
         function getNotesDB() { return localNotesDB; }
         function saveNotesDB(db) { localNotesDB = db; } 
+
+        // HISTORY PERSISTENCE
+        function saveHistoryLocal() { localStorage.setItem('SCHOOL_HISTORY_V1', JSON.stringify(localSchoolDB)); }
+        function loadHistoryLocal() { 
+            const h = localStorage.getItem('SCHOOL_HISTORY_V1'); 
+            if(h) { 
+                const loaded = JSON.parse(h); 
+                Object.keys(loaded).forEach(cls => { 
+                    if(localSchoolDB[cls]) { 
+                        Object.keys(loaded[cls]).forEach(id => { 
+                            if(localSchoolDB[cls][id]) { 
+                                localSchoolDB[cls][id].history = loaded[cls][id].history; 
+                            } 
+                        }); 
+                    } 
+                }); 
+            } 
+        }
 
         // --- AUTH: SUPABASE CONNECTION ---
         async function verifyUser(){ 
@@ -460,7 +419,7 @@
                 currentUser = tempUser; 
                 localStorage.setItem('SC_USER', JSON.stringify(currentUser));
                 document.getElementById('view-login').classList.add('hidden');
-                if(currentUser.role==='stud') loadClassroom('4AEE'); else initHub();
+                if(currentUser.role==='studente') loadClassroom('4AEE'); else initHub();
                 startClock();
                 initRealtime(); // Avvia Sync
             } else { 
@@ -484,9 +443,33 @@
                 container.appendChild(col);
             } 
         }
-        function loadClassroom(cls){ currentClass=cls; document.getElementById('view-hub').classList.add('hidden'); document.getElementById('view-classroom').classList.remove('hidden'); document.getElementById('class-header-name').innerText=cls; const today = getTodayStr(); document.getElementById('date-picker').value = today; changeDate(today); if(currentUser.role==='stud'){ document.getElementById('back-btn').classList.add('hidden'); document.getElementById('sign-btn').classList.add('hidden'); document.getElementById('dock-right').classList.remove('hidden'); document.getElementById('role-badge').innerText="STUDENTE"; document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-green-900/50 text-green-300 border border-green-700/50 uppercase tracking-widest"; } else { document.getElementById('back-btn').classList.remove('hidden'); document.getElementById('sign-btn').classList.remove('hidden'); document.getElementById('dock-right').classList.add('hidden'); document.getElementById('role-badge').innerText=currentUser.role.toUpperCase(); document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest"; } updateSignatureDisplay(); }
-        function backToHub(){document.getElementById('view-classroom').classList.add('hidden');document.getElementById('view-hub').classList.remove('hidden');}
+        function loadClassroom(cls){ 
+            currentClass=cls; 
+            document.getElementById('view-hub').classList.add('hidden'); 
+            document.getElementById('view-classroom').classList.remove('hidden'); 
+            document.getElementById('class-header-name').innerText=cls; 
+            const today = getTodayStr(); 
+            document.getElementById('date-picker').value = today; 
+            changeDate(today); 
+            
+            // FIX ROLE CHECK (stud -> studente)
+            if(currentUser.role==='studente'){ 
+                document.getElementById('back-btn').classList.add('hidden'); 
+                document.getElementById('sign-btn').classList.add('hidden'); 
+                document.getElementById('dock-right').classList.remove('hidden'); 
+                document.getElementById('role-badge').innerText="STUDENTE"; 
+                document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-green-900/50 text-green-300 border border-green-700/50 uppercase tracking-widest"; 
+            } else { 
+                document.getElementById('back-btn').classList.remove('hidden'); 
+                document.getElementById('sign-btn').classList.remove('hidden'); 
+                document.getElementById('dock-right').classList.add('hidden'); 
+                document.getElementById('role-badge').innerText=currentUser.role.toUpperCase(); 
+                document.getElementById('role-badge').className="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest"; 
+            } 
+            updateSignatureDisplay(); 
+        }
         
+        function backToHub(){document.getElementById('view-classroom').classList.add('hidden');document.getElementById('view-hub').classList.remove('hidden');}
         function resetToToday() { changeDate(getTodayStr()); }
 
         async function changeDate(val) { 
@@ -512,7 +495,7 @@
             renderGrid(localSchoolDB["4AEE"]);
             renderSignaturesList(); 
             renderCalendarStrip();
-            if(currentUser.role!=='stud') updateTeacherForm();
+            if(currentUser.role!=='studente') updateTeacherForm();
         }
 
         // --- REALTIME SYNC (IL PONTE) ---
@@ -599,6 +582,7 @@
             if (attReq.data) {
                 // Reset to default
                 localSchoolDB["4AEE"] = generateClassInitialState("4AEE", STUDENTS_4AEE);
+                loadHistoryLocal(); // Ripristina storico da locale se esiste
                 // Apply changes
                 attReq.data.forEach(row => {
                      for(let id in localSchoolDB["4AEE"]) {
@@ -671,7 +655,7 @@
             const list=document.getElementById('grades-list');
             
             // Filtra i voti online per l'utente corrente o per lo studente selezionato
-            let targetUser = currentUser.role === 'stud' ? currentUser.name : document.getElementById('modal-detail-name').innerText;
+            let targetUser = currentUser.role === 'studente' ? currentUser.name : document.getElementById('modal-detail-name').innerText;
             const myGrades = onlineGrades.filter(g => g.student_name === targetUser);
 
             list.innerHTML="";
@@ -759,7 +743,7 @@
         }
         
         async function deleteAgendaItem(id){ 
-            if(confirm("Eliminare?")){ 
+            if(confirm("Eliminare questo impegno?")){ 
                 // Passiamo ID come stringa per sicurezza
                 await _supabase.from('agenda').delete().eq('id', id); 
                 
@@ -779,7 +763,7 @@
             if(notes.length===0) list.innerHTML = `<div class="text-center text-slate-500 text-xs py-4">Nessuna nota</div>`;
             notes.forEach((n, idx) => {
                 const border = n.type === 'warning' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
-                const del = currentUser.role !== 'stud' ? `<button onclick="deleteNote(${n.id})" class="text-red-500 text-xs ml-2">Elimina</button>` : '';
+                const del = currentUser.role !== 'studente' ? `<button onclick="deleteNote(${n.id})" class="text-red-500 text-xs ml-2">Elimina</button>` : '';
                 list.innerHTML += `<div class="bg-slate-800 p-3 rounded mb-2 ${border}"><div class="flex justify-between"><span class="text-[10px] text-slate-400">${n.date} • ${n.teacher_name}</span>${del}</div><p class="text-sm text-slate-200 mt-1">${n.text}</p></div>`;
             });
         }
@@ -839,7 +823,7 @@
             if(t==='notes') loadNotes();
         }
 
-        function openAgendaModal(){document.getElementById('modal-agenda').classList.remove('hidden');if(currentUser.role!=='stud')document.getElementById('btn-add-agenda').classList.remove('hidden');renderAgendaList();}
+        function openAgendaModal(){document.getElementById('modal-agenda').classList.remove('hidden');if(currentUser.role!=='studente')document.getElementById('btn-add-agenda').classList.remove('hidden');renderAgendaList();}
         
         // UPDATED RENDER LIST WITH FIXED DELETE BUTTON
         function renderAgendaList(){
@@ -850,7 +834,7 @@
                 
                 // TASTO ELIMINA MIGLIORATO
                 // Aggiunto stopPropagation per sicurezza e stile migliore
-                const delBtn = currentUser.role !== 'stud' ? 
+                const delBtn = currentUser.role !== 'studente' ? 
                     `<button onclick="event.stopPropagation(); deleteAgendaItem('${item.id}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors ml-4 z-50 flex-shrink-0"><i class="fa-solid fa-trash"></i></button>` : ''; 
                 
                 list.innerHTML+=`
@@ -865,7 +849,7 @@
         }
         function openAddAgendaModal(){ document.getElementById('modal-add-agenda').classList.remove('hidden'); const sel = document.getElementById('agenda-subject'); sel.innerHTML = ""; ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`); }
         function selectAgendaType(t){ pendingAgendaType=t; document.getElementById('btn-type-compito').className=t==='compito'?'btn-selected py-3 bg-green-900/40':'py-3 bg-slate-800'; document.getElementById('btn-type-verifica').className=t==='verifica'?'btn-selected py-3 bg-red-900/40':'py-3 bg-slate-800'; }
-        function saveAgendaEntry(){ if(!pendingAgendaType) return; const d=new Date(document.getElementById('agenda-date').value); const db=getAgendaDB(); if(!db[currentClass]) db[currentClass]=[]; db[currentClass].push({date:`${d.getDate()}/${d.getMonth()+1}`, subject:document.getElementById('agenda-subject').value, type:pendingAgendaType, desc:document.getElementById('agenda-desc').value}); saveAgendaDB(db); document.getElementById('modal-add-agenda').classList.add('hidden'); renderAgendaList(); }
+        function saveAgendaEntry(){ if(!pendingAgendaType) return; const d=new Date(document.getElementById('agenda-date').value); const dateStr = `${d.getDate()}/${d.getMonth()+1}`; await _supabase.from('agenda').insert([{ date: dateStr, subject: document.getElementById('agenda-subject').value, type: pendingAgendaType, description: document.getElementById('agenda-desc').value, class: currentClass }]); const agendaReq = _supabase.from('agenda').select('*').then(r=>{if(r.data) onlineAgenda=r.data; renderAgendaList();}); document.getElementById('modal-add-agenda').classList.add('hidden'); }
         function openListModal(){ document.getElementById('modal-class-list').classList.remove('hidden'); filterListModal(); }
         
         // NEW FILTER LIST MODAL (SORT BY LASTNAME)
@@ -935,7 +919,7 @@
         // --- CALENDAR & REGISTER ---
         function openSignModal(){ 
             const m = document.getElementById('modal-sign'); m.classList.remove('hidden'); 
-            const isStud = currentUser.role === 'stud';
+            const isStud = currentUser.role === 'studente';
             if (isStud) {
                 document.getElementById('reg-header-student').classList.remove('hidden');
                 document.getElementById('reg-header-teacher').classList.add('hidden');
@@ -1013,20 +997,37 @@
             else if(student.status==='fuori_aula') color="text-indigo-400";
             statusEl.className=`text-3xl font-black ${color}`; 
              
-            document.getElementById('modal-detail-count').innerText=student.history.length; 
+            document.getElementById('modal-detail-count').innerText=student.history ? student.history.length : 0; 
             const tbody=document.getElementById('modal-history-body'); tbody.innerHTML=""; 
-            student.history.forEach(h=>{ 
-                // FIX DURATA BAGNO
-                let durationStr = "";
-                if(h.in && h.in !== '--:--') {
-                   const [h1, m1] = h.out.split(':').map(Number);
-                   const [h2, m2] = h.in.split(':').map(Number);
-                   let diff = (h2*60+m2) - (h1*60+m1);
-                   if (diff < 0) diff += 1440; // Giorno dopo
-                   durationStr = `<span class="text-[10px] text-yellow-300 font-bold ml-2">(${diff} min)</span>`;
-                }
-                tbody.innerHTML+=`<tr><td class="px-6 py-4 font-bold text-cyan-400">${h.out}</td><td class="px-6 py-4 font-bold text-green-400">${h.in||'--'} ${durationStr}</td><td class="px-6 py-4 text-right text-slate-500">${h.in?'Chiusa':'In corso'}</td></tr>`;
-            }); 
+            
+            // HISTORY RENDER WITH DURATION
+            if (student.history) {
+                student.history.forEach(h=>{ 
+                    let durationStr = "";
+                    let inTime = h.in;
+                    let statusText = "Chiusa";
+                    let diff = 0;
+
+                    const [hOut, mOut] = h.out.split(':').map(Number);
+                    
+                    if (inTime && inTime !== '--:--') {
+                       // Caso 1: Rientrato
+                       const [hIn, mIn] = inTime.split(':').map(Number);
+                       diff = (hIn*60+mIn) - (hOut*60+mOut);
+                       if (diff < 0) diff += 1440; // Giorno dopo
+                       durationStr = `<span class="text-[10px] text-yellow-300 font-bold ml-2">(${diff} min)</span>`;
+                    } else {
+                       // Caso 2: Ancora Fuori (Calcola live)
+                       inTime = "--:--";
+                       const now = new Date();
+                       diff = (now.getHours()*60 + now.getMinutes()) - (hOut*60+mOut);
+                       if (diff < 0) diff += 1440;
+                       statusText = `<span class="text-orange-400 animate-pulse font-bold">Fuori da ${diff} min</span>`;
+                    }
+                    
+                    tbody.innerHTML+=`<tr><td class="px-6 py-4 font-bold text-cyan-400">${h.out}</td><td class="px-6 py-4 font-bold text-green-400">${inTime} ${durationStr}</td><td class="px-6 py-4 text-right text-slate-500 font-mono text-xs">${statusText}</td></tr>`;
+                }); 
+            }
              
             const viewMode=document.getElementById('status-view-mode'); 
             const editMode=document.getElementById('status-edit-mode'); 
@@ -1036,7 +1037,8 @@
             editMode.classList.add('hidden'); 
 
             // IMPORTANT: Assign Click Handler
-            if(currentUser.role!=='stud'){ 
+            // FIX ROLE
+            if(currentUser.role!=='studente'){ 
                 viewMode.onclick = toggleStatusEdit; // Bind function
                 viewMode.classList.add('cursor-pointer'); 
                 document.getElementById('status-edit-hint').classList.remove('hidden'); 
@@ -1049,7 +1051,8 @@
             } 
              
             switchTab('presence'); 
-            if(currentUser.role==='stud'){ document.getElementById('tab-presence').parentElement.classList.add('hidden'); } 
+            // FIX ROLE
+            if(currentUser.role==='studente'){ document.getElementById('tab-presence').parentElement.classList.add('hidden'); } 
             else { document.getElementById('tab-presence').parentElement.classList.remove('hidden'); } 
              
             document.getElementById('modal-student-detail').classList.remove('hidden'); 
@@ -1073,10 +1076,25 @@
             if(!pendingStatus) return; 
             const s = localSchoolDB[currentClass][selectedStudentId]; 
             const now = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}); 
-             
+            
+            // HISTORY LOGIC (NEW)
+            if(pendingStatus === 'bagno' || pendingStatus === 'fuori_aula') {
+                // Nuova Uscita
+                if (!s.history) s.history = [];
+                s.history.push({ out: now, in: null, type: pendingStatus });
+            } 
+            else if (pendingStatus === 'presente' && (s.status === 'bagno' || s.status === 'fuori_aula')) {
+                // Rientro
+                if (s.history && s.history.length > 0) {
+                    let last = s.history[s.history.length-1];
+                    if(last && !last.in) last.in = now;
+                }
+            }
+
             s.status = pendingStatus; 
             s.time = (pendingStatus === 'presente') ? '08:00' : (pendingStatus === 'assente' ? '--:--' : now);
-             
+            
+            saveHistoryLocal(); // Persist history
             renderGrid(localSchoolDB[currentClass]); 
             openStudentDetail(selectedStudentId);
 
@@ -1164,7 +1182,7 @@
             onlineAgenda.forEach((item,idx)=>{
                 let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; 
                 // FIXED DELETE BUTTON
-                const delBtn = currentUser.role!=='stud'?`<button onclick="event.stopPropagation(); deleteAgendaItem('${item.id}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors ml-4 z-50 flex-shrink-0"><i class="fa-solid fa-trash"></i></button>`:''; 
+                const delBtn = currentUser.role!=='studente'?`<button onclick="event.stopPropagation(); deleteAgendaItem('${item.id}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors ml-4 z-50 flex-shrink-0"><i class="fa-solid fa-trash"></i></button>`:''; 
                 list.innerHTML+=`<div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start"><div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span><p class="text-sm text-slate-300 mt-1">${item.description}</p></div>${delBtn}</div>`;
             });
         }
