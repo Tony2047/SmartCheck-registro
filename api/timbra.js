@@ -6,6 +6,7 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
+  // Configurazione CORS standard
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -15,9 +16,21 @@ export default async function handler(req, res) {
 
   const body = req.body || req.query;
   const tagID = body.tagID;
-  const inputType = body.type || 'short'; 
+  const pressioneMS = body.pressioneMS || 0; // Leggiamo i millisecondi dal lettore
 
   if (!tagID) return res.status(400).json({ error: 'Manca tagID' });
+
+  // --- 0. LOGICA DI CONVERSIONE PRESSIONE -> TIPO AZIONE ---
+  // Qui trasformiamo il tempo di pressione nel tipo di input che il tuo vecchio codice si aspetta
+  let inputType = 'short'; // Default: Entrata/Tocco veloce
+
+  if (pressioneMS >= 5000) {
+      inputType = 'exit'; // Pressione lunga (> 5 sec) -> Uscita
+  } else if (pressioneMS >= 2000) {
+      inputType = 'bath'; // Pressione media (> 2 sec) -> Bagno
+  } else {
+      inputType = 'short'; // Pressione breve -> Entrata
+  }
 
   try {
     // 1. Identifica Studente
@@ -26,7 +39,7 @@ export default async function handler(req, res) {
 
     if (userError || !user) return res.status(404).json({ error: 'Badge sconosciuto', color: 'rosso' });
 
-    // 2. Calcola Ora
+    // 2. Calcola Ora Italiana
     const now = new Date();
     const italyTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Rome"}));
     const minutes = italyTime.getHours() * 60 + italyTime.getMinutes(); 
@@ -47,14 +60,12 @@ export default async function handler(req, res) {
     let msg = 'Operazione Completata';
     let updateDb = true; 
 
-    // --- LOGICA AGGIORNATA PER OPEN DAY ---
+    // --- LOGICA GESTIONE STATI (DEMO / ORARI) ---
 
-    // A. POMERIGGIO (> 15:00) -> MODALITÀ DEMO COMPLETAMENTE SBLOCCATA
-    // Permettiamo di cambiare stato liberamente per mostrare che funziona
+    // A. POMERIGGIO (> 15:00) -> MODALITÀ DEMO SBLOCCATA
     if (minutes >= 900) {
         if (inputType === 'bath') {
-            // Se sono in bagno torno presente, se sono presente vado in bagno
-            // Indipendentemente da cosa ho fatto la mattina
+            // Toggle Bagno Pomeriggio
             if (currentRecord && currentRecord.status === 'bagno') {
                 newStatus = 'presente';
                 ledColor = 'verde';
@@ -67,7 +78,7 @@ export default async function handler(req, res) {
         } 
         else if (inputType === 'exit') {
              newStatus = 'uscita_anticipata';
-             ledColor = 'uscita';
+             ledColor = 'uscita'; // Assicurati che l'ESP gestisca questo colore (es. rosso lampeggiante o arancione)
              msg = 'Uscita Demo';
         }
         else {
@@ -75,7 +86,6 @@ export default async function handler(req, res) {
             newStatus = 'presente';
             ledColor = 'verde';
             msg = 'Ingresso Demo';
-            // Se era già presente, lo forziamo a rimanere presente (o aggiorniamo l'ora)
         }
     }
     // B. SCUOLA CHIUSA (13:35 - 15:00) -> STATO CONGELATO
@@ -104,13 +114,15 @@ export default async function handler(req, res) {
             }
         } 
         else {
-            // ENTRATA
+            // ENTRATA (Tocco Corto)
             if (currentRecord && currentRecord.status !== 'assente') {
+                 // Se fa un tocco corto ma è già a scuola, non facciamo nulla (evitiamo doppi ingressi)
                  updateDb = false;
-                 ledColor = 'verde_f'; 
+                 ledColor = 'verde_f'; // Verde fisso o lampeggio veloce per dire "OK, lo so"
                  msg = 'Già Presente';
                  newStatus = currentRecord.status;
             } else {
+                // Prima entrata della giornata
                 if (minutes < 520) { 
                     newStatus = 'presente'; ledColor = 'verde'; msg = 'Entrata Regolare';
                 } 
@@ -134,7 +146,7 @@ export default async function handler(req, res) {
         }, { onConflict: 'student_name, date' });
     }
 
-    return res.status(200).json({ success: true, message: msg, status: newStatus, color: ledColor });
+    return res.status(200).json({ success: true, message: msg, status: newStatus, color: ledColor, debug_input: inputType });
 
   } catch (error) {
     return res.status(500).json({ error: error.message, color: 'rosso' });
