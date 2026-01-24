@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v500 (Production)</title>
+    <title>SmartCheck - School OS v550 (Perfect Fix)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,9 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* =========================================
-           STILI GLOBALI
-           ========================================= */
+        /* --- STILI GENERALI --- */
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #050b14; 
@@ -40,15 +38,13 @@
             display: none !important; 
         }
         
-        /* =========================================
-           FIX DATE PICKER (CRITICO)
-           ========================================= */
+        /* --- FIX DATE PICKER (HEADER ONLY) --- */
+        /* Importante: position relative sul contenitore per contenere l'absolute dell'input */
         .date-wrapper { 
             position: relative; 
             overflow: hidden; 
         }
         
-        /* Stile specifico per l'input data nell'header */
         .date-wrapper input[type="date"] { 
             color-scheme: dark; 
             background-color: transparent; 
@@ -57,290 +53,82 @@
             left: 0; 
             width: 100%; 
             height: 100%; 
-            z-index: 50; /* Fondamentale per il click */
-            opacity: 0; /* Invisibile */
+            z-index: 50; /* Deve essere sopra il testo per essere cliccabile */
+            opacity: 0; /* Invisibile ma attivo */
             cursor: pointer; 
             display: block; 
         }
         
-        /* Inversione icona calendario */
         ::-webkit-calendar-picker-indicator { 
             filter: invert(1); 
             cursor: pointer; 
         }
 
-        /* =========================================
-           SCROLLBAR CUSTOM
-           ========================================= */
-        ::-webkit-scrollbar { 
-            width: 4px; 
-        }
-        
-        ::-webkit-scrollbar-track { 
-            background: #0f172a; 
-        }
-        
-        ::-webkit-scrollbar-thumb { 
-            background: #334155; 
-            border-radius: 4px; 
-        }
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 
-        /* =========================================
-           ANIMAZIONI
-           ========================================= */
+        /* ANIMAZIONI */
         .fade-in { 
             animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
             opacity: 0; 
             transform: translateY(10px); 
         }
         
-        @keyframes fadeIn { 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-        
-        @keyframes pulse { 
-            0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); } 
-            70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); } 
-            100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } 
-        }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); } 70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
 
-        /* =========================================
-           COLORI STATO BANCHI
-           ========================================= */
-        .status-bagno { 
-            border: 1px solid #06b6d4 !important; 
-            background: linear-gradient(145deg, rgba(8, 51, 68, 0.9), rgba(22, 78, 99, 0.4)) !important; 
-            color: #67e8f9 !important; 
-            animation: pulse 2s infinite; 
-        }
-        
-        .status-presente { 
-            border: 1px solid #22c55e !important; 
-            background: linear-gradient(145deg, rgba(20, 83, 45, 0.5), rgba(5, 46, 22, 0.7)) !important; 
-            color: #4ade80 !important; 
-        }
-        
-        .status-assente { 
-            border: 1px solid #ef4444 !important; 
-            background: rgba(127, 29, 29, 0.2) !important; 
-            color: #ef4444 !important; 
-            opacity: 0.6; 
-        }
-        
-        .status-ritardo { 
-            border: 1px solid #f97316 !important; 
-            background: linear-gradient(145deg, rgba(67, 20, 7, 0.6), rgba(124, 45, 18, 0.2)) !important; 
-            color: #fdba74 !important; 
-        }
-        
-        .status-seconda-ora { 
-            border: 1px solid #8b5cf6 !important; 
-            background: linear-gradient(145deg, rgba(76, 29, 149, 0.6), rgba(109, 40, 217, 0.2)) !important; 
-            color: #c4b5fd !important; 
-        }
-        
-        .status-uscita-anticipata { 
-            border: 1px solid #eab308 !important; 
-            background: linear-gradient(145deg, rgba(66, 32, 6, 0.6), rgba(113, 63, 18, 0.2)) !important; 
-            color: #fde047 !important; 
-        }
-        
-        .status-fuori-aula { 
-            border: 1px solid #6366f1 !important; 
-            background: linear-gradient(145deg, rgba(49, 46, 129, 0.9), rgba(67, 56, 202, 0.4)) !important; 
-            color: #a5b4fc !important; 
-        }
+        /* COLORI STATO */
+        .status-bagno { border: 1px solid #06b6d4 !important; background: linear-gradient(145deg, rgba(8, 51, 68, 0.9), rgba(22, 78, 99, 0.4)) !important; color: #67e8f9 !important; animation: pulse 2s infinite; }
+        .status-presente { border: 1px solid #22c55e !important; background: linear-gradient(145deg, rgba(20, 83, 45, 0.5), rgba(5, 46, 22, 0.7)) !important; color: #4ade80 !important; }
+        .status-assente { border: 1px solid #ef4444 !important; background: rgba(127, 29, 29, 0.2) !important; color: #ef4444 !important; opacity: 0.6; }
+        .status-ritardo { border: 1px solid #f97316 !important; background: linear-gradient(145deg, rgba(67, 20, 7, 0.6), rgba(124, 45, 18, 0.2)) !important; color: #fdba74 !important; }
+        .status-seconda-ora { border: 1px solid #8b5cf6 !important; background: linear-gradient(145deg, rgba(76, 29, 149, 0.6), rgba(109, 40, 217, 0.2)) !important; color: #c4b5fd !important; }
+        .status-uscita-anticipata { border: 1px solid #eab308 !important; background: linear-gradient(145deg, rgba(66, 32, 6, 0.6), rgba(113, 63, 18, 0.2)) !important; color: #fde047 !important; }
+        .status-fuori-aula { border: 1px solid #6366f1 !important; background: linear-gradient(145deg, rgba(49, 46, 129, 0.9), rgba(67, 56, 202, 0.4)) !important; color: #a5b4fc !important; }
 
-        /* =========================================
-           PULSANTI TOOLBAR
-           ========================================= */
+        /* UI BUTTONS */
         .tool-btn { 
             background: rgba(15, 23, 42, 0.8); 
             backdrop-filter: blur(12px); 
             border: 1px solid rgba(255,255,255,0.1); 
-            width: 70px; 
-            height: 70px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            border-radius: 18px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
+            width: 70px; height: 70px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            border-radius: 18px; cursor: pointer; transition: all 0.2s; 
         }
-        
-        .tool-btn:hover { 
-            transform: translateY(-4px); 
-            border-color: rgba(255,255,255,0.3); 
-            background: rgba(30, 41, 59, 1); 
-        }
-        
-        .tool-btn span { 
-            font-family: 'JetBrains Mono', monospace; 
-            font-size: 9px; 
-            font-weight: 800; 
-            letter-spacing: 0.5px; 
-            margin-top: 8px; 
-            text-transform: uppercase; 
-        }
+        .tool-btn:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.3); background: rgba(30, 41, 59, 1); }
+        .tool-btn span { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; margin-top: 8px; text-transform: uppercase; }
         
         .tool-agenda { border-bottom: 3px solid #ec4899; } 
         .tool-bacheca { border-bottom: 3px solid #eab308; } 
         .tool-voti { border-bottom: 3px solid #66cc00; }
 
-        /* =========================================
-           COMPONENTI UI
-           ========================================= */
-        .cv-header { 
-            color: white; 
-            transition: background-color 0.4s ease; 
-        }
+        .cv-header { color: white; transition: background-color 0.4s ease; } 
+        .cv-card { background: #111; border: 1px solid #333; border-radius: 12px; transition: background 0.2s; } 
+        .cv-card:hover { background: #1a1a1a; }
         
-        .cv-card { 
-            background: #111; 
-            border: 1px solid #333; 
-            border-radius: 12px; 
-            transition: background 0.2s; 
-        }
+        .grade-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; position: relative; }
+        .grade-circle::before { content: ''; position: absolute; inset: 6px; background: #111; border-radius: 50%; }
+        .grade-value { position: relative; z-index: 10; font-size: 14px; }
         
-        .cv-card:hover { 
-            background: #1a1a1a; 
-        }
-        
-        .grade-circle { 
-            width: 50px; 
-            height: 50px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: 800; 
-            color: white; 
-            position: relative; 
-        }
-        
-        .grade-circle::before { 
-            content: ''; 
-            position: absolute; 
-            inset: 6px; 
-            background: #111; 
-            border-radius: 50%; 
-        }
-        
-        .grade-value { 
-            position: relative; 
-            z-index: 10; 
-            font-size: 14px; 
-        }
-        
-        .g-green { background: conic-gradient(#22c55e var(--percent), #333 0); } 
-        .text-g-green { color: #4ade80; } 
-        .bg-cv-green { background-color: #22c55e; }
-        
-        .g-orange { background: conic-gradient(#f97316 var(--percent), #333 0); } 
-        .text-g-orange { color: #fb923c; } 
-        .bg-cv-orange { background-color: #f97316; }
-        
-        .g-red { background: conic-gradient(#ef4444 var(--percent), #333 0); } 
-        .text-g-red { color: #f87171; } 
-        .bg-cv-red { background-color: #ef4444; }
+        .g-green { background: conic-gradient(#22c55e var(--percent), #333 0); } .text-g-green { color: #4ade80; } .bg-cv-green { background-color: #22c55e; }
+        .g-orange { background: conic-gradient(#f97316 var(--percent), #333 0); } .text-g-orange { color: #fb923c; } .bg-cv-orange { background-color: #f97316; }
+        .g-red { background: conic-gradient(#ef4444 var(--percent), #333 0); } .text-g-red { color: #f87171; } .bg-cv-red { background-color: #ef4444; }
 
-        .btn-selected { 
-            opacity: 1 !important; 
-            transform: scale(1.05) !important; 
-            border: 2px solid white !important; 
-            box-shadow: 0 0 15px rgba(255,255,255,0.2); 
-            z-index: 10; 
-        }
-        
-        .status-btn { 
-            opacity: 0.5; 
-            transition: all 0.2s; 
-            border-width: 1px; 
-            transform: scale(0.98); 
-        }
-        
-        .cv-event { 
-            border-left-width: 4px; 
-            background: rgba(30, 41, 59, 0.5); 
-            transition: transform 0.2s; 
-            position: relative; 
-        }
-        
-        .grade-details { 
-            border-top: 1px solid #333; 
-            background: #0a0a0a; 
-            border-radius: 0 0 12px 12px; 
-            overflow: hidden; 
-        }
+        .btn-selected { opacity: 1 !important; transform: scale(1.05) !important; border: 2px solid white !important; box-shadow: 0 0 15px rgba(255,255,255,0.2); z-index: 10; }
+        .status-btn { opacity: 0.5; transition: all 0.2s; border-width: 1px; transform: scale(0.98); }
+        .grade-details { border-top: 1px solid #333; background: #0a0a0a; border-radius: 0 0 12px 12px; overflow: hidden; }
 
-        .cv-calendar-strip { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 15px 0; 
-            border-bottom: 1px solid rgba(255,255,255,0.1); 
-            margin-bottom: 20px; 
-        }
-        
-        .cv-day { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 6px; 
-            width: 40px; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            opacity: 0.5; 
-        }
-        
-        .cv-day.active { 
-            opacity: 1; 
-            transform: scale(1.1); 
-        } 
-        
-        .cv-day.today { 
-            opacity: 1; 
-        }
-        
-        .cv-day-letter { 
-            font-size: 10px; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            color: #64748b; 
-        }
-        
-        .cv-day-number { 
-            width: 34px; 
-            height: 34px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border-radius: 50%; 
-            font-weight: 800; 
-            font-size: 14px; 
-            color: white; 
-            transition: all 0.3s; 
-            border: 2px solid transparent; 
-        }
-        
-        .cv-day.active .cv-day-number { 
-            background-color: #ef4444; 
-            color: white; 
-            border-color: #ef4444; 
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); 
-        }
-        
-        .cv-day.today:not(.active) .cv-day-number { 
-            border: 2px solid #ef4444; 
-            color: #ef4444; 
-        }
-        
-        .cv-day.future { 
-            opacity: 0.2; 
-            pointer-events: none; 
-            filter: grayscale(1); 
-        }
+        .cv-calendar-strip { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .cv-day { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 40px; cursor: pointer; transition: all 0.3s; opacity: 0.5; }
+        .cv-day.active { opacity: 1; transform: scale(1.1); } 
+        .cv-day.today { opacity: 1; }
+        .cv-day-letter { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+        .cv-day-number { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 800; font-size: 14px; color: white; transition: all 0.3s; border: 2px solid transparent; }
+        .cv-day.active .cv-day-number { background-color: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .cv-day.today:not(.active) .cv-day-number { border: 2px solid #ef4444; color: #ef4444; }
+        .cv-day.future { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
     </style>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col overflow-x-hidden selection:bg-blue-500">
@@ -353,28 +141,21 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v500.0 • Full Enterprise Edition</div>
+                <div class="text-xs font-mono text-slate-500">v550.0 • Final Edition</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
-                    <div class="text-center">
-                        <h2 class="text-2xl font-bold text-white mb-1">Accesso</h2>
-                        <p class="text-slate-400 text-sm">Inserisci le tue credenziali</p>
-                    </div>
-                    
+                    <div class="text-center"><h2 class="text-2xl font-bold text-white mb-1">Accesso</h2><p class="text-slate-400 text-sm">Inserisci le tue credenziali</p></div>
                     <div id="login-form-container" class="space-y-5">
                         <input type="text" id="input-username" placeholder="cognome.nome" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center font-bold lowercase transition-all">
-                        
                         <div id="password-container" class="hidden space-y-5">
                             <p class="text-center text-sm font-bold text-blue-400 uppercase tracking-widest" id="user-welcome">--</p>
                             <input type="password" id="input-password" placeholder="Password" class="w-full bg-[#131b2e] border border-slate-700 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none text-center">
                             <button type="button" id="btn-entra" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]">ENTRA</button>
                             <button type="button" onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-white underline">Indietro</button>
                         </div>
-                        
                         <button type="button" id="btn-next" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-[1.02]">CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i></button>
                     </div>
-
                     <p id="login-error" class="text-red-400 text-xs font-bold text-center hidden bg-red-900/20 p-2 rounded border border-red-900/50"><i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="error-text">Credenziali Errate</span></p>
                 </div>
             </div>
@@ -383,40 +164,23 @@
 
     <div id="view-hub" class="hidden min-h-screen p-8 fade-in">
         <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-            <div>
-                <h2 class="text-3xl font-black text-white italic">HUB <span class="text-blue-500">ISTITUTO</span></h2>
-                <div class="flex gap-2 mt-1">
-                    <span id="hub-role-badge" class="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-700 uppercase tracking-widest text-slate-400">--</span>
-                    <span id="hub-user-name" class="text-sm text-slate-300 font-bold">--</span>
-                </div>
-            </div>
+            <div><h2 class="text-3xl font-black text-white italic">HUB <span class="text-blue-500">ISTITUTO</span></h2><div class="flex gap-2 mt-1"><span id="hub-role-badge" class="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-700 uppercase tracking-widest text-slate-400">--</span><span id="hub-user-name" class="text-sm text-slate-300 font-bold">--</span></div></div>
             <button onclick="logout()" class="px-5 py-2 bg-red-900/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-500 hover:text-white transition-all text-xs font-black">ESCI</button>
         </header>
-        <div class="glass-panel p-10 rounded-3xl border border-slate-700/50">
-            <div class="flex gap-12 overflow-x-auto pb-4 custom-scrollbar" id="classes-container"></div>
-        </div>
+        <div class="glass-panel p-10 rounded-3xl border border-slate-700/50"><div class="flex gap-12 overflow-x-auto pb-4 custom-scrollbar" id="classes-container"></div></div>
     </div>
 
     <div id="view-classroom" class="hidden min-h-screen flex flex-col relative fade-in">
         <header class="bg-[#0b1121]/90 backdrop-blur-md border-b border-slate-800 px-8 py-4 flex justify-between items-center sticky top-0 z-40">
             <div class="flex items-center gap-6">
                 <button id="back-btn" onclick="backToHub()" class="p-2.5 bg-slate-800 rounded-xl hover:bg-slate-700 text-slate-400 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
-                <div>
-                    <h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1>
-                    <div class="flex items-center gap-2 text-[10px] font-bold mt-1">
-                        <span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span>
-                        <div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
-                    </div>
-                </div>
+                <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div></div></div>
             </div>
             
             <div class="relative group mx-4 date-wrapper">
                 <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 cursor-pointer border border-slate-700 hover:border-blue-500 transition-all relative">
                     <i class="fa-regular fa-calendar text-blue-400 text-lg"></i>
-                    <div class="flex flex-col text-right">
-                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DATA</span>
-                        <span id="date-display" class="font-mono text-sm font-bold text-white leading-none uppercase">Oggi</span>
-                    </div>
+                    <div class="flex flex-col text-right"><span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DATA</span><span id="date-display" class="font-mono text-sm font-bold text-white leading-none uppercase">Oggi</span></div>
                 </div>
                 <input type="date" id="date-picker" onchange="changeDate(this.value)">
             </div>
@@ -425,20 +189,14 @@
                 <button onclick="openListModal()" class="px-5 py-2.5 bg-slate-800 border border-slate-600 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 uppercase tracking-wider transition-all"><i class="fa-solid fa-list-ul mr-2"></i>ELENCO</button>
                 <button id="sign-btn" onclick="openSignModal()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg transition-all"><i class="fa-solid fa-book-open mr-2"></i>REGISTRO</button>
                 <button onclick="logout()" class="px-3 py-2.5 bg-red-900/10 text-red-400 border border-red-900/30 rounded-xl text-xs font-bold hover:bg-red-900/30 transition-all ml-2">ESCI</button>
-                <div class="text-right border-l border-slate-700 pl-6 ml-2">
-                    <div id="clock" class="mono text-2xl font-bold text-slate-200">00:00:00</div>
-                    <div id="hour-badge" class="text-[10px] text-purple-400 font-bold uppercase tracking-widest text-right leading-none">--</div>
-                </div>
+                <div class="text-right border-l border-slate-700 pl-6 ml-2"><div id="clock" class="mono text-2xl font-bold text-slate-200">00:00:00</div><div id="hour-badge" class="text-[10px] text-purple-400 font-bold uppercase tracking-widest text-right leading-none">--</div></div>
             </div>
         </header>
 
         <main class="flex-grow flex flex-col items-center w-full px-4 pb-40 pt-8">
             <div id="history-warning" class="hidden w-full max-w-md bg-yellow-900/20 border border-yellow-500/30 rounded-full py-2 px-6 mb-8 flex items-center justify-center gap-3 text-yellow-400 backdrop-blur-sm animate-pulse"><i class="fa-solid fa-clock-rotate-left"></i> <span class="text-xs font-black uppercase tracking-widest">Visualizzazione Archivio</span></div>
-            
             <div id="bathroom-bar" class="w-full max-w-2xl mb-6 flex justify-center"></div>
-            
             <div class="grid grid-cols-3 gap-24 w-full max-w-[95%]" id="classroom-grid"></div>
-            
             <div onclick="openSignModal()" class="mt-24 w-[450px] h-24 bg-[#1e293b]/90 backdrop-blur border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center shadow-2xl px-4 cursor-pointer hover:scale-105 transition-transform group">
                 <span class="text-2xl font-black tracking-[0.4em] text-blue-400 uppercase">Cattedra</span>
                 <span id="signature-display" class="text-xs text-slate-400 font-mono mt-2 w-full text-center truncate group-hover:text-blue-300">Clicca per Registro</span>
@@ -1108,7 +866,7 @@
             notes.forEach(n => {
                 const border = n.type === 'warning' ? 'border-red-500' : 'border-blue-500';
                 
-                // TASTO ELIMINA VISIBILE E FUNZIONANTE
+                // TASTO ELIMINA
                 const del = (currentUser.role !== 'studente' && currentUser.role !== 'stud') ? 
                     `<button onclick="event.stopPropagation(); deleteNote('${n.id}')" class="text-red-500 hover:text-red-400 font-bold text-xs uppercase ml-auto">Elimina</button>` : '';
                 
@@ -1279,6 +1037,48 @@
             renderSignaturesList(); 
         }
 
+        function updateTeacherForm() { 
+            const today = getTodayStr(); 
+            const form = document.getElementById('new-signature-form'); 
+            
+            if (selectedDate === today) {
+                form.classList.remove('hidden'); 
+            } else {
+                form.classList.add('hidden'); 
+            }
+        }
+
+        function renderCalendarStrip() { 
+            const container = document.getElementById('cv-calendar-container'); 
+            container.innerHTML = ""; 
+            
+            const days = ['D', 'L', 'M', 'M', 'G', 'V', 'S']; 
+            const today = new Date(); 
+            
+            for (let i = 6; i >= 0; i--) { 
+                const d = new Date(); 
+                d.setDate(today.getDate() - i); 
+                
+                const isoDate = d.toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-'); 
+                const isSelected = (isoDate === selectedDate); 
+                const isToday = (isoDate === getTodayStr()); 
+                const isFuture = d > today;
+                
+                const div = document.createElement('div'); 
+                div.className = `cv-day ${isSelected ? 'active' : ''} ${isToday ? 'today' : ''} ${isFuture ? 'future' : ''}`; 
+                
+                div.innerHTML = `
+                    <span class="cv-day-letter">${days[d.getDay()]}</span>
+                    <div class="cv-day-number">${d.getDate()}</div>
+                `; 
+                
+                if (!isFuture) {
+                    div.onclick = () => { changeDate(isoDate); }; 
+                }
+                container.appendChild(div); 
+            } 
+        }
+
         function selectSignHour(h) { 
             selectedSignHour = h; 
             for (let i = 1; i <= 5; i++) {
@@ -1400,7 +1200,7 @@
             
             statusEl.className = `text-3xl font-black ${color}`; 
             
-            // CONTA STORICO REALE
+            // CONTA STORICO DA DB REALE
             const historyCount = student.history ? student.history.length : 0;
             document.getElementById('modal-detail-count').innerText = historyCount; 
             
@@ -1486,7 +1286,7 @@
             const now = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}); 
             
             // LA LOGICA DI STORICO ORA E' GESTITA DAL TRIGGER SQL
-            // Qui aggiorniamo solo lo stato corrente per avere un feedback visivo immediato
+            // Noi aggiorniamo solo lo stato corrente per avere un feedback visivo immediato
             s.status = pendingStatus; 
             s.time = (pendingStatus === 'presente') ? '08:00' : (pendingStatus === 'assente' ? '--:--' : now);
             
@@ -1502,6 +1302,7 @@
             }, { onConflict: 'student_name, date' });
         }
         
+        // Funzioni Placeholder per evitare errori di riferimento
         function getSignaturesDB() { return {}; } 
         function saveSignaturesDB(db) {} 
         function getAgendaDB() { return {}; } 
