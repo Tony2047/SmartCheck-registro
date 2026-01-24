@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v600 (Click Fix)</title>
+    <title>SmartCheck - School OS v700 (Gold)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -39,7 +39,7 @@
         }
         
         /* --- FIX CRITICO: CALENDARIO HEADER ISOLATO --- */
-        /* Applico lo stile SOLO a questo specifico ID per non bloccare i click altrove */
+        /* Usiamo un ID specifico per evitare che lo stile colpisca altri input e blocchi i click */
         #header-date-input {
             color-scheme: dark; 
             background-color: transparent; 
@@ -48,30 +48,45 @@
             left: 0; 
             width: 100%; 
             height: 100%; 
-            z-index: 50; 
-            opacity: 0; 
+            z-index: 50; /* Deve stare sopra al testo della data per essere cliccabile */
+            opacity: 0; /* Invisibile */
             cursor: pointer; 
             display: block; 
         }
         
-        /* Contenitore sicuro per il calendario */
+        /* Wrapper sicuro per il calendario header */
         .date-wrapper-safe {
             position: relative;
             overflow: hidden;
-            border-radius: 0.75rem;
+            border-radius: 0.75rem; /* rounded-xl */
         }
 
-        /* Stile generico per gli altri input data (es. Agenda) */
+        /* Stile generico per gli altri input data (es. Agenda/Compiti) */
+        /* Questo resetta eventuali stili globali che potrebbero rompere l'agenda */
         input[type="date"]:not(#header-date-input) {
             color-scheme: dark;
             background-color: #0f172a;
             cursor: pointer;
+            position: relative;
+            z-index: auto;
+            opacity: 1;
         }
 
-        /* Inversione icona calendario */
+        /* Inversione icona calendario per tema scuro */
         ::-webkit-calendar-picker-indicator { 
             filter: invert(1); 
             cursor: pointer; 
+            opacity: 0.6;
+        }
+        
+        /* Specifico per header: icona invisibile ma cliccabile */
+        #header-date-input::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
         }
 
         /* SCROLLBAR */
@@ -85,6 +100,7 @@
             opacity: 0; 
             transform: translateY(10px); 
         }
+        
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); } 70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
 
@@ -118,6 +134,7 @@
         .btn-selected { opacity: 1 !important; transform: scale(1.05) !important; border: 2px solid white !important; box-shadow: 0 0 15px rgba(255,255,255,0.2); z-index: 10; }
         .status-btn { opacity: 0.5; transition: all 0.2s; border-width: 1px; transform: scale(0.98); }
         .grade-details { border-top: 1px solid #333; background: #0a0a0a; border-radius: 0 0 12px 12px; overflow: hidden; }
+        
         .cv-calendar-strip { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .cv-day { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 40px; cursor: pointer; transition: all 0.3s; opacity: 0.5; }
         .cv-day.active { opacity: 1; transform: scale(1.1); } .cv-day.today { opacity: 1; }
@@ -138,7 +155,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v600.0 • Safe Mode</div>
+                <div class="text-xs font-mono text-slate-500">v700.0 • Gold Release</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -155,69 +172,33 @@
     </div>
 
     <div id="view-hub" class="hidden min-h-screen p-8 fade-in">
-        <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-            <div><h2 class="text-3xl font-black text-white italic">HUB <span class="text-blue-500">ISTITUTO</span></h2><div class="flex gap-2 mt-1"><span id="hub-role-badge" class="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-700 uppercase tracking-widest text-slate-400">--</span><span id="hub-user-name" class="text-sm text-slate-300 font-bold">--</span></div></div>
-            <button onclick="logout()" class="px-5 py-2 bg-red-900/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-500 hover:text-white transition-all text-xs font-black">ESCI</button>
-        </header>
+        <header class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4"><div><h2 class="text-3xl font-black text-white italic">HUB <span class="text-blue-500">ISTITUTO</span></h2><div class="flex gap-2 mt-1"><span id="hub-role-badge" class="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-700 uppercase tracking-widest text-slate-400">--</span><span id="hub-user-name" class="text-sm text-slate-300 font-bold">--</span></div></div><button onclick="logout()" class="px-5 py-2 bg-red-900/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-500 hover:text-white transition-all text-xs font-black">ESCI</button></header>
         <div class="glass-panel p-10 rounded-3xl border border-slate-700/50"><div class="flex gap-12 overflow-x-auto pb-4 custom-scrollbar" id="classes-container"></div></div>
     </div>
 
     <div id="view-classroom" class="hidden min-h-screen flex flex-col relative fade-in">
         <header class="bg-[#0b1121]/90 backdrop-blur-md border-b border-slate-800 px-8 py-4 flex justify-between items-center sticky top-0 z-40">
-            <div class="flex items-center gap-6">
-                <button id="back-btn" onclick="backToHub()" class="p-2.5 bg-slate-800 rounded-xl hover:bg-slate-700 text-slate-400 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
-                <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div></div></div>
-            </div>
+            <div class="flex items-center gap-6"><button id="back-btn" onclick="backToHub()" class="p-2.5 bg-slate-800 rounded-xl hover:bg-slate-700 text-slate-400 transition-all"><i class="fa-solid fa-arrow-left"></i></button><div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div></div></div></div>
             
             <div class="relative group mx-4 date-wrapper-safe">
                 <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 cursor-pointer border border-slate-700 hover:border-blue-500 transition-all relative">
                     <i class="fa-regular fa-calendar text-blue-400 text-lg"></i>
-                    <div class="flex flex-col text-right">
-                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DATA</span>
-                        <span id="date-display" class="font-mono text-sm font-bold text-white leading-none uppercase">Oggi</span>
-                    </div>
+                    <div class="flex flex-col text-right"><span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DATA</span><span id="date-display" class="font-mono text-sm font-bold text-white leading-none uppercase">Oggi</span></div>
                 </div>
                 <input type="date" id="header-date-input" onchange="changeDate(this.value)">
             </div>
             
-            <div class="flex items-center gap-3">
-                <button onclick="openListModal()" class="px-5 py-2.5 bg-slate-800 border border-slate-600 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 uppercase tracking-wider transition-all"><i class="fa-solid fa-list-ul mr-2"></i>ELENCO</button>
-                <button id="sign-btn" onclick="openSignModal()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg transition-all"><i class="fa-solid fa-book-open mr-2"></i>REGISTRO</button>
-                <button onclick="logout()" class="px-3 py-2.5 bg-red-900/10 text-red-400 border border-red-900/30 rounded-xl text-xs font-bold hover:bg-red-900/30 transition-all ml-2">ESCI</button>
-                <div class="text-right border-l border-slate-700 pl-6 ml-2">
-                    <div id="clock" class="mono text-2xl font-bold text-slate-200">00:00:00</div>
-                    <div id="hour-badge" class="text-[10px] text-purple-400 font-bold uppercase tracking-widest text-right leading-none">--</div>
-                </div>
-            </div>
+            <div class="flex items-center gap-3"><button onclick="openListModal()" class="px-5 py-2.5 bg-slate-800 border border-slate-600 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 uppercase tracking-wider transition-all"><i class="fa-solid fa-list-ul mr-2"></i>ELENCO</button><button id="sign-btn" onclick="openSignModal()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-lg transition-all"><i class="fa-solid fa-book-open mr-2"></i>REGISTRO</button><button onclick="logout()" class="px-3 py-2.5 bg-red-900/10 text-red-400 border border-red-900/30 rounded-xl text-xs font-bold hover:bg-red-900/30 transition-all ml-2">ESCI</button><div class="text-right border-l border-slate-700 pl-6 ml-2"><div id="clock" class="mono text-2xl font-bold text-slate-200">00:00:00</div><div id="hour-badge" class="text-[10px] text-purple-400 font-bold uppercase tracking-widest text-right leading-none">--</div></div></div>
         </header>
 
         <main class="flex-grow flex flex-col items-center w-full px-4 pb-40 pt-8">
             <div id="history-warning" class="hidden w-full max-w-md bg-yellow-900/20 border border-yellow-500/30 rounded-full py-2 px-6 mb-8 flex items-center justify-center gap-3 text-yellow-400 backdrop-blur-sm animate-pulse"><i class="fa-solid fa-clock-rotate-left"></i> <span class="text-xs font-black uppercase tracking-widest">Visualizzazione Archivio</span></div>
-            <div id="bathroom-bar" class="w-full max-w-2xl mb-6 flex justify-center"></div>
-            <div class="grid grid-cols-3 gap-24 w-full max-w-[95%]" id="classroom-grid"></div>
-            <div onclick="openSignModal()" class="mt-24 w-[450px] h-24 bg-[#1e293b]/90 backdrop-blur border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center shadow-2xl px-4 cursor-pointer hover:scale-105 transition-transform group">
-                <span class="text-2xl font-black tracking-[0.4em] text-blue-400 uppercase">Cattedra</span>
-                <span id="signature-display" class="text-xs text-slate-400 font-mono mt-2 w-full text-center truncate group-hover:text-blue-300">Clicca per Registro</span>
-            </div>
+            <div id="bathroom-bar" class="w-full max-w-2xl mb-6 flex justify-center"></div><div class="grid grid-cols-3 gap-24 w-full max-w-[95%]" id="classroom-grid"></div><div onclick="openSignModal()" class="mt-24 w-[450px] h-24 bg-[#1e293b]/90 backdrop-blur border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center shadow-2xl px-4 cursor-pointer hover:scale-105 transition-transform group"><span class="text-2xl font-black tracking-[0.4em] text-blue-400 uppercase">Cattedra</span><span id="signature-display" class="text-xs text-slate-400 font-mono mt-2 w-full text-center truncate group-hover:text-blue-300">Clicca per Registro</span></div>
         </main>
 
-        <div class="fixed bottom-8 left-8 z-50 flex gap-6">
-            <div onclick="openAgendaModal()" class="tool-btn tool-agenda group"><i class="fa-solid fa-calendar-check text-pink-500 group-hover:text-pink-400 text-2xl mb-1"></i><span class="text-slate-400 group-hover:text-white">AGENDA</span></div>
-            <div onclick="toggleNoticeModal()" class="tool-btn tool-bacheca group"><i class="fa-solid fa-bullhorn text-yellow-500 group-hover:text-yellow-400 text-2xl mb-1"></i><span class="text-slate-400 group-hover:text-white">AVVISI</span></div>
-        </div>
-        
-        <div id="dock-right" class="fixed bottom-8 right-8 z-50 flex">
-            <div onclick="openGradesModal()" class="tool-btn tool-voti group"><i class="fa-solid fa-chart-pie text-[#66cc00] group-hover:text-green-400 text-2xl mb-1"></i><span class="text-slate-400 group-hover:text-white">VOTI</span></div>
-        </div>
-
-        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[55%] max-w-4xl glass-panel px-8 py-4 rounded-full flex flex-wrap justify-between items-center shadow-2xl z-40 border border-slate-700/50 backdrop-blur-xl">
-            <div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Presente</div>
-            <div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span> Bagno</div>
-            <div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span> 2° Ora</div>
-            <div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span> Uscita</div>
-            <div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Fuori Aula</div>
-            <div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full border border-red-500 bg-red-900/20"></span> Assente</div>
-        </div>
+        <div class="fixed bottom-8 left-8 z-50 flex gap-6"><div onclick="openAgendaModal()" class="tool-btn tool-agenda group"><i class="fa-solid fa-calendar-check text-pink-500 group-hover:text-pink-400 text-2xl mb-1"></i><span class="text-slate-400 group-hover:text-white">AGENDA</span></div><div onclick="toggleNoticeModal()" class="tool-btn tool-bacheca group"><i class="fa-solid fa-bullhorn text-yellow-500 group-hover:text-yellow-400 text-2xl mb-1"></i><span class="text-slate-400 group-hover:text-white">AVVISI</span></div></div>
+        <div id="dock-right" class="fixed bottom-8 right-8 z-50 flex"><div onclick="openGradesModal()" class="tool-btn tool-voti group"><i class="fa-solid fa-chart-pie text-[#66cc00] group-hover:text-green-400 text-2xl mb-1"></i><span class="text-slate-400 group-hover:text-white">VOTI</span></div></div>
+        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[55%] max-w-4xl glass-panel px-8 py-4 rounded-full flex flex-wrap justify-between items-center shadow-2xl z-40 border border-slate-700/50 backdrop-blur-xl"><div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Presente</div><div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span> Bagno</div><div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span> 2° Ora</div><div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span> Uscita</div><div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Fuori Aula</div><div class="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400"><span class="w-2.5 h-2.5 rounded-full border border-red-500 bg-red-900/20"></span> Assente</div></div>
     </div>
 
     <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700 relative"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic"><span class="text-pink-500">AGENDA</span> CLASSE</h2><div class="flex gap-3"><button id="btn-add-agenda" onclick="openAddAgendaModal()" class="hidden px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider">Nuovo +</button><button onclick="document.getElementById('modal-agenda').classList.add('hidden')" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div></div><div class="flex gap-4 mb-4"><div class="bg-slate-800 px-4 py-2 rounded text-xs font-bold text-slate-300 border-l-4 border-green-500 uppercase">Compiti</div><div class="bg-slate-800 px-4 py-2 rounded text-xs font-bold text-slate-300 border-l-4 border-red-500 uppercase">Verifiche</div></div><div class="overflow-y-auto flex-grow custom-scrollbar"><div id="agenda-list" class="space-y-3"></div></div></div></div>
@@ -225,7 +206,6 @@
     <div id="modal-notices" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic uppercase"><span class="text-yellow-500">Bacheca</span> Istituto</h2><button onclick="toggleNoticeModal()" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div><div class="overflow-y-auto flex-grow space-y-3" id="modal-notices-list"></div></div></div>
     <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="bg-[#0f172a] w-full max-w-md h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col"><div id="grades-header-bg" class="cv-header p-6 pb-8 bg-cv-green"><div class="flex justify-between items-start"><h2 class="text-2xl font-black uppercase">Valutazioni</h2><button onclick="document.getElementById('modal-grades').classList.add('hidden')" class="text-white/80 hover:text-white text-xl">✕</button></div><div class="mt-4 flex items-center justify-between"><div><div class="text-sm font-bold opacity-90">Media Generale</div><div class="text-xs opacity-75 mt-1" id="grades-total-count">0 valutazioni</div></div><div class="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center text-3xl font-black bg-white/10" id="grades-total-avg">0.0</div></div></div><div class="bg-[#0f172a] flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar" id="grades-list"></div></div></div>
     <div id="modal-class-list" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-2xl h-[80vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700"><h2 class="text-2xl font-black text-white italic uppercase tracking-tighter">ELENCO <span id="list-class-name" class="text-blue-500"></span></h2><button onclick="document.getElementById('modal-class-list').classList.add('hidden')" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button></div><input type="text" id="list-search" placeholder="Cerca studente..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:border-blue-500 outline-none mb-4"><div class="overflow-y-auto flex-grow custom-scrollbar"><ul id="full-student-list" class="space-y-2"></ul></div></div></div>
-    
     <div id="modal-sign" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm"><div class="glass-panel w-full max-w-xl p-8 rounded-3xl shadow-2xl max-h-[85vh] flex flex-col border border-slate-700"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-black text-white uppercase tracking-wider" id="reg-title">Registro</h2><button onclick="document.getElementById('modal-sign').classList.add('hidden')" class="text-slate-400 hover:text-white">✕</button></div><div id="cv-calendar-container" class="cv-calendar-strip px-2"></div><div class="flex-grow overflow-y-auto custom-scrollbar mb-6 bg-slate-900/50 rounded-lg p-4 border border-slate-700 min-h-[200px]"><div id="signatures-list" class="space-y-4"></div><div id="no-signatures" class="flex flex-col items-center justify-center h-full text-slate-500 opacity-50 py-10"><i class="fa-regular fa-folder-open text-3xl mb-2"></i><span class="text-xs font-bold uppercase tracking-widest">Nessuna attività registrata</span></div></div><div id="new-signature-form" class="border-t border-slate-700 pt-4 hidden"><h3 class="text-xs font-bold text-blue-400 uppercase mb-3">Nuova Firma</h3><div class="flex gap-2 mb-3"><button onclick="selectSignHour(1)" id="hour-btn-1" class="flex-1 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs font-bold hover:bg-slate-700 text-slate-300 transition">1</button><button onclick="selectSignHour(2)" id="hour-btn-2" class="flex-1 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs font-bold hover:bg-slate-700 text-slate-300 transition">2</button><button onclick="selectSignHour(3)" id="hour-btn-3" class="flex-1 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs font-bold hover:bg-slate-700 text-slate-300 transition">3</button><button onclick="selectSignHour(4)" id="hour-btn-4" class="flex-1 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs font-bold hover:bg-slate-700 text-slate-300 transition">4</button><button onclick="selectSignHour(5)" id="hour-btn-5" class="flex-1 py-1.5 rounded bg-slate-800 border border-slate-600 text-xs font-bold hover:bg-slate-700 text-slate-300 transition">5</button></div><div class="space-y-3"><div class="relative"><input type="text" id="subject-search" placeholder="Materia..." onkeyup="filterSubjects()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-2 rounded-lg outline-none focus:border-blue-500 text-sm"><div id="subject-dropdown" class="absolute z-10 w-full bg-slate-800 border border-slate-600 mt-1 rounded-lg max-h-32 overflow-y-auto hidden shadow-xl"></div></div><textarea id="sign-argomento" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-lg text-sm" rows="2" placeholder="Argomento..."></textarea><button onclick="saveSignature()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-500 uppercase text-xs">Salva Firma</button></div></div></div></div>
 
     <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm"><div class="bg-[#0f172a] w-full max-w-3xl rounded-3xl p-8 border border-slate-700 shadow-2xl relative"><div class="flex justify-between items-start mb-6"><div><h2 id="modal-detail-name" class="text-4xl font-black text-white tracking-tight">Nome Cognome</h2><div class="flex gap-4 mt-4 text-xs font-bold uppercase tracking-widest"><button onclick="switchTab('presence')" id="tab-presence" class="text-blue-400 border-b-2 border-blue-400 pb-1">Presenze</button><button onclick="switchTab('grades')" id="tab-grades" class="text-slate-500 hover:text-white pb-1">Voti</button><button onclick="switchTab('notes')" id="tab-notes" class="text-slate-500 hover:text-white pb-1">Note</button></div></div><button onclick="document.getElementById('modal-student-detail').classList.add('hidden')" class="bg-slate-800 p-2 rounded-lg text-slate-400 hover:text-white">✕</button></div>
@@ -461,7 +441,8 @@
             document.getElementById('class-header-name').innerText = cls; 
             
             const today = getTodayStr(); 
-            document.getElementById('header-date-input').value = today; // FIX: USA ID SPECIFICO
+            // FIX: Usa l'ID specifico per settare la data
+            document.getElementById('header-date-input').value = today; 
             changeDate(today); 
             
             // Gestione Visibilità in base al Ruolo
@@ -733,7 +714,6 @@
             const div = document.createElement('div'); 
             div.className = isSingle ? "w-[300px]" : "w-full";
             
-            // FIX CLICK: Assicuriamoci che l'evento onclick sia ben formato
             const clickAction = (d.name !== "Libero") ? `onclick="openStudentDetail('${id}')"` : "";
             
             let alertHtml = ""; 
@@ -771,6 +751,7 @@
             
             if (confirm("Eliminare questa nota?")) {
                 const { error } = await _supabase.from('notes').delete().eq('id', id);
+                
                 if (!error) {
                     // Aggiorna localmente subito
                     onlineNotes = onlineNotes.filter(n => n.id !== id);
@@ -915,6 +896,21 @@
             setInterval(() => {
                 const now = new Date();
                 document.getElementById('clock').innerText = now.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+                
+                // --- FIX: RIPRISTINO CALCOLO ORA SCOLASTICA ---
+                const h = now.getHours();
+                const m = now.getMinutes();
+                const totalM = h * 60 + m;
+                let s = "FUORI ORARIO";
+                
+                if (totalM >= 505 && totalM < 585) s = "1° ORA (8:25-9:45)";
+                else if (totalM >= 585 && totalM < 645) s = "2° ORA (9:45-10:45)";
+                else if (totalM >= 645 && totalM < 705) s = "3° ORA (10:45-11:45)";
+                else if (totalM >= 705 && totalM < 765) s = "4° ORA (11:45-12:45)";
+                else if (totalM >= 765 && totalM < 810) s = "5° ORA (12:45-13:30)";
+                
+                document.getElementById('hour-badge').innerText = s;
+                // ------------------------------------------------
             }, 1000);
         }
         
@@ -1223,7 +1219,7 @@
             const now = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}); 
             
             // LA LOGICA DI STORICO ORA E' GESTITA DAL TRIGGER SQL
-            // Noi aggiorniamo solo lo stato corrente per avere un feedback visivo immediato
+            // Qui aggiorniamo solo lo stato corrente per avere un feedback visivo immediato
             s.status = pendingStatus; 
             s.time = (pendingStatus === 'presente') ? '08:00' : (pendingStatus === 'assente' ? '--:--' : now);
             
@@ -1237,17 +1233,6 @@
                 status: pendingStatus, 
                 time: s.time 
             }, { onConflict: 'student_name, date' });
-        }
-        
-        function updateTeacherForm() { 
-            const today = getTodayStr(); 
-            const form = document.getElementById('new-signature-form'); 
-            
-            if (selectedDate === today) {
-                form.classList.remove('hidden'); 
-            } else {
-                form.classList.add('hidden'); 
-            }
         }
         
         function getSignaturesDB() { return {}; } 
