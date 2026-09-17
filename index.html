@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v138.4 (Unified Core)</title>
+    <title>SmartCheck - School OS v138.5 (Fixed Clock & Grades)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,7 +36,6 @@
         .status-seconda-ora { border: 1px solid #8b5cf6 !important; background: linear-gradient(145deg, rgba(76, 29, 149, 0.6), rgba(109, 40, 217, 0.2)) !important; color: #c4b5fd !important; }
         .status-uscita-anticipata { border: 1px solid #eab308 !important; background: linear-gradient(145deg, rgba(66, 32, 6, 0.6), rgba(113, 63, 18, 0.2)) !important; color: #fde047 !important; }
         .status-fuori-aula { border: 1px solid #6366f1 !important; background: linear-gradient(145deg, rgba(49, 46, 129, 0.9), rgba(67, 56, 202, 0.4)) !important; color: #a5b4fc !important; }
-
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); } 70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
 
         .tool-btn { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); width: 70px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 18px; cursor: pointer; transition: all 0.2s; }
@@ -48,6 +47,20 @@
         .status-btn { opacity: 0.5; transition: all 0.2s; border-width: 1px; transform: scale(0.98); }
         .cv-event { border-left-width: 4px; background: rgba(30, 41, 59, 0.5); transition: transform 0.2s; position: relative; }
         
+        /* GRADES UI */
+        .cv-header { color: white; transition: background-color 0.4s ease; }
+        .cv-card { background: #111; border: 1px solid #333; border-radius: 12px; transition: background 0.2s; }
+        .cv-card:hover { background: #1a1a1a; }
+        .grade-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; position: relative; }
+        .grade-circle::before { content: ''; position: absolute; inset: 6px; background: #111; border-radius: 50%; }
+        .grade-value { position: relative; z-index: 10; font-size: 14px; }
+        .g-green { background: conic-gradient(#22c55e var(--percent), #333 0); }
+        .g-orange { background: conic-gradient(#f97316 var(--percent), #333 0); }
+        .g-red { background: conic-gradient(#ef4444 var(--percent), #333 0); }
+        .bg-cv-green { background-color: #22c55e; }
+        .bg-cv-orange { background-color: #f97316; }
+        .bg-cv-red { background-color: #ef4444; }
+
         .cv-calendar-strip { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .cv-day { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 40px; cursor: pointer; transition: all 0.3s; opacity: 0.5; }
         .cv-day.active { opacity: 1; transform: scale(1.1); }
@@ -60,7 +73,7 @@
 
         .sc-toast-container { position: fixed; right: 22px; top: 22px; z-index: 250; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 44px)); pointer-events: none; }
         .sc-toast { pointer-events: auto; background: rgba(15,23,42,.96); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 18px 45px rgba(0,0,0,.35); backdrop-filter: blur(16px); border-radius: 14px; padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; animation: scToastIn .22s ease-out; }
-        .sc-toast.success { border-color: rgba(34,197,94,.35); } .sc-toast.error { border-color: rgba(239,68,68,.45); } .sc-toast.info { border-color: rgba(59,130,246,.35); }
+        .sc-toast.success { border-color: rgba(34,197,94,.35); } .sc-toast.error { border-color: rgba(239,68,68,.45)} .sc-toast.info { border-color: rgba(59,130,246,.35); }
         .sc-toast-icon { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.06); flex: 0 0 auto; font-weight: bold; }
         .sc-toast-title { font-size: 12px; font-weight: 900; color: #fff; } .sc-toast-msg { font-size: 11px; color: #94a3b8; margin-top: 2px; }
         @keyframes scToastIn { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
@@ -90,7 +103,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v138.4 • Unified Core</div>
+                <div class="text-xs font-mono text-slate-500">v138.5 • Fixed Clock & Grades</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -163,7 +176,7 @@
             <!-- GRIGLIA BANCHI -->
             <div class="grid grid-cols-3 gap-24 w-full max-w-[95%] mt-4" id="classroom-grid"></div>
             
-            <!-- CATTEDRA (In basso, cliccabile per aprire il registro) -->
+            <!-- CATTEDRA -->
             <div id="teacher-desk" onclick="openSignModal()" class="mt-20 mb-4 w-[450px] h-24 bg-[#1e293b]/90 backdrop-blur border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center shadow-2xl px-4 cursor-pointer hover:scale-105 transition-transform group">
                 <span class="text-2xl font-black tracking-[0.4em] text-blue-400 uppercase">Cattedra</span>
                 <span id="signature-display" class="text-xs text-slate-400 font-mono mt-2 w-full text-center truncate group-hover:text-blue-300">Clicca per Registro</span>
@@ -188,7 +201,6 @@
         </div>
     </div>
 
-    <!-- MODALI -->
     <!-- MODALE AGENDA -->
     <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
         <div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700 relative">
@@ -278,6 +290,26 @@
         </div>
     </div>
 
+    <!-- MODALE VALUTAZIONI (VOTI) -->
+    <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-sm">
+        <div class="bg-[#0f172a] w-full max-w-md h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
+            <div id="grades-header-bg" class="cv-header p-6 pb-8 bg-cv-green">
+                <div class="flex justify-between items-start">
+                    <h2 class="text-2xl font-black uppercase">Valutazioni</h2>
+                    <button onclick="document.getElementById('modal-grades').classList.add('hidden')" class="text-white/80 hover:text-white text-xl">✕</button>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <div>
+                        <div class="text-sm font-bold opacity-90">Media Generale</div>
+                        <div class="text-xs opacity-75 mt-1" id="grades-total-count">0 valutazioni</div>
+                    </div>
+                    <div class="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center text-3xl font-black bg-white/10" id="grades-total-avg">0.0</div>
+                </div>
+            </div>
+            <div class="bg-[#0f172a] flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar" id="grades-list"></div>
+        </div>
+    </div>
+
     <!-- MODALE DETTAGLIO STUDENTE & CAMBIO STATO -->
     <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm">
         <div class="bg-[#0f172a] w-full max-w-3xl rounded-3xl p-8 border border-slate-700 shadow-2xl relative">
@@ -293,7 +325,7 @@
                 <button onclick="document.getElementById('modal-student-detail').classList.add('hidden')" class="bg-slate-800 p-2 rounded-lg text-slate-400 hover:text-white">✕</button>
             </div>
             
-            <!-- CONTENUTO PRESENZE & TIMER BAGNO -->
+            <!-- PRESENZE -->
             <div id="content-presence">
                 <div class="grid grid-cols-2 gap-6 mb-8">
                     <div id="status-card" class="bg-[#1e293b]/50 p-6 rounded-2xl border border-slate-700 group transition-all">
@@ -335,7 +367,7 @@
                 </div>
             </div>
             
-            <!-- CONTENUTO VOTI -->
+            <!-- VOTI STUDENTE -->
             <div id="content-grades" class="hidden">
                 <div id="teacher-subject-block" class="mb-4 text-center"><span class="text-xs font-bold text-slate-500 uppercase">Materia:</span><span id="teacher-subject-name" class="text-green-400 font-bold ml-2">--</span></div>
                 <div id="grade-input-area" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6 flex gap-4 items-end">
@@ -361,7 +393,7 @@
                 </div>
             </div>
             
-            <!-- CONTENUTO NOTE -->
+            <!-- NOTE STUDENTE -->
             <div id="content-notes" class="hidden">
                 <div id="teacher-note-input" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
                     <textarea id="note-text" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-3 text-sm mb-3" rows="3" placeholder="Scrivi una nota disciplinare o annotazione..."></textarea>
@@ -382,12 +414,12 @@
                 <h2 class="text-2xl font-black text-white italic uppercase tracking-tighter">ELENCO <span id="list-class-name" class="text-blue-500"></span></h2>
                 <button onclick="document.getElementById('modal-class-list').classList.add('hidden')" class="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-lg">✕</button>
             </div>
-            <input type="text" id="list-search" placeholder="Cerca studente..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:border-blue-500 outline-none mb-4">
+            <input type="text" id="list-search" placeholder="Cerca studente per cognome o nome..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:border-blue-500 outline-none mb-4">
             <div class="overflow-y-auto flex-grow custom-scrollbar"><ul id="full-student-list" class="space-y-2"></ul></div>
         </div>
     </div>
 
-    <!-- MOTORE UNIFICATO SMARTCHECK -->
+    <!-- SCRIPT APPLICATIVO UNICO E STABILE -->
     <script>
         const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
@@ -422,7 +454,6 @@
             "Giuseppe Palombizio"     // banco_23
         ];
 
-        // STATO APPLICATIVO UNICO
         let currentUser = null; 
         let tempUser = null; 
         let currentClass = null; 
@@ -444,7 +475,6 @@
         let localGradesDB = {}; 
         let localNotesDB = {};
 
-        // HELPERS UI & NOTIFICHE
         function esc(val) { return String(val ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
         
         function toast(title, message = '', type = 'info', timeout = 3000) {
@@ -474,7 +504,29 @@
             return `${diff} min`;
         }
 
-        // GESTIONE DATE & PICKER
+        // CLOCK ENGINE
+        function updateClockDisplay() {
+            const el = document.getElementById('clock');
+            const badge = document.getElementById('hour-badge');
+            if (!el) return;
+            const now = new Date();
+            el.innerText = now.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            
+            const totalM = now.getHours() * 60 + now.getMinutes();
+            let s = "FUORI ORARIO";
+            if (totalM >= 505 && totalM < 585) s = "1° ORA (8:25-9:45)";
+            else if (totalM >= 585 && totalM < 645) s = "2° ORA (9:45-10:45)";
+            else if (totalM >= 645 && totalM < 705) s = "3° ORA (10:45-11:45)";
+            else if (totalM >= 705 && totalM < 765) s = "4° ORA (11:45-12:45)";
+            else if (totalM >= 765 && totalM < 810) s = "5° ORA (12:45-13:30)";
+            if (badge) badge.innerText = s;
+        }
+
+        function startClock() {
+            updateClockDisplay();
+            setInterval(updateClockDisplay, 1000);
+        }
+
         function openNativeDatePicker() {
             const el = document.getElementById('date-picker');
             if (el) {
@@ -490,8 +542,7 @@
         async function changeDate(val) {
             if (!val) return;
             selectedDate = val;
-            const today = getTodayStr();
-            const isToday = (selectedDate === today);
+            const isToday = (selectedDate === getTodayStr());
             
             const disp = document.getElementById('date-display');
             if (disp) disp.innerText = isToday ? "OGGI" : new Date(val + "T12:00:00").toLocaleDateString('it-IT');
@@ -501,7 +552,7 @@
             document.getElementById('history-warning')?.classList.toggle('hidden', isToday);
             document.getElementById('bathroom-bar')?.classList.toggle('hidden', !isToday);
 
-            setLoading(true, "Caricamento data...");
+            setLoading(true, "Caricamento presenze...");
             try {
                 await loadDayData(selectedDate);
                 renderGrid(localSchoolDB[currentClass]);
@@ -513,7 +564,6 @@
             }
         }
 
-        // CARICAMENTO & CREAZIONE CLASSE
         function buildLocalClassState(cls, students) {
             const data = {};
             for (let i=1; i<=23; i++) {
@@ -633,20 +683,21 @@
 
         async function loadScopedSchoolData() {
             try {
-                if (currentUser?.role === 'studente' && currentUser?.id) {
-                    const { data: g } = await _supabase.from('grades').select('*').eq('student_id', currentUser.id).order('date', {ascending:false});
-                    const { data: n } = await _supabase.from('notes').select('*').eq('student_id', currentUser.id).order('date', {ascending:false});
-                    onlineGrades = g || []; onlineNotes = n || [];
-                } else if (currentClassId) {
-                    const { data: g } = await _supabase.from('grades').select('*').eq('class_id', currentClassId).order('date', {ascending:false});
-                    const { data: n } = await _supabase.from('notes').select('*').eq('class_id', currentClassId).order('date', {ascending:false});
-                    onlineGrades = g || []; onlineNotes = n || [];
-                }
-                
+                const { data: g } = await _supabase.from('grades').select('*');
+                onlineGrades = g || [];
                 localGradesDB = {};
-                onlineGrades.forEach(g => { if(!localGradesDB[g.student_id]) localGradesDB[g.student_id] = []; localGradesDB[g.student_id].push(g); });
+                onlineGrades.forEach(grade => {
+                    if (!localGradesDB[grade.student_id]) localGradesDB[grade.student_id] = [];
+                    localGradesDB[grade.student_id].push(grade);
+                });
+
+                const { data: n } = await _supabase.from('notes').select('*');
+                onlineNotes = n || [];
                 localNotesDB = {};
-                onlineNotes.forEach(n => { if(!localNotesDB[n.student_id]) localNotesDB[n.student_id] = []; localNotesDB[n.student_id].push(n); });
+                onlineNotes.forEach(note => {
+                    if (!localNotesDB[note.student_id]) localNotesDB[note.student_id] = [];
+                    localNotesDB[note.student_id].push(note);
+                });
 
                 const { data: ag } = await _supabase.from('agenda').select('*').eq('class', currentClass); 
                 onlineAgenda = ag || []; 
@@ -655,7 +706,6 @@
             }
         }
 
-        // RENDERING GRIGLIA BANCHI
         function renderGrid(data) {
             if (!data) return;
             const grid = document.getElementById('classroom-grid'); 
@@ -751,7 +801,7 @@
             return wrap;
         }
 
-        // DETTAGLIO STUDENTE & CAMBIO STATO
+        // DETTAGLIO STUDENTE
         function openStudentDetail(id) {
             const student = localSchoolDB[currentClass]?.[id];
             if (!student || student.name === 'Libero') return;
@@ -853,14 +903,12 @@
                     toast('Presenza salvata', `${student.name} → ${pendingStatus.toUpperCase().replace('_', ' ')}`, 'success');
                 } catch(err) {
                     console.error("Errore salvataggio presenza:", err);
-                    toast('Errore server', 'Modifica salvata solo in locale.', 'error');
+                    toast('Errore', 'Impossibile salvare su database.', 'error');
                 }
-            } else {
-                toast('Presenza aggiornata', `${student.name} → ${pendingStatus.toUpperCase().replace('_', ' ')}`, 'success');
             }
         }
 
-        // REGISTRO & FIRME DOCENTE
+        // REGISTRO & FIRME
         function openSignModal() {
             const m = document.getElementById('modal-sign');
             if (!m) return;
@@ -934,19 +982,14 @@
         }
 
         async function saveSignature() {
-            if (!selectedSignHour) {
-                toast('Seleziona ora', 'Devi selezionare l\'ora della lezione.', 'error');
-                return;
-            }
+            if (!selectedSignHour) { toast('Seleziona ora', 'Devi selezionare l\'ora.', 'error'); return; }
             const subj = document.getElementById('subject-search').value.trim();
             const topic = document.getElementById('sign-argomento').value.trim();
-            if (!subj || !topic) {
-                toast('Campi incompleti', 'Inserisci materia e argomento.', 'error');
-                return;
-            }
+            if (!subj || !topic) { toast('Campi incompleti', 'Inserisci materia e argomento.', 'error'); return; }
+            
             setLoading(true, "Salvataggio firma...");
             try {
-                const { error } = await _supabase.from('signatures').insert([{
+                await _supabase.from('signatures').insert([{
                     date: selectedDate,
                     hour: selectedSignHour,
                     teacher: currentUser?.name || 'Docente',
@@ -954,24 +997,22 @@
                     topic: topic,
                     class: currentClass
                 }]);
-                if (error) throw error;
                 
-                toast('Firma registrata', `${selectedSignHour}° ora firmata con successo!`, 'success');
+                toast('Firma salvata', `${selectedSignHour}° ora firmata!`, 'success');
                 document.getElementById('modal-sign').classList.add('hidden');
                 document.getElementById('sign-argomento').value = '';
                 selectSignHour(null);
                 
                 await loadDayData(selectedDate);
+                renderSignaturesList();
                 updateSignatureDisplay();
-            } catch(err) {
-                toast('Errore firma', err.message || 'Riprova.', 'error');
             } finally {
                 setLoading(false);
             }
         }
 
         async function deleteSignature(id) {
-            if (!confirm("Eliminare questa firma dal registro?")) return;
+            if (!confirm("Eliminare questa firma?")) return;
             setLoading(true, "Eliminazione...");
             try {
                 await _supabase.from('signatures').delete().eq('id', id);
@@ -1055,15 +1096,9 @@
         }
 
         async function saveAgendaEntry() {
-            if (!pendingAgendaType) {
-                toast('Seleziona tipo', 'Scegli tra Compito o Verifica.', 'error');
-                return;
-            }
+            if (!pendingAgendaType) { toast('Seleziona tipo', 'Scegli tra Compito o Verifica.', 'error'); return; }
             const dateInput = document.getElementById('agenda-date').value;
-            if (!dateInput) {
-                toast('Data mancante', 'Inserisci una data valida.', 'error');
-                return;
-            }
+            if (!dateInput) { toast('Data mancante', 'Inserisci una data valida.', 'error'); return; }
             const d = new Date(dateInput);
             const formatted = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
             setLoading(true, "Salvataggio impegno...");
@@ -1080,8 +1115,6 @@
                 document.getElementById('modal-add-agenda').classList.add('hidden');
                 renderAgendaList();
                 toast('Agenda aggiornata', 'Impegno registrato con successo!', 'success');
-            } catch(e) {
-                toast('Errore salvataggio', e.message, 'error');
             } finally {
                 setLoading(false);
             }
@@ -1104,7 +1137,114 @@
             document.getElementById('modal-notices')?.classList.toggle('hidden');
         }
 
-        // VOTI & NOTE
+        // VOTI & MEDIA
+        function openGradesModal() {
+            const modal = document.getElementById('modal-grades');
+            const list = document.getElementById('grades-list');
+            if (!modal || !list) return;
+
+            let targetId = null;
+            let targetName = '';
+
+            if (currentUser?.role === 'studente') {
+                targetId = currentUser.id;
+                targetName = currentUser.name || 'I miei voti';
+            } else {
+                const student = localSchoolDB[currentClass]?.[selectedStudentId];
+                if (student?.db_id) {
+                    targetId = student.db_id;
+                    targetName = student.name;
+                }
+            }
+
+            if (!targetId) {
+                // Mostra elenco di tutta la classe con medie
+                renderClassGradePicker();
+                modal.classList.remove('hidden');
+                return;
+            }
+
+            const myGrades = (localGradesDB[targetId] || []).slice().sort((a,b) => String(b.date||'').localeCompare(String(a.date||'')));
+            const subjects = {}; 
+            myGrades.forEach(g => { 
+                const subj = g.subject || 'Generale'; 
+                if(!subjects[subj]) subjects[subj] = []; 
+                subjects[subj].push(g); 
+            });
+
+            const allV = myGrades.map(g => Number(g.value)).filter(Number.isFinite); 
+            const avg = allV.length ? (allV.reduce((a,b) => a+b, 0) / allV.length).toFixed(2) : '0.0';
+            
+            document.getElementById('grades-total-avg').innerText = avg; 
+            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni • ${targetName}`;
+
+            const header = document.getElementById('grades-header-bg'); 
+            header.className = `cv-header p-6 pb-8 ${Number(avg)>=6?'bg-cv-green':Number(avg)>=5?'bg-cv-orange':'bg-cv-red'}`;
+            list.innerHTML = ''; 
+            
+            const entries = Object.entries(subjects); 
+            if (entries.length === 0) { 
+                list.innerHTML = '<div class="p-8 text-center text-slate-500">Nessuna valutazione presente.</div>'; 
+            }
+
+            entries.forEach(([subj, votes], idx) => {
+                const avgSub = (votes.reduce((a,b) => a + Number(b.value), 0) / votes.length).toFixed(2); 
+                const safeId = `sc-grade-${idx}`; 
+                const card = document.createElement('div');
+                card.className = 'mb-3';
+                card.innerHTML = `
+                    <div class="cv-card p-4 flex justify-between items-center cursor-pointer" onclick="toggleGradeDetails('${safeId}')">
+                        <div>
+                            <div class="text-white font-bold text-lg">${esc(subj)}</div>
+                            <div class="text-[10px] text-slate-500 uppercase">${votes.length} valutazioni</div>
+                        </div>
+                        <div class="grade-circle ${Number(avgSub)>=6?'g-green':Number(avgSub)>=5?'g-orange':'g-red'}" style="--percent:${Math.min(100, Number(avgSub)*10)}%">
+                            <span class="grade-value">${esc(avgSub)}</span>
+                        </div>
+                    </div>
+                    <div id="${safeId}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl">
+                        ${votes.map(v => `
+                            <div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+                                <div><span class="text-[10px] text-slate-500 block">${esc(v.date\vert{}\vert{}'--')}</span><span class="text-xs text-slate-300 uppercase">${esc(v.type||'')}</span></div>
+                                <span class="font-black ${Number(v.value)>=6?'text-green-400':'text-red-400'}">${esc(v.value)}</span>
+                            </div>
+                        `).join('')}
+                    </div>`;
+                list.appendChild(card);
+            });
+            modal.classList.remove('hidden');
+        }
+
+        function toggleGradeDetails(id) {
+            document.getElementById(id)?.classList.toggle('hidden');
+        }
+
+        function renderClassGradePicker() {
+            const list = document.getElementById('grades-list');
+            if (!list) return;
+            document.getElementById('grades-total-avg').innerText = '--';
+            document.getElementById('grades-total-count').innerText = "Seleziona uno studente";
+            document.getElementById('grades-header-bg').className = "cv-header p-6 pb-8 bg-slate-800";
+
+            list.innerHTML = '<div class="text-[10px] text-slate-500 uppercase tracking-widest font-black mb-3 px-1">Studenti della classe</div>';
+            
+            const students = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s.name !== 'Libero');
+            students.forEach(([deskId, s]) => {
+                const grades = s.db_id ? (localGradesDB[s.db_id] || []) : [];
+                const nums = grades.map(g => Number(g.value)).filter(Number.isFinite);
+                const avg = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2) : '--';
+
+                const item = document.createElement('button');
+                item.className = 'w-full text-left p-4 bg-slate-900 border border-slate-700 rounded-xl mb-2 hover:border-blue-500 transition-all flex items-center justify-between';
+                item.innerHTML = `<div><div class="font-bold text-white">${esc(s.name)}</div><div class="text-[10px] text-slate-500 uppercase">${deskId.replace('banco_','Banco ')}</div></div><div class="text-xl font-black ${avg==='--'?'text-slate-600':Number(avg)>=6?'text-green-400':'text-red-400'}">${avg}</div>`;
+                item.onclick = () => {
+                    selectedStudentId = deskId;
+                    openGradesModal();
+                };
+                list.appendChild(item);
+            });
+        }
+
         function switchTab(t) {
             document.getElementById('content-presence')?.classList.toggle('hidden', t !== 'presence');
             document.getElementById('content-grades')?.classList.toggle('hidden', t !== 'grades');
@@ -1113,11 +1253,8 @@
             ['presence', 'grades', 'notes'].forEach(tab => {
                 const el = document.getElementById(`tab-${tab}`);
                 if (el) {
-                    if (tab === t) {
-                        el.className = "text-blue-400 border-b-2 border-blue-400 pb-1";
-                    } else {
-                        el.className = "text-slate-500 hover:text-white pb-1";
-                    }
+                    if (tab === t) el.className = "text-blue-400 border-b-2 border-blue-400 pb-1";
+                    else el.className = "text-slate-500 hover:text-white pb-1";
                 }
             });
 
@@ -1139,7 +1276,7 @@
                 return;
             }
             grades.forEach(g => {
-                list.innerHTML += `<tr><td class="px-6 py-3">${g.date}</td><td class="px-6 py-3 uppercase text-[10px]">${g.type}</td><td class="px-6 py-3 text-right font-bold ${g.value>=6?'text-green-400':'text-red-400'}">${g.value}</td><td class="px-6 py-3 text-right"><button onclick="deleteGrade('${g.id}')" class="text-red-500 hover:text-white"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                list.innerHTML += `<tr><td class="px-6 py-3">${g.date}</td><td class="px-6 py-3 uppercase text-[10px]">${g.type}</td><td class="px-6 py-3 text-right font-bold ${Number(g.value)>=6?'text-green-400':'text-red-400'}">${g.value}</td><td class="px-6 py-3 text-right"><button onclick="deleteGrade('${g.id}')" class="text-red-500 hover:text-white"><i class="fa-solid fa-trash"></i></button></td></tr>`;
             });
         }
 
@@ -1223,6 +1360,7 @@
             toast('Nota eliminata', '', 'success');
         }
 
+        // ELENCO ALUNNI ALFABETICO PER COGNOME
         function openListModal() {
             document.getElementById('modal-class-list').classList.remove('hidden');
             filterListModal();
@@ -1232,20 +1370,45 @@
             const ul = document.getElementById('full-student-list');
             ul.innerHTML = "";
             const q = document.getElementById('list-search').value.toLowerCase();
+            
+            // Estrai e ordina per cognome
             const list = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s.name !== 'Libero');
+            
+            list.sort((a, b) => {
+                const partsA = a[1].name.trim().split(' ');
+                const cognomeA = partsA.slice(1).join(' ') || partsA[0];
+                const partsB = b[1].name.trim().split(' ');
+                const cognomeB = partsB.slice(1).join(' ') || partsB[0];
+                return cognomeA.localeCompare(cognomeB, 'it', { sensitivity: 'base' });
+            });
+
             list.forEach(([deskId, s]) => {
                 if (q && !s.name.toLowerCase().includes(q)) return;
-                ul.innerHTML += `<li onclick="document.getElementById('modal-class-list').classList.add('hidden'); openStudentDetail('${deskId}')" class="p-3 bg-slate-800/50 border border-slate-700 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-slate-800"><span class="font-bold">${esc(s.name)}</span><span class="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-black/30">${s.status.replace('_',' ')}</span></li>`;
-            });
-        }
+                
+                const parts = s.name.trim().split(' ');
+                const nome = parts[0];
+                const cognome = parts.slice(1).join(' ');
 
-        function openGradesModal() {
-            document.getElementById('modal-grades')?.classList.remove('hidden');
+                let statusBg = "bg-slate-700/30 text-slate-400";
+                if (s.status === 'presente') statusBg = "bg-green-900/40 text-green-400 border border-green-600/50";
+                else if (s.status === 'bagno') statusBg = "bg-cyan-900/40 text-cyan-400 border border-cyan-600/50 animate-pulse";
+                else if (s.status === 'assente') statusBg = "bg-red-900/40 text-red-400 border border-red-600/50";
+
+                ul.innerHTML += `
+                    <li onclick="document.getElementById('modal-class-list').classList.add('hidden'); openStudentDetail('${deskId}')" class="p-3 bg-slate-800/50 border border-slate-700 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition">
+                        <div>
+                            <span class="font-black text-white text-base">${esc(cognome.toUpperCase())}</span> 
+                            <span class="text-slate-300 font-semibold ml-1">${esc(nome)}</span>
+                            <span class="text-[10px] text-slate-500 font-mono ml-2">#${deskId.split('_')[1]}</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-black px-2.5 py-1 rounded ${statusBg}">${s.status.replace('_',' ')}</span>
+                    </li>`;
+            });
         }
 
         // REALTIME
         function initRealtime() {
-            _supabase.channel('public_changes')
+            _supabase.channel('smartcheck_channel')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, payload => {
                  if (payload.new && payload.new.date === selectedDate) {
                      for (let id in localSchoolDB[currentClass]) {
@@ -1271,7 +1434,7 @@
             .subscribe();
         }
 
-        // AUTH & INGRESSO
+        // AUTENTICAZIONE
         async function verifyUser() {
             const input = document.getElementById('input-username').value.trim().toLowerCase();
             if (!input) { toast('Inserisci utente', '', 'error'); return; }
@@ -1301,12 +1464,7 @@
                 currentUser = tempUser;
                 localStorage.setItem('SC_USER', JSON.stringify(currentUser));
                 document.getElementById('view-login').classList.add('hidden');
-                if (currentUser.role === 'studente') {
-                    openUserHome();
-                } else {
-                    initHub();
-                }
-                startClock();
+                if (currentUser.role === 'studente') openUserHome(); else initHub();
             } else {
                 document.getElementById('error-text').innerText = "Password Errata";
                 document.getElementById('login-error').classList.remove('hidden');
@@ -1372,8 +1530,10 @@
             renderClassSelector();
         }
 
-        // AVVIO
-        window.onload = function() {
+        // AVVIO GENERALE (Ascoltatori ed Orologio attivati subito)
+        window.addEventListener('DOMContentLoaded', () => {
+            startClock();
+            
             document.getElementById('input-username').addEventListener('keydown', e => { if (e.key === 'Enter') verifyUser(); });
             document.getElementById('input-password').addEventListener('keydown', e => { if (e.key === 'Enter') processAuth(); });
 
@@ -1383,12 +1543,11 @@
                     currentUser = JSON.parse(saved);
                     document.getElementById('view-login').classList.add('hidden');
                     if (currentUser.role === 'studente') openUserHome(); else initHub();
-                    startClock();
                 } catch(e) {
                     localStorage.removeItem('SC_USER');
                 }
             }
-        };
+        });
     </script>
 </body>
 </html>
