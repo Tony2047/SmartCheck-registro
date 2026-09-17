@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v138.6 (Grades Fix)</title>
+    <title>SmartCheck - School OS v138.7 (Grades & Average Fix)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,6 +57,7 @@
         .g-green { background: conic-gradient(#22c55e var(--percent), #333 0); }
         .g-orange { background: conic-gradient(#f97316 var(--percent), #333 0); }
         .g-red { background: conic-gradient(#ef4444 var(--percent), #333 0); }
+        .g-gray { background: #334155; }
         .bg-cv-green { background-color: #22c55e; }
         .bg-cv-orange { background-color: #f97316; }
         .bg-cv-red { background-color: #ef4444; }
@@ -103,7 +104,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v138.6 • Grades Fix</div>
+                <div class="text-xs font-mono text-slate-500">v138.7 • Grades & Average Fix</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -294,7 +295,7 @@
     <!-- MODALE VALUTAZIONI (VOTI) -->
     <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-sm">
         <div class="bg-[#0f172a] w-full max-w-md h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
-            <div id="grades-header-bg" class="cv-header p-6 pb-8 bg-cv-green">
+            <div id="grades-header-bg" class="cv-header p-6 pb-8 bg-slate-800">
                 <div class="flex justify-between items-start">
                     <div class="flex items-center gap-3">
                         <button id="btn-grades-back" onclick="backToGradePicker()" class="hidden text-xs bg-black/30 hover:bg-black/50 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-bold">
@@ -309,7 +310,7 @@
                         <div class="text-sm font-bold opacity-90">Media Generale</div>
                         <div class="text-xs opacity-75 mt-1" id="grades-total-count">0 valutazioni</div>
                     </div>
-                    <div class="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center text-3xl font-black bg-white/10" id="grades-total-avg">0.0</div>
+                    <div class="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center text-3xl font-black bg-white/10" id="grades-total-avg">0</div>
                 </div>
             </div>
             <div class="bg-[#0f172a] flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar" id="grades-list"></div>
@@ -530,6 +531,19 @@
             if (s.endsWith('-')) return parseFloat(s.slice(0, -1)) - 0.25;
             if (s.includes('½') || s.includes('1/2')) return parseFloat(s.replace(/½|1\/2/g, '')) + 0.5;
             return parseFloat(s);
+        }
+
+        // FORMATTATORE SPECIFICO MEDIE
+        function formatAverage(avgNum) {
+            if (isNaN(avgNum) || avgNum <= 0) return "0";
+            // 10 secco -> "10"
+            if (Math.abs(avgNum - 10) < 0.001) return "10";
+            // Interi (9 -> 9.0, 8 -> 8.0, ecc.)
+            if (Number.isInteger(avgNum) || Math.abs(avgNum - Math.round(avgNum)) < 0.001) {
+                return Math.round(avgNum).toFixed(1);
+            }
+            // Decimale non tondo (es. 9.78)
+            return avgNum.toFixed(2);
         }
 
         // CLOCK ENGINE
@@ -1019,7 +1033,7 @@
             
             setLoading(true, "Salvataggio firma...");
             try {
-                await _supabase.from('signatures').insert([{
+                const { error } = await _supabase.from('signatures').insert([{
                     date: selectedDate,
                     hour: selectedSignHour,
                     teacher: currentUser?.name || 'Docente',
@@ -1027,6 +1041,7 @@
                     topic: topic,
                     class: currentClass
                 }]);
+                if (error) throw error;
                 
                 toast('Firma salvata', `${selectedSignHour}° ora firmata!`, 'success');
                 document.getElementById('modal-sign').classList.add('hidden');
@@ -1212,15 +1227,32 @@
             });
 
             const allV = myGrades.map(g => parseGradeNum(g.value)).filter(n => !isNaN(n)); 
-            const avg = allV.length ? (allV.reduce((a,b) => a+b, 0) / allV.length).toFixed(2) : '0.0';
+            const hasGrades = allV.length > 0;
+            const avgNum = hasGrades ? (allV.reduce((a,b) => a+b, 0) / allV.length) : 0;
             
-            document.getElementById('grades-total-avg').innerText = avg; 
-            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni • ${targetName}`;
+            const totalAvgEl = document.getElementById('grades-total-avg');
+            const totalCountEl = document.getElementById('grades-total-count');
+            const header = document.getElementById('grades-header-bg');
 
-            const header = document.getElementById('grades-header-bg'); 
-            header.className = `cv-header p-6 pb-8 ${Number(avg)>=6?'bg-cv-green':Number(avg)>=5?'bg-cv-orange':'bg-cv-red'}`;
+            if (!hasGrades || avgNum === 0) {
+                header.className = "cv-header p-6 pb-8 bg-slate-800";
+                totalAvgEl.innerText = "0";
+                totalCountEl.innerText = `0 valutazioni • ${targetName}`;
+            } else {
+                const avgFormatted = formatAverage(avgNum);
+                totalAvgEl.innerText = avgFormatted;
+                totalCountEl.innerText = `${allV.length} valutazioni • ${targetName}`;
+
+                if (avgNum >= 6) {
+                    header.className = "cv-header p-6 pb-8 bg-cv-green";
+                } else if (avgNum >= 5) {
+                    header.className = "cv-header p-6 pb-8 bg-cv-orange";
+                } else {
+                    header.className = "cv-header p-6 pb-8 bg-cv-red";
+                }
+            }
+
             list.innerHTML = ''; 
-            
             const entries = Object.entries(subjects); 
             if (entries.length === 0) { 
                 list.innerHTML = '<div class="p-8 text-center text-slate-500">Nessuna valutazione presente.</div>'; 
@@ -1228,8 +1260,12 @@
 
             entries.forEach(([subj, votes], idx) => {
                 const subjNums = votes.map(v => parseGradeNum(v.value)).filter(n => !isNaN(n));
-                const avgSub = subjNums.length ? (subjNums.reduce((a,b) => a + b, 0) / subjNums.length).toFixed(2) : '0.0'; 
+                const subHas = subjNums.length > 0;
+                const avgSub = subHas ? (subjNums.reduce((a,b) => a + b, 0) / subjNums.length) : 0; 
+                const avgSubStr = formatAverage(avgSub);
+                const circleClass = (!subHas || avgSub === 0) ? 'g-gray' : (avgSub >= 6 ? 'g-green' : (avgSub >= 5 ? 'g-orange' : 'g-red'));
                 const safeId = `sc-grade-${idx}`; 
+                
                 const card = document.createElement('div');
                 card.className = 'mb-3';
                 card.innerHTML = `
@@ -1238,8 +1274,8 @@
                             <div class="text-white font-bold text-lg">${esc(subj)}</div>
                             <div class="text-[10px] text-slate-500 uppercase">${votes.length} valutazioni</div>
                         </div>
-                        <div class="grade-circle ${Number(avgSub)>=6?'g-green':Number(avgSub)>=5?'g-orange':'g-red'}" style="--percent:${Math.min(100, Number(avgSub)*10)}%">
-                            <span class="grade-value">${esc(avgSub)}</span>
+                        <div class="grade-circle ${circleClass}" style="--percent:${Math.min(100, Number(avgSub)*10)}%">
+                            <span class="grade-value">${esc(avgSubStr)}</span>
                         </div>
                     </div>
                     <div id="${safeId}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl">
@@ -1271,7 +1307,6 @@
             
             const students = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s.name !== 'Libero');
             
-            // Ordina per Cognome
             students.sort((a, b) => {
                 const partsA = a[1].name.trim().split(' ');
                 const cognomeA = partsA.slice(1).join(' ') || partsA[0];
@@ -1283,11 +1318,14 @@
             students.forEach(([deskId, s]) => {
                 const grades = s.db_id ? (localGradesDB[s.db_id] || []) : [];
                 const nums = grades.map(g => parseGradeNum(g.value)).filter(n => !isNaN(n));
-                const avg = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2) : '--';
+                const hasV = nums.length > 0;
+                const avg = hasV ? (nums.reduce((a,b)=>a+b,0)/nums.length) : 0;
+                const avgDisplay = hasV ? formatAverage(avg) : '--';
+                const avgColor = (!hasV || avg === 0) ? 'text-slate-600' : (avg >= 6 ? 'text-green-400' : (avg >= 5 ? 'text-orange-400' : 'text-red-400'));
 
                 const item = document.createElement('button');
                 item.className = 'w-full text-left p-4 bg-slate-900 border border-slate-700 rounded-xl mb-2 hover:border-blue-500 transition-all flex items-center justify-between';
-                item.innerHTML = `<div><div class="font-bold text-white">${esc(s.name)}</div><div class="text-[10px] text-slate-500 uppercase">${deskId.replace('banco_','Banco ')}</div></div><div class="text-xl font-black ${avg==='--'?'text-slate-600':Number(avg)>=6?'text-green-400':'text-red-400'}">${avg}</div>`;
+                item.innerHTML = `<div><div class="font-bold text-white">${esc(s.name)}</div><div class="text-[10px] text-slate-500 uppercase">${deskId.replace('banco_','Banco ')}</div></div><div class="text-xl font-black ${avgColor}">${avgDisplay}</div>`;
                 item.onclick = () => {
                     selectedStudentId = deskId;
                     openGradesModal();
@@ -1317,7 +1355,6 @@
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
             
-            // Popola il menu a tendina Materie per l'inserimento
             const subjSelect = document.getElementById('new-grade-subject');
             if (subjSelect && subjSelect.children.length === 0) {
                 ALL_SUBJECTS.forEach(s => {
@@ -1333,7 +1370,6 @@
             const list = document.getElementById('teacher-grades-list');
             list.innerHTML = "";
             
-            // Per l'admin mostra tutti i voti dello studente
             const allStudentGrades = (localGradesDB[student.db_id] || []);
             const grades = isTeacher ? allStudentGrades.filter(g => g.subject === currentUser.subject) : allStudentGrades;
 
@@ -1363,24 +1399,69 @@
 
         async function addGrade() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
-            if (!student?.db_id) return;
+            if (!student) return;
+
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            
+            // Garantisci che student.db_id sia un UUID valido
+            if (!student.db_id || !uuidRegex.test(student.db_id)) {
+                const { data: sData } = await _supabase.from('registry').select('id').eq('full_name', student.name).limit(1);
+                if (sData && sData.length > 0) student.db_id = sData[0].id;
+            }
+            if (!student.db_id) {
+                toast('Errore', 'Studente non associato al database', 'error');
+                return;
+            }
+
+            // Garantisci che teacher_id sia un UUID valido nel database
+            let teacherId = currentUser?.id;
+            if (!teacherId || !uuidRegex.test(teacherId)) {
+                const { data: adminUser } = await _supabase.from('registry').select('id').eq('role', 'admin').limit(1);
+                if (adminUser && adminUser.length > 0) {
+                    teacherId = adminUser[0].id;
+                    if (currentUser) currentUser.id = teacherId;
+                }
+            }
+
+            // Garantisci che currentClassId sia valido
+            if (!currentClassId && currentClass) {
+                const { data: cData } = await _supabase.from('classes').select('id').eq('name', currentClass).limit(1);
+                if (cData && cData.length > 0) currentClassId = cData[0].id;
+            }
+
             const val = document.getElementById('new-grade-value').value;
             const chosenSubject = document.getElementById('new-grade-subject')?.value || currentUser?.subject || 'Generale';
             
             setLoading(true, "Salvataggio voto...");
             try {
-                await _supabase.from('grades').insert([{
+                const { data: inserted, error } = await _supabase.from('grades').insert([{
                     student_id: student.db_id,
-                    teacher_id: currentUser?.id,
+                    teacher_id: teacherId,
                     subject: chosenSubject,
-                    value: val,
+                    value: String(val),
                     type: document.getElementById('new-grade-type').value,
                     date: new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}),
                     class_id: currentClassId
-                }]);
-                await loadScopedSchoolData();
+                }]).select();
+
+                if (error) throw error;
+
+                if (inserted && inserted.length > 0) {
+                    onlineGrades.push(inserted[0]);
+                    if (!localGradesDB[student.db_id]) localGradesDB[student.db_id] = [];
+                    localGradesDB[student.db_id].push(inserted[0]);
+                } else {
+                    await loadScopedSchoolData();
+                }
+
                 loadTeacherGradesView();
+                if (!document.getElementById('modal-grades').classList.contains('hidden')) {
+                    openGradesModal();
+                }
                 toast('Voto inserito', `${student.name}: ${val} (${chosenSubject})`, 'success');
+            } catch(e) {
+                console.error("Errore inserimento voto:", e);
+                toast('Errore inserimento', e.message || 'Errore database', 'error');
             } finally {
                 setLoading(false);
             }
@@ -1388,10 +1469,24 @@
 
         async function deleteGrade(id) {
             if (!confirm("Eliminare questa valutazione?")) return;
-            await _supabase.from('grades').delete().eq('id', id);
-            await loadScopedSchoolData();
-            loadTeacherGradesView();
-            toast('Voto eliminato', '', 'success');
+            setLoading(true, "Eliminazione...");
+            try {
+                const { error } = await _supabase.from('grades').delete().eq('id', id);
+                if (error) throw error;
+                onlineGrades = onlineGrades.filter(g => g.id !== id);
+                for (let sId in localGradesDB) {
+                    localGradesDB[sId] = localGradesDB[sId].filter(g => g.id !== id);
+                }
+                loadTeacherGradesView();
+                if (!document.getElementById('modal-grades').classList.contains('hidden')) {
+                    openGradesModal();
+                }
+                toast('Voto eliminato', '', 'success');
+            } catch(err) {
+                toast('Errore', err.message, 'error');
+            } finally {
+                setLoading(false);
+            }
         }
 
         function loadNotes() {
@@ -1538,12 +1633,13 @@
             btn.innerText = "Verifica...";
 
             try {
-                // Recupera l'utente direttamente con il suo UUID da Supabase
                 const { data, error } = await _supabase
                     .from('registry')
                     .select('*')
                     .eq('username', input)
                     .limit(1);
+
+                if (error) throw error;
 
                 if (data && data.length > 0) {
                     const user = data[0];
@@ -1560,22 +1656,6 @@
                     document.getElementById('btn-next').classList.add('hidden');
                     document.getElementById('password-container').classList.remove('hidden');
                     document.getElementById('user-welcome').innerText = user.full_name;
-                    setTimeout(() => document.getElementById('input-password').focus(), 100);
-                } else if (input === 'admin') {
-                    // Fallback immediato se admin non fosse presente in registry
-                    tempUser = {
-                        id: '00000000-0000-0000-0000-000000000001',
-                        u: 'admin',
-                        name: 'Amministratore',
-                        role: 'admin',
-                        pass: 'admin',
-                        class_id: null,
-                        subject: 'Generale'
-                    };
-                    document.getElementById('input-username').classList.add('hidden');
-                    document.getElementById('btn-next').classList.add('hidden');
-                    document.getElementById('password-container').classList.remove('hidden');
-                    document.getElementById('user-welcome').innerText = "Amministratore";
                     setTimeout(() => document.getElementById('input-password').focus(), 100);
                 } else {
                     errText.innerText = "Utente non trovato nel DB";
@@ -1682,7 +1762,7 @@
         }
 
         // AVVIO GENERALE
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             startClock();
             
             document.getElementById('input-username').addEventListener('keydown', e => { if (e.key === 'Enter') verifyUser(); });
@@ -1692,6 +1772,15 @@
             if (saved) {
                 try {
                     currentUser = JSON.parse(saved);
+                    // Ripristino UUID reale per admin se salvato in sessioni precedenti
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                    if (currentUser && (!currentUser.id || !uuidRegex.test(currentUser.id))) {
+                        const { data: uRow } = await _supabase.from('registry').select('id').eq('username', currentUser.u).limit(1);
+                        if (uRow && uRow[0]) {
+                            currentUser.id = uRow[0].id;
+                            localStorage.setItem('SC_USER', JSON.stringify(currentUser));
+                        }
+                    }
                     document.getElementById('view-login').classList.add('hidden');
                     if (currentUser.role === 'studente') openUserHome(); else initHub();
                 } catch(e) {
