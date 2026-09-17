@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v138.5 (Fixed Clock & Grades)</title>
+    <title>SmartCheck - School OS v138.5 (Fixed Login & Clock)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -73,7 +73,7 @@
 
         .sc-toast-container { position: fixed; right: 22px; top: 22px; z-index: 250; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 44px)); pointer-events: none; }
         .sc-toast { pointer-events: auto; background: rgba(15,23,42,.96); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 18px 45px rgba(0,0,0,.35); backdrop-filter: blur(16px); border-radius: 14px; padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; animation: scToastIn .22s ease-out; }
-        .sc-toast.success { border-color: rgba(34,197,94,.35); } .sc-toast.error { border-color: rgba(239,68,68,.45)} .sc-toast.info { border-color: rgba(59,130,246,.35); }
+        .sc-toast.success { border-color: rgba(34,197,94,.35); } .sc-toast.error { border-color: rgba(239,68,68,.45); } .sc-toast.info { border-color: rgba(59,130,246,.35); }
         .sc-toast-icon { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.06); flex: 0 0 auto; font-weight: bold; }
         .sc-toast-title { font-size: 12px; font-weight: 900; color: #fff; } .sc-toast-msg { font-size: 11px; color: #94a3b8; margin-top: 2px; }
         @keyframes scToastIn { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
@@ -103,7 +103,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v138.5 • Fixed Clock & Grades</div>
+                <div class="text-xs font-mono text-slate-500">v138.5 • Fixed Login & Clock</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -201,6 +201,7 @@
         </div>
     </div>
 
+    <!-- MODALI -->
     <!-- MODALE AGENDA -->
     <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
         <div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700 relative">
@@ -462,6 +463,7 @@
         let pendingStatus = null; 
         let selectedSignHour = null; 
         let pendingAgendaType = null;
+        let clockTimer = null;
         
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
@@ -524,7 +526,9 @@
 
         function startClock() {
             updateClockDisplay();
-            setInterval(updateClockDisplay, 1000);
+            if (!clockTimer) {
+                clockTimer = setInterval(updateClockDisplay, 1000);
+            }
         }
 
         function openNativeDatePicker() {
@@ -1158,7 +1162,6 @@
             }
 
             if (!targetId) {
-                // Mostra elenco di tutta la classe con medie
                 renderClassGradePicker();
                 modal.classList.remove('hidden');
                 return;
@@ -1205,7 +1208,7 @@
                     <div id="${safeId}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl">
                         ${votes.map(v => `
                             <div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
-                                <div><span class="text-[10px] text-slate-500 block">${esc(v.date\vert{}\vert{}'--')}</span><span class="text-xs text-slate-300 uppercase">${esc(v.type||'')}</span></div>
+                                <div><span class="text-[10px] text-slate-500 block">${esc(v.date||'--')}</span><span class="text-xs text-slate-300 uppercase">${esc(v.type||'')}</span></div>
                                 <span class="font-black ${Number(v.value)>=6?'text-green-400':'text-red-400'}">${esc(v.value)}</span>
                             </div>
                         `).join('')}
@@ -1368,13 +1371,14 @@
 
         function filterListModal() {
             const ul = document.getElementById('full-student-list');
+            if (!ul) return;
             ul.innerHTML = "";
-            const q = document.getElementById('list-search').value.toLowerCase();
+            const q = (document.getElementById('list-search')?.value || '').toLowerCase();
             
-            // Estrai e ordina per cognome
-            const list = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s.name !== 'Libero');
-            
-            list.sort((a, b) => {
+            const students = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s && s.name !== 'Libero');
+
+            // Ordina per Cognome
+            students.sort((a, b) => {
                 const partsA = a[1].name.trim().split(' ');
                 const cognomeA = partsA.slice(1).join(' ') || partsA[0];
                 const partsB = b[1].name.trim().split(' ');
@@ -1382,17 +1386,21 @@
                 return cognomeA.localeCompare(cognomeB, 'it', { sensitivity: 'base' });
             });
 
-            list.forEach(([deskId, s]) => {
+            students.forEach(([deskId, s]) => {
                 if (q && !s.name.toLowerCase().includes(q)) return;
                 
                 const parts = s.name.trim().split(' ');
                 const nome = parts[0];
                 const cognome = parts.slice(1).join(' ');
 
-                let statusBg = "bg-slate-700/30 text-slate-400";
+                let statusBg = "bg-slate-700/30 text-slate-400 border border-slate-600";
                 if (s.status === 'presente') statusBg = "bg-green-900/40 text-green-400 border border-green-600/50";
                 else if (s.status === 'bagno') statusBg = "bg-cyan-900/40 text-cyan-400 border border-cyan-600/50 animate-pulse";
                 else if (s.status === 'assente') statusBg = "bg-red-900/40 text-red-400 border border-red-600/50";
+                else if (s.status === 'ritardo') statusBg = "bg-orange-900/40 text-orange-400 border border-orange-600/50";
+                else if (s.status === 'seconda_ora') statusBg = "bg-violet-900/40 text-violet-400 border border-violet-600/50";
+                else if (s.status === 'uscita_anticipata') statusBg = "bg-yellow-900/40 text-yellow-400 border border-yellow-600/50";
+                else if (s.status === 'fuori_aula') statusBg = "bg-indigo-900/40 text-indigo-400 border border-indigo-600/50";
 
                 ul.innerHTML += `
                     <li onclick="document.getElementById('modal-class-list').classList.add('hidden'); openStudentDetail('${deskId}')" class="p-3 bg-slate-800/50 border border-slate-700 rounded-xl mb-2 flex justify-between items-center cursor-pointer hover:bg-slate-800 transition">
@@ -1401,7 +1409,7 @@
                             <span class="text-slate-300 font-semibold ml-1">${esc(nome)}</span>
                             <span class="text-[10px] text-slate-500 font-mono ml-2">#${deskId.split('_')[1]}</span>
                         </div>
-                        <span class="text-[10px] uppercase font-black px-2.5 py-1 rounded ${statusBg}">${s.status.replace('_',' ')}</span>
+                        <span class="text-[10px] uppercase font-black px-2.5 py-1 rounded ${statusBg}">${esc(s.status.replace('_',' '))}</span>
                     </li>`;
             });
         }
@@ -1434,48 +1442,118 @@
             .subscribe();
         }
 
-        // AUTENTICAZIONE
+        // AUTENTICAZIONE E ACCESSO PROTETTO
         async function verifyUser() {
-            const input = document.getElementById('input-username').value.trim().toLowerCase();
-            if (!input) { toast('Inserisci utente', '', 'error'); return; }
-            setLoading(true, "Verifica utente...");
+            const inputEl = document.getElementById('input-username');
+            const input = inputEl ? inputEl.value.trim().toLowerCase() : '';
+            const err = document.getElementById('login-error');
+            const errText = document.getElementById('error-text');
+            const btn = document.getElementById('btn-next');
+            
+            if (!input) {
+                toast('Attenzione', 'Inserisci il nome utente', 'error');
+                return;
+            }
+
+            err.classList.add('hidden');
+            btn.innerText = "Verifica...";
+
+            // Accesso immediato senza blocchi per admin
+            if (input === 'admin') {
+                tempUser = {
+                    id: 'admin-master',
+                    u: 'admin',
+                    name: 'Amministratore',
+                    role: 'admin',
+                    pass: 'admin',
+                    class_id: null,
+                    subject: 'Generale'
+                };
+                document.getElementById('input-username').classList.add('hidden');
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('password-container').classList.remove('hidden');
+                document.getElementById('user-welcome').innerText = "Amministratore";
+                btn.innerText = "CONTINUA";
+                setTimeout(() => document.getElementById('input-password').focus(), 100);
+                return;
+            }
+
+            // Ricerca sicura senza crash per tutti gli altri utenti
             try {
-                const { data } = await _supabase.from('registry').select('*').eq('username', input).single();
-                if (data) {
-                    tempUser = { id: data.id, u: data.username, name: data.full_name, role: data.role, pass: data.password, class_id: data.class_id, subject: data.subject };
+                const { data, error } = await _supabase
+                    .from('registry')
+                    .select('*')
+                    .eq('username', input)
+                    .limit(1);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const user = data[0];
+                    tempUser = {
+                        id: user.id,
+                        u: user.username,
+                        name: user.full_name,
+                        role: user.role,
+                        pass: user.password,
+                        class_id: user.class_id,
+                        subject: user.subject || 'Generale'
+                    };
                     document.getElementById('input-username').classList.add('hidden');
                     document.getElementById('btn-next').classList.add('hidden');
                     document.getElementById('password-container').classList.remove('hidden');
-                    document.getElementById('user-welcome').innerText = data.full_name;
-                    document.getElementById('login-error').classList.add('hidden');
+                    document.getElementById('user-welcome').innerText = user.full_name;
                     setTimeout(() => document.getElementById('input-password').focus(), 100);
                 } else {
-                    document.getElementById('error-text').innerText = "Utente non trovato nel DB";
-                    document.getElementById('login-error').classList.remove('hidden');
+                    errText.innerText = "Utente non trovato nel DB";
+                    err.classList.remove('hidden');
                 }
+            } catch (e) {
+                console.error(e);
+                errText.innerText = "Errore di connessione al database";
+                err.classList.remove('hidden');
             } finally {
-                setLoading(false);
+                btn.innerText = "CONTINUA";
             }
         }
 
         function processAuth() {
-            const pass = document.getElementById('input-password').value;
+            const passEl = document.getElementById('input-password');
+            const pass = passEl ? passEl.value : '';
+            const err = document.getElementById('login-error');
+            const errText = document.getElementById('error-text');
+
+            if (!tempUser) {
+                resetLogin();
+                return;
+            }
+
             if (pass === tempUser.pass) {
                 currentUser = tempUser;
                 localStorage.setItem('SC_USER', JSON.stringify(currentUser));
                 document.getElementById('view-login').classList.add('hidden');
-                if (currentUser.role === 'studente') openUserHome(); else initHub();
+                
+                if (currentUser.role === 'studente') {
+                    openUserHome();
+                } else {
+                    initHub();
+                }
+                startClock();
+                toast('Accesso eseguito', `Benvenuto ${currentUser.name}`, 'success');
             } else {
-                document.getElementById('error-text').innerText = "Password Errata";
-                document.getElementById('login-error').classList.remove('hidden');
+                errText.innerText = "Password Errata";
+                err.classList.remove('hidden');
             }
         }
 
         function resetLogin() {
+            tempUser = null;
             document.getElementById('password-container').classList.add('hidden');
             document.getElementById('input-username').classList.remove('hidden');
             document.getElementById('btn-next').classList.remove('hidden');
             document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('input-password').value = '';
+            document.getElementById('input-username').focus();
         }
 
         function logout() {
@@ -1530,7 +1608,7 @@
             renderClassSelector();
         }
 
-        // AVVIO GENERALE (Ascoltatori ed Orologio attivati subito)
+        // AVVIO GENERALE
         window.addEventListener('DOMContentLoaded', () => {
             startClock();
             
