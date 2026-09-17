@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v138.2 (Seat Map & UI Fixes)</title>
+    <title>SmartCheck - School OS v138.3 (Stable & Unlocked)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,16 +18,10 @@
         .glass-panel { background: rgba(20, 27, 45, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
         .hidden { display: none !important; }
         
-        input[type="date"] { 
-            color-scheme: dark; 
-            background-color: transparent;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator { 
-            filter: invert(1); 
-            opacity: 0.6; 
-            cursor: pointer; 
-        }
-        
+        input[type="date"] { color-scheme: dark; background-color: transparent; position: relative; z-index: 20; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
+        #date-picker { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -42,7 +36,6 @@
         .status-seconda-ora { border: 1px solid #8b5cf6 !important; background: linear-gradient(145deg, rgba(76, 29, 149, 0.6), rgba(109, 40, 217, 0.2)) !important; color: #c4b5fd !important; }
         .status-uscita-anticipata { border: 1px solid #eab308 !important; background: linear-gradient(145deg, rgba(66, 32, 6, 0.6), rgba(113, 63, 18, 0.2)) !important; color: #fde047 !important; }
         .status-fuori-aula { border: 1px solid #6366f1 !important; background: linear-gradient(145deg, rgba(49, 46, 129, 0.9), rgba(67, 56, 202, 0.4)) !important; color: #a5b4fc !important; }
-
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); } 70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
 
         .tool-btn { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); width: 70px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 18px; cursor: pointer; transition: all 0.2s; }
@@ -77,7 +70,7 @@
         .cv-day.future { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
         .cv-day:not(.active):not(.future):hover .cv-day-number { background-color: rgba(255,255,255,0.1); }
     
-        /* ===== SmartCheck v138.2 functional layer ===== */
+        /* ===== SmartCheck v138.3 functional layer ===== */
         .sc-toast-container{position:fixed;right:22px;top:22px;z-index:250;display:flex;flex-direction:column;gap:10px;width:min(380px,calc(100vw - 44px));pointer-events:none}
         .sc-toast{pointer-events:auto;background:rgba(15,23,42,.96);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 45px rgba(0,0,0,.35);backdrop-filter:blur(16px);border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;animation:scToastIn .22s ease-out}
         .sc-toast.success{border-color:rgba(34,197,94,.35)} .sc-toast.error{border-color:rgba(239,68,68,.45)} .sc-toast.info{border-color:rgba(59,130,246,.35)}
@@ -93,6 +86,9 @@
         .sc-desk-btn:focus-visible>div{outline:2px solid #60a5fa;outline-offset:3px}
         .sc-empty{border:1px dashed rgba(148,163,184,.25);border-radius:14px;padding:24px;text-align:center;color:#64748b}
         .sc-grade-picker-item:hover{transform:translateY(-1px);background:rgba(59,130,246,.12)!important}
+        
+        .sc-date-input {position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; opacity: 0 !important; cursor: pointer !important; z-index: 50 !important;}
+        #date-control {position: relative;}
     </style>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col overflow-x-hidden selection:bg-blue-500">
@@ -111,7 +107,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v138.2 • Dynamic DB</div>
+                <div class="text-xs font-mono text-slate-500">v138.3 • Fully Stable</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -153,16 +149,16 @@
                 <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div></div></div>
             </div>
             
-            <!-- SELETTORE DATA (SISTEMATO CSS) -->
-            <div class="relative group mx-4">
+            <!-- SELETTORE DATA (FIXATO CSS) -->
+            <div class="relative group mx-4" id="date-control">
                 <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 border border-slate-700 hover:border-blue-500 transition-all relative overflow-hidden">
-                    <input type="date" id="date-picker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40" onchange="changeDate(this.value)">
+                    <input type="date" id="date-picker" class="sc-date-input" onchange="changeDate(this.value)">
                     <i class="fa-regular fa-calendar text-blue-400 text-lg pointer-events-none"></i>
                     <div class="flex flex-col text-right pointer-events-none">
                         <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DATA</span>
                         <span id="date-display" class="font-mono text-sm font-bold text-white leading-none uppercase">OGGI</span>
                     </div>
-                    <button type="button" onclick="resetToToday()" class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 z-50 relative pointer-events-auto">OGGI</button>
+                    <button type="button" onclick="event.stopPropagation();resetToToday()" class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 z-50 relative pointer-events-auto">OGGI</button>
                 </div>
             </div>
 
@@ -181,6 +177,7 @@
             <div id="history-warning" class="hidden w-full max-w-md bg-yellow-900/20 border border-yellow-500/30 rounded-full py-2 px-6 mb-8 flex items-center justify-center gap-3 text-yellow-400 backdrop-blur-sm animate-pulse"><i class="fa-solid fa-clock-rotate-left"></i> <span class="text-xs font-black uppercase tracking-widest">Visualizzazione Archivio</span></div>
             <div id="bathroom-bar" class="w-full max-w-2xl mb-6 flex justify-center"></div>
             
+            <!-- GRIGLIA BANCHI -->
             <div class="grid grid-cols-3 gap-24 w-full max-w-[95%] mt-4" id="classroom-grid"></div>
             
             <!-- CATTEDRA -->
@@ -208,7 +205,7 @@
         </div>
     </div>
 
-    <!-- MODALI (Agenda, Voti, Elenco, ecc...) -->
+    <!-- MODALI -->
     <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
         <div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl shadow-2xl flex flex-col border border-slate-700 relative">
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700">
@@ -248,7 +245,7 @@
                     <textarea id="agenda-desc" rows="3" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl outline-none" placeholder="Cosa studiare..."></textarea>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <button onclick="saveAgendaEntry()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-500">SALVA</button>
+                    <button onclick="saveAgendaEntryPatched()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-500">SALVA</button>
                 </div>
             </div>
         </div>
@@ -340,9 +337,9 @@
         let onlineGrades = []; let onlineNotes = []; let onlineAgenda = []; let onlineSignatures = [];
         let localGradesDB = {}; let localNotesDB = {};
 
-        // MAPPA DEI BANCHI ESATTA COME DA TUA RICHIESTA
+        // MAPPA DEI BANCHI ESATTA
         const OLD_SEAT_ORDER = [
-            "Antonio Navarroli",      // banco_01 (Tu)
+            "Antonio Navarroli",      // banco_01 (Tu - Fila Sinistra, Primo Banco)
             "Emiliano Calò",          // banco_02
             "Filippo Agnitti",        // banco_03
             "Ivan Garofalo",          // banco_04
@@ -350,7 +347,7 @@
             "Lorenzo Esposito",       // banco_06
             "Kristian Methasa",       // banco_07
             "Stefano Spaczil",        // banco_08
-            "Federico Pasqualone",    // banco_09 (Cattedra middle front)
+            "Federico Pasqualone",    // banco_09 (Banco singolo/centrale frontale)
             "Leonardo Pacchione",     // banco_10
             "Oleksandr Tsikhanskyi",  // banco_11
             "Alessio Tofano",         // banco_12
@@ -379,7 +376,6 @@
                 document.getElementById('view-login').classList.add('hidden');
                 if (currentUser.role === 'studente') { window.openUserHome ? window.openUserHome() : null; } else initHub();
                 startClock();
-                initRealtime(); 
             }
         };
 
@@ -416,7 +412,6 @@
                 document.getElementById('view-login').classList.add('hidden');
                 if(currentUser.role==='studente') { window.openUserHome ? window.openUserHome() : null; } else initHub();
                 startClock();
-                initRealtime();
             } else { 
                 document.getElementById('error-text').innerText = "Password Errata"; 
                 document.getElementById('login-error').classList.remove('hidden'); 
@@ -430,7 +425,7 @@
         function renderClassSelector(){ return window.renderClassSelector ? window.renderClassSelector() : null; }
 
         function backToHub(){document.getElementById('view-classroom').classList.add('hidden');document.getElementById('view-hub').classList.remove('hidden');}
-        function resetToToday() { changeDate(getTodayStr()); }
+        function resetToToday() { changeDatePatched(getTodayStr()); }
 
         function calcolaDurata(orarioUscita, orarioRientro) {
             if (!orarioUscita || !orarioRientro || orarioRientro === '--:--') return "";
@@ -449,18 +444,10 @@
         function selectSignHour(h){ selectedSignHour=h; for(let i=1;i<=5;i++) document.getElementById(`hour-btn-${i}`).className=i===h?'hour-selected flex-1 py-1.5 rounded':'flex-1 py-1.5 rounded bg-slate-800'; }
     </script>
 
-    <!-- PATCH ACTION LAYER -->
+    <!-- ROBUST SCRIPT ACTION LAYER -->
     <script>
     (() => {
         const SC = window.SC = window.SC || { version: "139-action-layer", demoMode: false, realtimeChannel: null, routeSyncing: false, clockStarted: false };
-
-        window.SC_API = window.SC_API || {
-            async select(table, buildQuery) { let q = _supabase.from(table); q = buildQuery ? buildQuery(q) : q.select('*'); const {data, error} = await q; if (error) throw error; return data || []; },
-            async insert(table, rows) { const {data, error} = await _supabase.from(table).insert(rows).select(); if (error) throw error; return data || []; },
-            async upsert(table, rows, options = {}) { const {data, error} = await _supabase.from(table).upsert(rows, options).select(); if (error) throw error; return data || []; },
-            async update(table, values, buildQuery) { let q = _supabase.from(table).update(values); q = buildQuery ? buildQuery(q) : q; const {data, error} = await q.select(); if (error) throw error; return data || []; },
-            async remove(table, buildQuery) { let q = _supabase.from(table).delete(); q = buildQuery ? buildQuery(q) : q; const {data, error} = await q.select(); if (error) throw error; return data || []; }
-        };
 
         function esc(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
         function toast(title, message = '', type = 'info', timeout = 3200) {
@@ -478,14 +465,6 @@
             if (tx) tx.textContent = text; if (el) el.classList.toggle('hidden', !show);
         }
 
-        window.SC_ACTIONS = window.SC_ACTIONS || {
-            attendance: { async setStatus({studentId, classId, date, status, time}) { return window.SC_API.upsert('attendance', [{ student_id: studentId, class_id: classId, date, status, time: time || '--:--' }], { onConflict: 'student_id,date' }); } },
-            grades: { async create(row) { return window.SC_API.insert('grades', [row]); }, async remove(id) { return window.SC_API.remove('grades', q => q.eq('id', id)); } },
-            notes: { async create(row) { return window.SC_API.insert('notes', [row]); }, async remove(id) { return window.SC_API.remove('notes', q => q.eq('id', id)); } },
-            agenda: { async create(row) { return window.SC_API.insert('agenda', [row]); }, async remove(id) { return window.SC_API.remove('agenda', q => q.eq('id', id)); } },
-            signatures: { async create(row) { return window.SC_API.insert('signatures', [row]); }, async remove(id) { return window.SC_API.remove('signatures', q => q.eq('id', id)); } }
-        };
-
         function normalizeDateInput(value) {
             if (!value) return null; const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value); if (!m) return null;
             const d = new Date(Number(m[1]), Number(m[2])-1, Number(m[3])); if (Number.isNaN(d.getTime())) return null; return value;
@@ -495,13 +474,13 @@
 
         function buildLocalClassState(cls, students) {
             const data = {};
-            // 1. Inizializza tutti i 23 banchi come vuoti
+            // Inizializza 23 banchi
             for (let i=1; i<=23; i++) {
                 const id = `banco_${String(i).padStart(2,'0')}`;
                 data[id] = { db_id: null, name: 'Libero', status: 'assente', time: '--:--', history: [] };
             }
             
-            // 2. Assegna i posti in base a OLD_SEAT_ORDER (La tua vecchia configurazione)
+            // Applica ordine preciso
             students.forEach(stud => {
                 let seatIndex = OLD_SEAT_ORDER.indexOf(stud.full_name);
                 if (seatIndex !== -1) {
@@ -511,7 +490,6 @@
                         data[id].name = stud.full_name;
                     }
                 } else {
-                    // Se c'è uno studente nuovo non in lista, lo mette nel primo posto libero
                     let emptySeat = Object.keys(data).find(k => data[k].name === 'Libero');
                     if (emptySeat) {
                         data[emptySeat].db_id = stud.id;
@@ -529,18 +507,22 @@
             try {
                 let gradeRows = []; let noteRows = [];
                 if (currentUser?.role === 'studente' && currentUser?.id) {
-                    gradeRows = await window.SC_API.select('grades', q => q.eq('student_id', currentUser.id).order('date', {ascending:false}));
-                    noteRows = await window.SC_API.select('notes', q => q.eq('student_id', currentUser.id).order('date', {ascending:false}));
+                    const {data: g} = await _supabase.from('grades').select('*').eq('student_id', currentUser.id).order('date', {ascending:false});
+                    const {data: n} = await _supabase.from('notes').select('*').eq('student_id', currentUser.id).order('date', {ascending:false});
+                    gradeRows = g || []; noteRows = n || [];
                 } else if (currentClassId) {
-                    gradeRows = await window.SC_API.select('grades', q => q.eq('class_id', currentClassId).order('date', {ascending:false}));
-                    noteRows = await window.SC_API.select('notes', q => q.eq('class_id', currentClassId).order('date', {ascending:false}));
+                    const {data: g} = await _supabase.from('grades').select('*').eq('class_id', currentClassId).order('date', {ascending:false});
+                    const {data: n} = await _supabase.from('notes').select('*').eq('class_id', currentClassId).order('date', {ascending:false});
+                    gradeRows = g || []; noteRows = n || [];
                 }
                 onlineGrades = gradeRows; onlineNotes = noteRows;
                 organizeGrades(onlineGrades); organizeNotes(onlineNotes);
 
-                try { const ag = await window.SC_API.select('agenda', q => q.eq('class', currentClass)); onlineAgenda = ag; } 
-                catch (e) { onlineAgenda = []; }
-            } catch (e) { console.warn('scoped school data', e); }
+                try { 
+                    const {data: ag} = await _supabase.from('agenda').select('*').eq('class', currentClass); 
+                    onlineAgenda = ag || []; 
+                } catch (e) { onlineAgenda = []; }
+            } catch (e) { console.warn('scoped school data error', e); }
         }
 
         function organizeGrades(rawData) { localGradesDB = {}; rawData.forEach(g => { if(!localGradesDB[g.student_id]) localGradesDB[g.student_id] = []; localGradesDB[g.student_id].push(g); }); }
@@ -549,36 +531,47 @@
         async function loadClassroomPatched(cls, options = {}) {
             const target = String(cls || '').trim(); if (!target) return;
             currentClass = target; selectedStudentId = null;
+            
             setLoading(true, `Apertura ${target}...`);
             document.getElementById('view-hub')?.classList.add('hidden');
             document.getElementById('view-classroom')?.classList.remove('hidden');
             if (document.getElementById('class-header-name')) document.getElementById('class-header-name').textContent = target;
 
-            const classRecord = await window.SC_API.select('classes', q => q.eq('name', target).limit(1));
-            currentClassId = classRecord[0]?.id || null;
-            
-            const students = currentClassId ? await window.SC_API.select('registry', q => q.select('id,username,full_name,role,class_id').eq('class_id', currentClassId).eq('role','studente').order('full_name')) : [];
-            classStudents = students;
-            localSchoolDB[target] = buildLocalClassState(target, students);
+            try {
+                const {data: classRecord} = await _supabase.from('classes').select('id').eq('name', target).single();
+                currentClassId = classRecord?.id || null;
+                
+                const {data: students} = currentClassId 
+                    ? await _supabase.from('registry').select('id,username,full_name,role,class_id').eq('class_id', currentClassId).eq('role','studente').order('full_name')
+                    : {data: []};
+                
+                classStudents = students || [];
+                localSchoolDB[target] = buildLocalClassState(target, classStudents);
 
-            selectedDate = normalizeDateInput(selectedDate) || getTodayStr();
-            const picker = document.getElementById('date-picker'); if (picker) picker.value = selectedDate;
+                selectedDate = normalizeDateInput(selectedDate) || getTodayStr();
+                const picker = document.getElementById('date-picker'); if (picker) picker.value = selectedDate;
 
-            await changeDatePatched(selectedDate, {skipRoute:true});
-            await loadScopedSchoolData();
-            subscribeRealtimeForCurrentClass();
+                await changeDatePatched(selectedDate, {skipRoute:true});
+                await loadScopedSchoolData();
+                subscribeRealtimeForCurrentClass();
 
-            const isStudent = currentUser?.role === 'studente';
-            document.getElementById('back-btn')?.classList.toggle('hidden', isStudent);
-            document.getElementById('sign-btn')?.classList.toggle('hidden', isStudent);
-            document.getElementById('dock-right')?.classList.remove('hidden');
+                const isStudent = currentUser?.role === 'studente';
+                document.getElementById('back-btn')?.classList.toggle('hidden', isStudent);
+                document.getElementById('sign-btn')?.classList.toggle('hidden', isStudent);
+                document.getElementById('dock-right')?.classList.remove('hidden');
 
-            const badge = document.getElementById('role-badge');
-            if (badge) {
-                badge.textContent = isStudent ? 'STUDENTE' : (currentUser?.role || 'UTENTE').toUpperCase();
-                badge.className = isStudent ? 'px-2 py-0.5 rounded bg-green-900/50 text-green-300 border border-green-700/50 uppercase tracking-widest' : 'px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest';
+                const badge = document.getElementById('role-badge');
+                if (badge) {
+                    badge.textContent = isStudent ? 'STUDENTE' : (currentUser?.role || 'UTENTE').toUpperCase();
+                    badge.className = isStudent ? 'px-2 py-0.5 rounded bg-green-900/50 text-green-300 border border-green-700/50 uppercase tracking-widest' : 'px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest';
+                }
+                updateSignatureDisplay(); 
+            } catch (err) {
+                console.error(err);
+                toast('Errore', 'Impossibile aprire la classe', 'error');
+            } finally {
+                setLoading(false);
             }
-            updateSignatureDisplay(); setLoading(false);
         }
 
         async function loadDayDataPatched(dateStr) {
@@ -587,16 +580,23 @@
             if (!currentClassId) return; 
 
             try {
-                const att = await window.SC_API.select('attendance', q => q.eq('date', dateStr).eq('class_id', currentClassId));
-                for (const row of att) { const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id); if (seat) { seat.status = row.status || 'assente'; seat.time = row.time || '--:--'; } }
-                
+                const {data: att} = await _supabase.from('attendance').select('*').eq('date', dateStr).eq('class_id', currentClassId);
+                if (att) {
+                    for (const row of att) { const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id); if (seat) { seat.status = row.status || 'assente'; seat.time = row.time || '--:--'; } }
+                }
+
                 try {
-                    const bath = await window.SC_API.select('bathroom_history', q => q.eq('date', dateStr));
-                    for (const row of bath) { const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id); if (seat) seat.history.push({out: row.out_time || row.out || null, in: row.in_time || row.in || null}); }
+                    const {data: bath} = await _supabase.from('bathroom_history').select('*').eq('date', dateStr);
+                    if (bath) {
+                        for (const row of bath) { const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id); if (seat) seat.history.push({out: row.out_time || row.out || null, in: row.in_time || row.in || null}); }
+                    }
                 } catch (bathError) {}
 
-                try { const sig = await window.SC_API.select('signatures', q => q.eq('date', dateStr).eq('class', currentClass)); onlineSignatures = sig; } catch (sigError) { onlineSignatures = []; }
-            } catch (e) { toast('Errore caricamento', e.message || 'Impossibile caricare i dati del giorno.', 'error'); }
+                try { 
+                    const {data: sig} = await _supabase.from('signatures').select('*').eq('date', dateStr).eq('class', currentClass); 
+                    onlineSignatures = sig || []; 
+                } catch (sigError) { onlineSignatures = []; }
+            } catch (e) { toast('Errore caricamento', 'Impossibile caricare i dati del giorno.', 'error'); }
         }
 
         async function changeDatePatched(val, options = {}) {
@@ -607,16 +607,21 @@
             if (document.getElementById('date-display')) document.getElementById('date-display').textContent = isToday ? 'OGGI' : formatDateIT(normalized);
             if (document.getElementById('date-picker')) document.getElementById('date-picker').value = normalized;
 
-            await loadDayDataPatched(normalized);
+            try {
+                setLoading(true, "Caricamento presenze...");
+                await loadDayDataPatched(normalized);
 
-            document.getElementById('history-warning')?.classList.toggle('hidden', isToday);
-            document.getElementById('signature-display')?.parentElement.classList.toggle('hidden', !isToday);
-            document.getElementById('bathroom-bar')?.classList.toggle('hidden', !isToday);
+                document.getElementById('history-warning')?.classList.toggle('hidden', isToday);
+                document.getElementById('signature-display')?.parentElement.classList.toggle('hidden', !isToday);
+                document.getElementById('bathroom-bar')?.classList.toggle('hidden', !isToday);
 
-            renderGridPatched(localSchoolDB[currentClass]);
-            renderSignaturesList();
-            renderCalendarStripPatched();
-            if (currentUser?.role !== 'studente') updateTeacherForm();
+                renderGridPatched(localSchoolDB[currentClass]);
+                renderSignaturesList();
+                renderCalendarStripPatched();
+                if (currentUser?.role !== 'studente') updateTeacherForm();
+            } finally {
+                setLoading(false);
+            }
         }
 
         function renderGridPatched(data) {
@@ -685,7 +690,7 @@
                 <div class="text-center"><span class="text-[9px] font-bold font-mono opacity-60 bg-black/20 px-2 py-0.5 rounded text-white">${esc(d.time || '--:--')}</span></div>
             </div>`;
 
-            if (d.name !== 'Libero') { btn.addEventListener('click', ev => { ev.preventDefault(); selectedStudentId = id; try { openStudentDetail(id); } catch (err) { toast('Scheda studente non disponibile', err.message || 'Errore inatteso.', 'error'); } }); }
+            if (d.name !== 'Libero') { btn.addEventListener('click', ev => { ev.preventDefault(); selectedStudentId = id; try { openStudentDetail(id); } catch (err) { toast('Errore', 'Scheda studente non disponibile.', 'error'); } }); }
             wrap.appendChild(btn); return wrap;
         }
 
@@ -745,13 +750,20 @@
         }
 
         async function addGradePatched() {
-            const selected=getSelectedStudentRecord(); if (!selected?.db_id) { toast('Studente non selezionato','Apri prima una scheda studente.','error'); return; }
+            const selected=getSelectedStudentRecord(); if (!selected?.db_id) { toast('Errore','Apri prima una scheda studente.','error'); return; }
             const val=document.getElementById('new-grade-value')?.value; if (!val) return;
-            const row={ student_id:selected.db_id, teacher_id:currentUser?.id || null, subject:currentUser?.subject || currentUser?.materia || 'Generale', value:val, type:document.getElementById('new-grade-type')?.value || 'Scritto', date:formatDateIT(getTodayStr()).slice(0,5), class_id:currentClassId };
-            try { setLoading(true,'Salvataggio voto...'); await window.SC_ACTIONS.grades.create(row); toast('Voto salvato',`${selected.name} • ${gradeDisplay(val)}`,'success'); await loadScopedSchoolData(); await loadTeacherGradesViewPatched(); if (!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModalPatched(); } catch(e) { toast('Errore salvataggio voto',e.message||'Operazione non riuscita.','error'); } finally { setLoading(false); }
+            try {
+                setLoading(true,'Salvataggio voto...');
+                await _supabase.from('grades').insert([{ student_id:selected.db_id, teacher_id:currentUser?.id || null, subject:currentUser?.subject || currentUser?.materia || 'Generale', value:val, type:document.getElementById('new-grade-type')?.value || 'Scritto', date:formatDateIT(getTodayStr()).slice(0,5), class_id:currentClassId }]);
+                toast('Voto salvato',`${selected.name} • ${gradeDisplay(val)}`,'success');
+                await loadScopedSchoolData(); await loadTeacherGradesViewPatched(); if (!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModalPatched();
+            } catch(e) { toast('Errore salvataggio voto','Operazione non riuscita.','error'); } finally { setLoading(false); }
         }
 
-        async function deleteGradePatched(id) { if (!id || !confirm('Eliminare questo voto?')) return; try { await window.SC_ACTIONS.grades.remove(id); toast('Voto eliminato','','success'); await loadScopedSchoolData(); await loadTeacherGradesViewPatched(); if (!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModalPatched(); } catch(e) { toast('Errore eliminazione',e.message||'Operazione non riuscita.','error'); } }
+        async function deleteGradePatched(id) {
+            if (!id || !confirm('Eliminare questo voto?')) return;
+            try { await _supabase.from('grades').delete().eq('id', id); toast('Voto eliminato','','success'); await loadScopedSchoolData(); await loadTeacherGradesViewPatched(); if (!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModalPatched(); } catch(e) { toast('Errore','Operazione non riuscita.','error'); }
+        }
 
         function renderCalendarStripPatched() {
             const container=document.getElementById('cv-calendar-container'); if(!container) return; container.innerHTML='';
@@ -783,9 +795,9 @@
         async function renderClassSelectorPatched() {
             const container=document.getElementById('classes-container'); if(!container) return; container.innerHTML='<div class="w-full text-center text-slate-500 py-10">Caricamento classi...</div>';
             try {
-                const rows = await window.SC_API.select('classes', q => q.select('*').order('name'));
+                const {data: rows} = await _supabase.from('classes').select('*').order('name');
                 const groups = {}; rows.forEach(row => { const name = row.name; if (!name) return; const dept = row.department || 'CLASSI'; if (!groups[dept]) groups[dept] = []; groups[dept].push({ id: row.id, name }); });
-                container.innerHTML=''; const groupEntries=Object.entries(groups); if(!groupEntries.length){ container.innerHTML='<div class="w-full text-center text-slate-500 py-10">Nessuna classe disponibile nel database.</div>'; return; }
+                container.innerHTML=''; const groupEntries=Object.entries(groups); if(!groupEntries.length){ container.innerHTML='<div class="w-full text-center text-slate-500 py-10">Nessuna classe nel database.</div>'; return; }
                 for(const [dept,classes] of groupEntries) {
                     const col=document.createElement('div'); col.className='min-w-[200px]';
                     const title=document.createElement('div'); title.className='text-xs text-slate-500 font-bold uppercase tracking-widest mb-4 border-b border-slate-700 pb-1 text-center'; title.textContent=dept;
@@ -799,9 +811,9 @@
         async function openUserHome() {
             if (!currentUser || currentUser.role !== 'studente') { initHub(); return; }
             try {
-                if (!currentUser.class_id && currentUser.u) { const rows = await window.SC_API.select('registry', q => q.select('id,username,full_name,role,class_id,subject').eq('username', currentUser.u).limit(1)); const profile = rows[0]; if (profile) { currentUser = { ...currentUser, ...profile }; localStorage.setItem('SC_USER', JSON.stringify(currentUser)); } }
+                if (!currentUser.class_id && currentUser.u) { const {data: rows} = await _supabase.from('registry').select('id,username,full_name,role,class_id,subject').eq('username', currentUser.u).limit(1); const profile = rows[0]; if (profile) { currentUser = { ...currentUser, ...profile }; localStorage.setItem('SC_USER', JSON.stringify(currentUser)); } }
                 if (!currentUser.class_id) { toast('Classe non assegnata','L’account studente non risulta associato a una classe nel database.','error'); return; }
-                const classes = await window.SC_API.select('classes', q => q.select('*').eq('id', currentUser.class_id).limit(1)); const classRecord = classes[0]; const className = classRecord?.name;
+                const {data: classes} = await _supabase.from('classes').select('*').eq('id', currentUser.class_id).limit(1); const classRecord = classes[0]; const className = classRecord?.name;
                 if (!className) return; await loadClassroomPatched(className, {navigate:false});
             } catch (e) { toast('Errore', 'Impossibile determinare la classe.', 'error'); }
         }
@@ -815,7 +827,7 @@
             student.status=pendingStatus; student.time=pendingStatus==='presente'?'08:00':(pendingStatus==='assente'?'--:--':now);
             if(pendingStatus==='bagno' && oldStatus!=='bagno') student.history.push({out:now,in:null}); else if(oldStatus==='bagno' && pendingStatus!=='bagno') { const open=student.history.slice().reverse().find(h=>!h.in); if(open) open.in=now; }
             renderGridPatched(localSchoolDB[currentClass]);
-            try { await window.SC_API.update('attendance',{ student_id:student.db_id,class_id:currentClassId,date:selectedDate,status:pendingStatus,time:student.time },q=>q.eq('student_id',student.db_id).eq('class_id',currentClassId).eq('date',selectedDate)); toast('Presenza aggiornata',`${student.name} → ${pendingStatus.replace('_',' ')}`,'success',2200); } catch(e) {}
+            try { await _supabase.from('attendance').upsert({ student_id:student.db_id,class_id:currentClassId,date:selectedDate,status:pendingStatus,time:student.time },{onConflict:'student_id,date'}); toast('Presenza aggiornata',`${student.name} → ${pendingStatus.replace('_',' ')}`,'success',2200); } catch(e) {}
             try { openStudentDetail(selectedStudentId); } catch {}
         }
 
@@ -835,7 +847,7 @@
             });
         };
 
-        // --- SALVATAGGIO AGENDA PATCHATO (Ora mostra subito il task) ---
+        // --- SALVATAGGIO AGENDA CON REFRESH IMMEDIATO E LOADING OVERLAY ---
         async function saveAgendaEntryPatched(){ 
             if(!pendingAgendaType) { toast('Errore', 'Seleziona se l\'impegno è un Compito o una Verifica.', 'error'); return; }
             const dateInput = document.getElementById('agenda-date').value;
@@ -844,15 +856,14 @@
             const formattedDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
             try {
                 setLoading(true, "Salvataggio in agenda...");
-                const res = await window.SC_ACTIONS.agenda.create({ date: formattedDate, subject: document.getElementById('agenda-subject').value, type: pendingAgendaType, description: document.getElementById('agenda-desc').value, class: currentClass });
+                const {data} = await _supabase.from('agenda').insert([{ date: formattedDate, subject: document.getElementById('agenda-subject').value, type: pendingAgendaType, description: document.getElementById('agenda-desc').value, class: currentClass }]).select();
                 document.getElementById('modal-add-agenda').classList.add('hidden'); 
                 
-                // Forza l'iniezione locale immediata
-                if (res && res.length > 0) { onlineAgenda.push(res[0]); } else { await loadScopedSchoolData(); }
+                if (data && data.length > 0) { onlineAgenda.push(data[0]); } else { await loadScopedSchoolData(); }
                 
                 renderAgendaList();
-                toast('Agenda aggiornata', 'L\'impegno è stato salvato correttamente.', 'success');
-            } catch(e) { toast('Errore', e.message, 'error'); } finally { setLoading(false); }
+                toast('Agenda aggiornata', 'L\'impegno è stato salvato.', 'success');
+            } catch(e) { toast('Errore', 'Non è stato possibile salvare l\'impegno.', 'error'); } finally { setLoading(false); }
         }
 
         window.loadClassroom = loadClassroomPatched; window.renderGrid = renderGridPatched; window.createDeskCard = createDeskCardPatched;
@@ -862,7 +873,6 @@
         window.saveAgendaEntry = saveAgendaEntryPatched; window.resetToToday = () => changeDatePatched(getTodayStr());
 
         window.addEventListener('load', () => {
-            if (!SC.clockStarted) { SC.clockStarted=true; try { startClock(); } catch {} }
             if (currentUser && currentUser.role==='studente' && !currentClass) { openUserHome().catch(console.error); }
         });
     })();
