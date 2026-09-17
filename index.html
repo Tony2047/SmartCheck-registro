@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v137 (Dynamic DB)</title>
+    <title>SmartCheck - School OS v138 (Action Layer + DB Only)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -80,9 +80,37 @@
         .cv-day.today:not(.active) .cv-day-number { border: 2px solid #ef4444; color: #ef4444; }
         .cv-day.future { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
         .cv-day:not(.active):not(.future):hover .cv-day-number { background-color: rgba(255,255,255,0.1); }
+    
+        /* ===== SmartCheck v138 functional layer ===== */
+        .sc-toast-container{position:fixed;right:22px;top:22px;z-index:250;display:flex;flex-direction:column;gap:10px;width:min(380px,calc(100vw - 44px));pointer-events:none}
+        .sc-toast{pointer-events:auto;background:rgba(15,23,42,.96);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 45px rgba(0,0,0,.35);backdrop-filter:blur(16px);border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;animation:scToastIn .22s ease-out}
+        .sc-toast.success{border-color:rgba(34,197,94,.35)} .sc-toast.error{border-color:rgba(239,68,68,.45)} .sc-toast.info{border-color:rgba(59,130,246,.35)}
+        .sc-toast-icon{width:24px;height:24px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);flex:0 0 auto}
+        .sc-toast-title{font-size:12px;font-weight:900;color:#fff}.sc-toast-msg{font-size:11px;color:#94a3b8;margin-top:2px;line-height:1.4}
+        @keyframes scToastIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+        .sc-loading{position:fixed;inset:0;background:rgba(2,6,23,.55);backdrop-filter:blur(5px);z-index:220;display:flex;align-items:center;justify-content:center}
+        .sc-loading.hidden{display:none!important}
+        .sc-loading-card{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:16px;background:#0f172a;border:1px solid #334155;box-shadow:0 22px 55px rgba(0,0,0,.4);font-size:12px;font-weight:800}
+        .sc-spinner{width:18px;height:18px;border:3px solid rgba(255,255,255,.15);border-top-color:#3b82f6;border-radius:50%;animation:scSpin .8s linear infinite}
+        @keyframes scSpin{to{transform:rotate(360deg)}}
+        .sc-route-link{position:relative}
+        .sc-route-link::after{content:'';position:absolute;inset:0;border-radius:inherit}
+        .sc-date-input{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:0!important;cursor:pointer!important;z-index:50!important}
+        #date-control{position:relative}
+        .sc-desk-btn{appearance:none;border:0;background:transparent;padding:0;text-align:inherit;min-width:0}
+        .sc-desk-btn:focus-visible>div{outline:2px solid #60a5fa;outline-offset:3px}
+        .sc-empty{border:1px dashed rgba(148,163,184,.25);border-radius:14px;padding:24px;text-align:center;color:#64748b}
+        .sc-grade-picker-item:hover{transform:translateY(-1px);background:rgba(59,130,246,.12)!important}
+
     </style>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col overflow-x-hidden selection:bg-blue-500">
+
+    <div id="sc-toast-container" class="sc-toast-container"></div>
+    <div id="sc-loading" class="sc-loading hidden">
+        <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Caricamento...</span></div>
+    </div>
+
 
     <div id="view-login" class="fixed inset-0 z-[100] bg-[#050b14] flex items-center justify-center p-4">
         <div class="relative z-10 w-full max-w-5xl h-[600px] glass-panel rounded-3xl overflow-hidden flex shadow-2xl fade-in">
@@ -131,11 +159,15 @@
                 <button id="back-btn" onclick="backToHub()" class="p-2.5 bg-slate-800 rounded-xl hover:bg-slate-700 text-slate-400 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
                 <div><h1 class="text-2xl font-black text-white italic tracking-tight"><span class="text-blue-500">CLASSE</span> <span id="class-header-name">--</span></h1><div class="flex items-center gap-2 text-[10px] font-bold mt-1"><span id="role-badge" class="px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest">--</span><div id="db-led" class="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-2"></div></div></div>
             </div>
-            <div class="relative group mx-4">
-                <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 cursor-pointer border border-slate-700 hover:border-blue-500 transition-all" onclick="resetToToday()">
+            <div class="relative group mx-4" id="date-control" onclick="openDatePicker(event)">
+                <div class="glass-panel px-5 py-2.5 rounded-xl flex items-center gap-3 cursor-pointer border border-slate-700 hover:border-blue-500 transition-all">
                     <i class="fa-regular fa-calendar text-blue-400 text-lg"></i>
-                    <div class="flex flex-col text-right"><span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DATA</span><span id="date-display" class="font-mono text-sm font-bold text-white leading-none uppercase">Oggi</span></div>
-                    <input type="date" id="date-picker" class="absolute inset-0 opacity-0 cursor-pointer" onchange="changeDate(this.value)">
+                    <div class="flex flex-col text-right">
+                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">DATA</span>
+                        <span id="date-display" class="font-mono text-sm font-bold text-white leading-none uppercase">OGGI</span>
+                    </div>
+                    <button type="button" onclick="event.stopPropagation();resetToToday()" class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-blue-500/10 text-blue-300 hover:bg-blue-500/20">OGGI</button>
+                    <input type="date" id="date-picker" class="sc-date-input" onchange="changeDate(this.value)" aria-label="Seleziona data">
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -152,8 +184,8 @@
         <main class="flex-grow flex flex-col items-center w-full px-4 pb-40 pt-8">
             <div id="history-warning" class="hidden w-full max-w-md bg-yellow-900/20 border border-yellow-500/30 rounded-full py-2 px-6 mb-8 flex items-center justify-center gap-3 text-yellow-400 backdrop-blur-sm animate-pulse"><i class="fa-solid fa-clock-rotate-left"></i> <span class="text-xs font-black uppercase tracking-widest">Visualizzazione Archivio</span></div>
             <div id="bathroom-bar" class="w-full max-w-2xl mb-6 flex justify-center"></div>
-            <div class="grid grid-cols-3 gap-24 w-full max-w-[95%]" id="classroom-grid"></div>
-            <div onclick="openSignModal()" class="mt-24 w-[450px] h-24 bg-[#1e293b]/90 backdrop-blur border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center shadow-2xl px-4 cursor-pointer hover:scale-105 transition-transform group">
+            <div class="grid grid-cols-3 gap-24 w-full max-w-[95%] mt-4" id="classroom-grid"></div>
+            <div id="teacher-desk" onclick="openSignModal()" class="order-first mt-0 mb-8 w-[450px] h-24 bg-[#1e293b]/90 backdrop-blur border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center shadow-2xl px-4 cursor-pointer hover:scale-105 transition-transform group">
                 <span class="text-2xl font-black tracking-[0.4em] text-blue-400 uppercase">Cattedra</span>
                 <span id="signature-display" class="text-xs text-slate-400 font-mono mt-2 w-full text-center truncate group-hover:text-blue-300">Clicca per Registro</span>
             </div>
@@ -295,14 +327,8 @@
         const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const ALL_SUBJECTS=["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
-        const TEACHER_SUBJECT_MAP = { "Petrilli Antonio": "Sistemi Automatici", "Mascio Fabio": "Elettrotecnica", "Roselli Michele": "TPSEE", "Manna Valeria": "Italiano", "Santilli Mirco": "Matematica", "Di Tella Arianna": "Inglese" };
-        
-        // HUB STRUCT
-        const CLASSES_STRUCT={ 
-            "ELETTRONICA":["1AEE","2AEE","3AEE","4AEE","5AEE"],
-            "MECCANICA":["1AMM","2AMM","3AMM","4AMM","5AMM","4 MAUT","4 MROB","5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"],
-            "CHIMICA":["1ACM","2ACM","3ACM","4ACM","5ACM"]
-        };
+        // Cataloghi non personali: verranno progressivamente letti dal DB.
+        // I nomi degli studenti/docenti e le classi NON devono essere hardcoded nel client.
         
         let currentUser=null; let tempUser=null; 
         let currentClass=null; let currentClassId = null; 
@@ -359,7 +385,7 @@
             if (saved) {
                 currentUser = JSON.parse(saved);
                 document.getElementById('view-login').classList.add('hidden');
-                if (currentUser.role === 'studente') loadClassroom('5AEE'); else initHub();
+                if (currentUser.role === 'studente') { window.openUserHome ? window.openUserHome() : null; } else initHub();
                 startClock();
                 initRealtime(); 
             }
@@ -378,7 +404,7 @@
             const { data, error } = await _supabase.from('registry').select('*').eq('username', input).single();
 
             if (data) {
-                tempUser = { id: data.id, u: data.username, name: data.full_name, role: data.role, pass: data.password };
+                tempUser = { id: data.id, u: data.username, name: data.full_name, role: data.role, pass: data.password, class_id: data.class_id || null, subject: data.subject || data.materia || null };
                 document.getElementById('input-username').classList.add('hidden');
                 document.getElementById('btn-next').classList.add('hidden');
                 document.getElementById('password-container').classList.remove('hidden');
@@ -398,7 +424,7 @@
                 currentUser = tempUser; 
                 localStorage.setItem('SC_USER', JSON.stringify(currentUser));
                 document.getElementById('view-login').classList.add('hidden');
-                if(currentUser.role==='studente') loadClassroom('5AEE'); else initHub();
+                if(currentUser.role==='studente') { window.openUserHome ? window.openUserHome() : null; } else initHub();
                 startClock();
                 initRealtime();
             } else { 
@@ -413,15 +439,9 @@
 
         function initHub(){ document.getElementById('view-hub').classList.remove('hidden'); document.getElementById('hub-user-name').innerText=currentUser.name; document.getElementById('hub-role-badge').innerText=currentUser.role==='admin'?"ADMIN":"DOCENTE"; renderClassSelector(); }
         
-        function renderClassSelector(){ 
-            const container=document.getElementById('classes-container'); container.innerHTML=""; 
-            for(const[dept,classes]of Object.entries(CLASSES_STRUCT)){ 
-                const col=document.createElement('div'); col.className="min-w-[200px]";
-                col.innerHTML=`<div class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-4 border-b border-slate-700 pb-1 text-center">${dept}</div><div class="space-y-3"></div>`;
-                const list = col.querySelector('div:last-child');
-                classes.forEach(cls=>{ list.innerHTML+=`<button onclick="loadClassroom('${cls}')" class="w-full h-16 bg-[#1e293b] border border-slate-700/50 rounded-xl hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all text-lg font-black shadow-lg tracking-widest group">${cls}</button>`; });
-                container.appendChild(col);
-            } 
+        // Il selettore classi definitivo viene installato dal layer DB/Service qui sotto.
+        function renderClassSelector(){
+            return window.renderClassSelector ? window.renderClassSelector() : null;
         }
 
         // CARICAMENTO DINAMICO DELLA CLASSE DAL DB
@@ -715,7 +735,7 @@
         function toggleGradeDetails(id){ document.getElementById(id).classList.toggle('hidden'); }
         
         function loadTeacherGradesView(){
-            const subject=TEACHER_SUBJECT_MAP[currentUser.name]||"Generale";
+            const subject=currentUser?.subject || currentUser?.materia || 'Generale';
             const list=document.getElementById('teacher-grades-list'); list.innerHTML="";
             const targetId = localSchoolDB[currentClass][selectedStudentId].db_id;
             const grades= (localGradesDB[targetId] || []).filter(g => g.subject===subject);
@@ -736,7 +756,7 @@
             const newGrade = {
                 student_id: targetId,
                 teacher_id: currentUser.id,
-                subject: TEACHER_SUBJECT_MAP[currentUser.name]||"Generale",
+                subject: currentUser?.subject || currentUser?.materia || 'Generale',
                 value: val,
                 type: document.getElementById('new-grade-type').value,
                 date: new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}),
@@ -1050,5 +1070,1085 @@
 
         function toggleNoticeModal(){const m=document.getElementById('modal-notices');if(m.classList.contains('hidden'))m.classList.remove('hidden');else m.classList.add('hidden');}
     </script>
+
+<script>
+/* ============================================================
+   SmartCheck v138 — Action Layer + DB Only Patch
+   Goal: make the current single-file prototype behave like a
+   real app: stateful routes, action services, robust UI flows,
+   stable seat mapping, date navigation, grades and realtime.
+
+   NOTE: this is still a transitional client-side build.
+   Security/authorization must ultimately move behind a server/API.
+   ============================================================ */
+(() => {
+    const SC = window.SC = window.SC || {
+        version: "139-action-layer",
+        demoMode: false,
+        realtimeChannel: null,
+        routeSyncing: false,
+        clockStarted: false
+    };
+
+    window.SC_API = window.SC_API || {
+        async select(table, buildQuery) {
+            let q = _supabase.from(table);
+            q = buildQuery ? buildQuery(q) : q.select('*');
+            const {data, error} = await q;
+            if (error) throw error;
+            return data || [];
+        },
+        async insert(table, rows) {
+            const {data, error} = await _supabase.from(table).insert(rows).select();
+            if (error) throw error;
+            return data || [];
+        },
+        async upsert(table, rows, options = {}) {
+            const {data, error} = await _supabase.from(table).upsert(rows, options).select();
+            if (error) throw error;
+            return data || [];
+        },
+        async update(table, values, buildQuery) {
+            let q = _supabase.from(table).update(values);
+            q = buildQuery ? buildQuery(q) : q;
+            const {data, error} = await q.select();
+            if (error) throw error;
+            return data || [];
+        },
+        async remove(table, buildQuery) {
+            let q = _supabase.from(table).delete();
+            q = buildQuery ? buildQuery(q) : q;
+            const {data, error} = await q.select();
+            if (error) throw error;
+            return data || [];
+        }
+    };
+
+    function esc(value) {
+        return String(value ?? '').replace(/[&<>"']/g, c => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+        }[c]));
+    }
+
+    function toast(title, message = '', type = 'info', timeout = 3200) {
+        const wrap = document.getElementById('sc-toast-container');
+        if (!wrap) return;
+        const icon = type === 'success' ? '✓' : type === 'error' ? '!' : 'i';
+        const node = document.createElement('div');
+        node.className = `sc-toast ${type}`;
+        node.innerHTML = `<div class="sc-toast-icon">${icon}</div><div><div class="sc-toast-title">${esc(title)}</div>${message ? `<div class="sc-toast-msg">${esc(message)}</div>`:''}</div>`;
+        wrap.appendChild(node);
+        setTimeout(() => { node.style.opacity='0'; node.style.transform='translateY(-6px)'; setTimeout(()=>node.remove(),220); }, timeout);
+    }
+    window.scToast = toast;
+
+    function setLoading(show, text='Caricamento...') {
+        const el = document.getElementById('sc-loading');
+        const tx = document.getElementById('sc-loading-text');
+        if (tx) tx.textContent = text;
+        if (el) el.classList.toggle('hidden', !show);
+    }
+
+    // Azioni applicative: la UI non deve scrivere direttamente sul database.
+    // Ogni modifica passa da un service dedicato; in futuro questo service chiamerà /api/... lato server.
+    window.SC_ACTIONS = window.SC_ACTIONS || {
+        attendance: {
+            async setStatus({studentId, classId, date, status, time}) {
+                if (!studentId || !classId || !date || !status) throw new Error('Parametri presenza incompleti.');
+                return window.SC_API.upsert('attendance', [{
+                    student_id: studentId, class_id: classId, date, status, time: time || '--:--'
+                }], { onConflict: 'student_id,date' });
+            }
+        },
+        grades: {
+            async create(row) { return window.SC_API.insert('grades', [row]); },
+            async remove(id) { return window.SC_API.remove('grades', q => q.eq('id', id)); }
+        },
+        notes: {
+            async create(row) { return window.SC_API.insert('notes', [row]); },
+            async remove(id) { return window.SC_API.remove('notes', q => q.eq('id', id)); }
+        },
+        agenda: {
+            async create(row) { return window.SC_API.insert('agenda', [row]); },
+            async remove(id) { return window.SC_API.remove('agenda', q => q.eq('id', id)); }
+        },
+        signatures: {
+            async create(row) { return window.SC_API.insert('signatures', [row]); },
+            async remove(id) { return window.SC_API.remove('signatures', q => q.eq('id', id)); }
+        }
+    };
+
+    function normalizeDateInput(value) {
+        if (!value) return null;
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+        if (!m) return null;
+        const d = new Date(Number(m[1]), Number(m[2])-1, Number(m[3]));
+        if (Number.isNaN(d.getTime())) return null;
+        return value;
+    }
+
+    function formatDateIT(iso) {
+        if (!iso) return '--';
+        const [y,m,d] = iso.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    function updateRoute() {
+        const cls = currentClass ? encodeURIComponent(currentClass) : '';
+        const route = cls ? `#/classes/${cls}?date=${encodeURIComponent(selectedDate)}` : '#/dashboard';
+        history.replaceState({class: currentClass, date: selectedDate}, '', route);
+    }
+
+    function pushClassRoute(cls) {
+        history.pushState({class: cls}, '', `#/classes/${encodeURIComponent(cls)}?date=${encodeURIComponent(selectedDate)}`);
+    }
+
+    function buildLocalClassState(cls, students) {
+        const names = Array.isArray(students) ? students.slice(0, 23) : [];
+        const data = {};
+        for (let i=1; i<=23; i++) {
+            const id = `banco_${String(i).padStart(2,'0')}`;
+            const name = names[i-1] || 'Libero';
+            data[id] = {
+                db_id: null,
+                name,
+                status: name === 'Libero' ? 'assente' : 'assente',
+                time: '--:--',
+                history: [],
+                seat_id: id,
+                position_index: i
+            };
+            // Keep deterministic seat assignment for demo/transition mode.
+            const dbStudent = Array.isArray(students) ? students[i-1] : null;
+            if (dbStudent) {
+                data[id].db_id = dbStudent.id || null;
+                data[id].name = dbStudent.full_name || `${dbStudent.cognome || ''} ${dbStudent.nome || ''}`.trim() || name;
+            }
+        }
+        return data;
+    }
+
+    function classStudentRows() {
+        return Object.entries(localSchoolDB[currentClass] || {})
+            .filter(([,s]) => s && s.name && s.name !== 'Libero');
+    }
+
+    async function resolveClassFromDb(cls) {
+        try {
+            const rows = await window.SC_API.select('classes', q => q.eq('name', cls).limit(1));
+            return rows[0] || null;
+        } catch (e) {
+            console.warn('classes lookup', e);
+            return null;
+        }
+    }
+
+    async function fetchClassStudents(classId, cls) {
+        if (!classId) return [];
+        try {
+            const rows = await window.SC_API.select('registry', q =>
+                q.select('id,username,full_name,role,class_id').eq('class_id', classId).eq('role','studente').order('full_name')
+            );
+            return rows;
+        } catch (e) {
+            console.warn('registry lookup', e);
+            return [];
+        }
+    }
+
+    async function loadScopedSchoolData() {
+        onlineGrades = [];
+        onlineNotes = [];
+        onlineAgenda = [];
+        localGradesDB = {};
+        localNotesDB = {};
+
+        try {
+            let gradeRows = [];
+            let noteRows = [];
+
+            if (currentUser?.role === 'studente' && currentUser?.id) {
+                gradeRows = await window.SC_API.select('grades', q => q.eq('student_id', currentUser.id).order('date', {ascending:false}));
+                noteRows = await window.SC_API.select('notes', q => q.eq('student_id', currentUser.id).order('date', {ascending:false}));
+            } else if (currentClassId) {
+                gradeRows = await window.SC_API.select('grades', q => q.eq('class_id', currentClassId).order('date', {ascending:false}));
+                noteRows = await window.SC_API.select('notes', q => q.eq('class_id', currentClassId).order('date', {ascending:false}));
+            }
+
+            onlineGrades = gradeRows;
+            onlineNotes = noteRows;
+            organizeGrades(onlineGrades);
+            organizeNotes(onlineNotes);
+
+            // Agenda in the current schema uses a class string.
+            try {
+                const ag = await window.SC_API.select('agenda', q => q.eq('class', currentClass));
+                onlineAgenda = ag;
+            } catch (e) {
+                console.warn('agenda scoped lookup', e);
+                onlineAgenda = [];
+            }
+        } catch (e) {
+            console.warn('scoped school data', e);
+        }
+    }
+
+    async function loadClassroomPatched(cls, options = {}) {
+        const target = String(cls || '').trim();
+        if (!target) return;
+
+        currentClass = target;
+        selectedStudentId = null;
+        SC.demoMode = false;
+
+        if (options.navigate !== false && !SC.routeSyncing) {
+            pushClassRoute(target);
+        }
+
+        setLoading(true, `Apertura ${target}...`);
+        document.getElementById('view-hub')?.classList.add('hidden');
+        document.getElementById('view-classroom')?.classList.remove('hidden');
+        const header = document.getElementById('class-header-name');
+        if (header) header.textContent = target;
+
+        currentClassId = null;
+        let classRecord = await resolveClassFromDb(target);
+        currentClassId = classRecord?.id || null;
+
+        const students = currentClassId ? await fetchClassStudents(currentClassId, target) : [];
+        SC.demoMode = false;
+        classStudents = students;
+        localSchoolDB[target] = buildLocalClassState(target, students);
+
+        selectedDate = normalizeDateInput(selectedDate) || getTodayStr();
+        const picker = document.getElementById('date-picker');
+        if (picker) picker.value = selectedDate;
+
+        await changeDatePatched(selectedDate, {skipRoute:true});
+        await loadScopedSchoolData();
+        subscribeRealtimeForCurrentClass();
+
+        // UI permissions
+        const isStudent = currentUser?.role === 'studente';
+        document.getElementById('back-btn')?.classList.toggle('hidden', isStudent);
+        document.getElementById('sign-btn')?.classList.toggle('hidden', isStudent);
+        document.getElementById('dock-right')?.classList.remove('hidden');
+
+        const badge = document.getElementById('role-badge');
+        if (badge) {
+            badge.textContent = isStudent ? 'STUDENTE' : (currentUser?.role || 'UTENTE').toUpperCase();
+            badge.className = isStudent
+                ? 'px-2 py-0.5 rounded bg-green-900/50 text-green-300 border border-green-700/50 uppercase tracking-widest'
+                : 'px-2 py-0.5 rounded bg-blue-900/50 text-blue-300 border border-blue-700/50 uppercase tracking-widest';
+        }
+
+        updateSignatureDisplay();
+        setLoading(false);
+    }
+
+    async function loadDayDataPatched(dateStr) {
+        if (!currentClass) return;
+        const data = localSchoolDB[currentClass];
+        if (!data) return;
+
+        // Crucial: when changing day, reset transient day state first.
+        Object.values(data).forEach(s => {
+            if (!s || s.name === 'Libero') return;
+            s.status = 'assente';
+            s.time = '--:--';
+            s.history = [];
+        });
+
+        if (!currentClassId) return; // demo/local fallback
+
+        try {
+            const att = await window.SC_API.select('attendance', q =>
+                q.eq('date', dateStr).eq('class_id', currentClassId)
+            );
+
+            for (const row of att) {
+                const seat = Object.values(data).find(s => s.db_id && s.db_id === row.student_id);
+                if (seat) {
+                    seat.status = row.status || 'assente';
+                    seat.time = row.time || '--:--';
+                }
+            }
+
+            try {
+                const bath = await window.SC_API.select('bathroom_history', q =>
+                    q.eq('date', dateStr)
+                );
+                for (const row of bath) {
+                    const seat = Object.values(data).find(s => s.db_id && s.db_id === row.student_id);
+                    if (seat) seat.history.push({out: row.out_time || row.out || null, in: row.in_time || row.in || null});
+                }
+            } catch (bathError) {
+                console.warn('bathroom_history', bathError);
+            }
+
+            try {
+                const sig = await window.SC_API.select('signatures', q =>
+                    q.eq('date', dateStr).eq('class', currentClass)
+                );
+                onlineSignatures = sig;
+            } catch (sigError) {
+                console.warn('signatures scoped lookup', sigError);
+                onlineSignatures = [];
+            }
+        } catch (e) {
+            console.error('loadDayData', e);
+            toast('Errore caricamento', e.message || 'Impossibile caricare i dati del giorno.', 'error');
+        }
+    }
+
+    async function changeDatePatched(val, options = {}) {
+        const normalized = normalizeDateInput(val);
+        if (!normalized) {
+            toast('Data non valida', 'Seleziona una data valida.', 'error');
+            return;
+        }
+
+        selectedDate = normalized;
+        const today = getTodayStr();
+        const isToday = normalized === today;
+
+        const display = document.getElementById('date-display');
+        if (display) display.textContent = isToday ? 'OGGI' : formatDateIT(normalized);
+
+        const picker = document.getElementById('date-picker');
+        if (picker) picker.value = normalized;
+
+        if (!options.skipRoute) {
+            updateRoute();
+        }
+
+        await loadDayDataPatched(normalized);
+
+        const warning = document.getElementById('history-warning');
+        const sigCard = document.getElementById('signature-display')?.parentElement;
+        const bathBar = document.getElementById('bathroom-bar');
+
+        warning?.classList.toggle('hidden', isToday);
+        sigCard?.classList.toggle('hidden', !isToday);
+        bathBar?.classList.toggle('hidden', !isToday);
+
+        renderGridPatched(localSchoolDB[currentClass]);
+        renderSignaturesList();
+        renderCalendarStripPatched();
+
+        if (currentUser?.role !== 'studente') updateTeacherForm();
+    }
+
+    function renderGridPatched(data) {
+        if (!data) return;
+        const grid = document.getElementById('classroom-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const makeColumn = (label, deskIds) => {
+            const col = document.createElement('div');
+            col.className = 'flex flex-col gap-5';
+            const labelEl = document.createElement('div');
+            labelEl.className = 'text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-1 opacity-70';
+            labelEl.textContent = label;
+            col.appendChild(labelEl);
+
+            const rows = [];
+            for (let i = 0; i < deskIds.length; i += 2) rows.push(deskIds.slice(i, i+2));
+            rows.forEach(pair => {
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-2 gap-4';
+                pair.forEach(id => row.appendChild(createDeskCardPatched(id, data)));
+                col.appendChild(row);
+            });
+            return col;
+        };
+
+        const left = [];
+        for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
+
+        const center = [`banco_09`];
+        for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
+
+        const right = [];
+        for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
+
+        const leftCol = makeColumn('ALA SINISTRA', left);
+        const centerCol = document.createElement('div');
+        centerCol.className = 'flex flex-col gap-5';
+        const centerLabel = document.createElement('div');
+        centerLabel.className = 'text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-1 opacity-70';
+        centerLabel.textContent = 'FILA CENTRALE';
+        centerCol.appendChild(centerLabel);
+        const single = document.createElement('div');
+        single.className = 'flex justify-center';
+        single.appendChild(createDeskCardPatched('banco_09', data, true));
+        centerCol.appendChild(single);
+        const centerPairs = center.slice(1);
+        for (let i=0;i<centerPairs.length;i+=2) {
+            const row=document.createElement('div');
+            row.className='grid grid-cols-2 gap-4';
+            row.appendChild(createDeskCardPatched(centerPairs[i], data));
+            if (centerPairs[i+1]) row.appendChild(createDeskCardPatched(centerPairs[i+1], data));
+            centerCol.appendChild(row);
+        }
+
+        const rightCol = makeColumn('ALA DESTRA', right);
+        grid.appendChild(leftCol);
+        grid.appendChild(centerCol);
+        grid.appendChild(rightCol);
+
+        let out = null;
+        Object.values(data).forEach(v => { if (v.status === 'bagno') out = v.name; });
+        const bath = document.getElementById('bathroom-bar');
+        if (bath && !bath.classList.contains('hidden')) {
+            bath.innerHTML = out
+                ? `<div class="px-6 py-3 rounded-full border border-yellow-500/50 bg-yellow-900/30 flex items-center justify-center gap-3 animate-pulse shadow-lg shadow-yellow-900/20"><div class="w-3 h-3 rounded-full bg-yellow-500"></div><span class="text-xs font-black text-yellow-400 uppercase tracking-widest">BAGNO OCCUPATO: <span class="text-white">${esc(out)}</span></span></div>`
+                : `<div class="px-6 py-3 rounded-full border border-green-500/30 bg-green-900/20 flex items-center justify-center gap-3 shadow-lg"><div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-xs font-black text-green-400 uppercase tracking-widest">BAGNO LIBERO</span></div>`;
+        }
+    }
+
+    function createDeskCardPatched(id, data, isSingle=false) {
+        const d = data[id] || {name:'Libero',status:'assente',time:'--:--'};
+        const wrap = document.createElement('div');
+        wrap.className = isSingle ? 'w-[300px]' : 'w-full';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sc-desk-btn w-full block';
+        btn.disabled = d.name === 'Libero';
+        btn.setAttribute('aria-label', d.name === 'Libero' ? `${id} libero` : `Apri scheda ${d.name}, ${id}`);
+
+        const noteFlag = d.db_id && localNotesDB[d.db_id]?.length
+            ? `<i class="fa-solid fa-circle-exclamation text-yellow-500 absolute top-2 right-2 text-xl z-20 drop-shadow-md" title="Presente una nota"></i>` : '';
+
+        const status = String(d.status || 'assente').replace(/_/g,'-');
+        btn.innerHTML = `<div class="relative h-40 w-full rounded-xl p-3 flex flex-col justify-between shadow-lg status-${status} ${d.name==='Libero'?'opacity-20':'opacity-100'} transition-all ${d.name==='Libero'?'cursor-default':'cursor-pointer hover:scale-[1.03]'}">
+            ${noteFlag}
+            <div class="flex justify-between items-start">
+                <span class="text-[9px] font-bold opacity-50 font-mono">#${id.split('_')[1]}</span>
+                <span class="text-[8px] font-black uppercase tracking-wider opacity-80 py-0.5 px-1.5 rounded bg-black/20">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
+            </div>
+            <div class="text-center flex-grow flex items-center justify-center px-1">
+                <h3 class="font-black text-sm leading-tight uppercase w-full break-words text-white/90">${esc(d.name)}</h3>
+            </div>
+            <div class="text-center"><span class="text-[9px] font-bold font-mono opacity-60 bg-black/20 px-2 py-0.5 rounded text-white">${esc(d.time || '--:--')}</span></div>
+        </div>`;
+
+        if (d.name !== 'Libero') {
+            btn.addEventListener('click', ev => {
+                ev.preventDefault();
+                selectedStudentId = id;
+                try { openStudentDetail(id); }
+                catch (err) {
+                    console.error(err);
+                    toast('Scheda studente non disponibile', err.message || 'Errore inatteso.', 'error');
+                }
+            });
+        }
+
+        wrap.appendChild(btn);
+        return wrap;
+    }
+
+    function getSelectedStudentRecord() {
+        return currentClass && selectedStudentId ? localSchoolDB?.[currentClass]?.[selectedStudentId] : null;
+    }
+
+    function gradeDisplay(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return String(value ?? '--');
+        const frac = Math.round((n - Math.floor(n))*100)/100;
+        if (frac === 0.25) return `${Math.floor(n)}+`;
+        if (frac === 0.75) return `${Math.ceil(n)}-`;
+        if (frac === 0.5) return `${Math.floor(n)}½`;
+        return Number.isInteger(n) ? String(n) : n.toFixed(2);
+    }
+
+    function gradeColorClass(v) {
+        const n=Number(v);
+        return n>=6 ? 'text-green-400' : n>=5 ? 'text-orange-400' : 'text-red-400';
+    }
+
+    function renderClassGradePicker() {
+        const list = document.getElementById('grades-list');
+        if (!list) return;
+        const students = classStudentRows();
+        document.getElementById('grades-total-avg').textContent = '--';
+        document.getElementById('grades-total-count').textContent = `${students.length} studenti`;
+        document.getElementById('grades-header-bg').classList.remove('bg-cv-green','bg-cv-orange','bg-cv-red');
+        document.getElementById('grades-header-bg').classList.add('bg-slate-800');
+
+        list.innerHTML = students.length
+            ? `<div class="text-[10px] text-slate-500 uppercase tracking-widest font-black mb-3 px-1">Seleziona uno studente</div>`
+            : `<div class="sc-empty">Nessuno studente disponibile per la classe.</div>`;
+
+        students.forEach(([seatId, s]) => {
+            const grades = s.db_id ? (localGradesDB[s.db_id] || []) : [];
+            const nums = grades.map(g=>Number(g.value)).filter(Number.isFinite);
+            const avg = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2) : '--';
+
+            const item = document.createElement('button');
+            item.type='button';
+            item.className='sc-grade-picker-item w-full text-left p-4 bg-slate-900 border border-slate-700 rounded-xl mb-2 transition-all';
+            item.innerHTML = `<div class="flex items-center justify-between gap-4"><div><div class="font-black text-white">${esc(s.name)}</div><div class="text-[10px] text-slate-500 uppercase">${seatId.replace('banco_','Banco ')}</div></div><div class="text-xl font-black ${avg==='--'?'text-slate-500':gradeColorClass(avg)}">${avg}</div></div>`;
+            item.addEventListener('click', ()=>{
+                selectedStudentId = seatId;
+                openGradesModalPatched();
+            });
+            list.appendChild(item);
+        });
+    }
+
+    function openGradesModalPatched() {
+        const modal = document.getElementById('modal-grades');
+        const list = document.getElementById('grades-list');
+        if (!modal || !list) return;
+
+        let targetId = null;
+        let targetName = '';
+
+        if (currentUser?.role === 'studente') {
+            targetId = currentUser.id;
+            targetName = currentUser.name || 'I miei voti';
+        } else {
+            const selected = getSelectedStudentRecord();
+            if (selected?.db_id) {
+                targetId = selected.db_id;
+                targetName = selected.name;
+            }
+        }
+
+        if (!targetId) {
+            renderClassGradePicker();
+            modal.classList.remove('hidden');
+            return;
+        }
+
+        const myGrades = (localGradesDB[targetId] || []).slice().sort((a,b)=>{
+            return String(b.date||'').localeCompare(String(a.date||''));
+        });
+
+        const subjects = {};
+        myGrades.forEach(g=>{
+            const subj=g.subject||'Generale';
+            if(!subjects[subj]) subjects[subj]=[];
+            subjects[subj].push(g);
+        });
+
+        const allV=myGrades.map(g=>Number(g.value)).filter(Number.isFinite);
+        const avg=allV.length ? (allV.reduce((a,b)=>a+b,0)/allV.length).toFixed(2) : '0.0';
+
+        document.getElementById('grades-total-avg').textContent=avg;
+        document.getElementById('grades-total-count').textContent=`${allV.length} valutazioni${targetName?` • ${targetName}`:''}`;
+
+        const header=document.getElementById('grades-header-bg');
+        header.classList.remove('bg-cv-green','bg-cv-orange','bg-cv-red','bg-slate-800');
+        header.classList.add(Number(avg)>=6?'bg-cv-green':Number(avg)>=5?'bg-cv-orange':'bg-cv-red');
+
+        list.innerHTML='';
+        const entries=Object.entries(subjects);
+        if(!entries.length){
+            list.innerHTML='<div class="sc-empty">Nessuna valutazione presente.</div>';
+        }
+
+        entries.forEach(([subj,votes], idx)=>{
+            const avgSub=(votes.reduce((a,b)=>a+Number(b.value),0)/votes.length).toFixed(2);
+            const section=document.createElement('div');
+            const safeId=`sc-grade-${idx}`;
+            section.className='mb-3';
+            section.innerHTML=`<div class="cv-card p-4 flex justify-between items-center cursor-pointer" role="button" tabindex="0">
+                <div><div class="text-white font-bold text-lg">${esc(subj)}</div><div class="text-[10px] text-slate-500 uppercase">${votes.length} valutazioni</div></div>
+                <div class="grade-circle ${Number(avgSub)>=6?'g-green':Number(avgSub)>=5?'g-orange':'g-red'}" style="--percent:${Math.max(0,Math.min(100,Number(avgSub)*10))}%"><span class="grade-value">${esc(avgSub)}</span></div>
+            </div>
+            <div id="${safeId}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl grade-details"></div>`;
+
+            const head=section.firstElementChild;
+            const details=section.querySelector(`#${safeId}`);
+            const renderDetails=()=>{
+                details.classList.toggle('hidden');
+                if (!details.classList.contains('hidden')) {
+                    details.innerHTML = votes.map(v=>`<div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+                        <div><span class="text-[10px] text-slate-500 block">${esc(v.date||'--')}</span><span class="text-xs text-slate-300 uppercase">${esc(v.type||'')}</span></div>
+                        <span class="font-black ${gradeColorClass(v.value)}">${esc(gradeDisplay(v.value))}</span>
+                    </div>`).join('');
+                }
+            };
+            head.addEventListener('click',renderDetails);
+            head.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();renderDetails();}});
+            list.appendChild(section);
+        });
+
+        modal.classList.remove('hidden');
+    }
+
+    async function loadTeacherGradesViewPatched() {
+        const block=document.getElementById('grade-input-area');
+        const list=document.getElementById('teacher-grades-list');
+        if(!list) return;
+
+        const selected=getSelectedStudentRecord();
+        if(!selected?.db_id) {
+            document.getElementById('teacher-subject-name').textContent='Seleziona uno studente';
+            block?.classList.add('hidden');
+            list.innerHTML=`<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">Apri la scheda di uno studente e poi seleziona Voti.</td></tr>`;
+            return;
+        }
+
+        block?.classList.remove('hidden');
+        const subject=currentUser?.subject || currentUser?.materia || 'Generale';
+        document.getElementById('teacher-subject-name').textContent=subject;
+        const grades=(localGradesDB[selected.db_id]||[]).filter(g=>!g.subject || g.subject===subject);
+        list.innerHTML='';
+
+        if(!grades.length) {
+            list.innerHTML=`<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">Nessun voto presente per ${esc(selected.name)}.</td></tr>`;
+            return;
+        }
+
+        grades.forEach(g=>{
+            const tr=document.createElement('tr');
+            tr.innerHTML=`<td class="px-6 py-3">${esc(g.date||'--')}</td><td class="px-6 py-3 uppercase text-[10px]">${esc(g.type||'')}</td><td class="px-6 py-3 text-right font-bold ${gradeColorClass(g.value)}">${esc(gradeDisplay(g.value))}</td><td class="px-6 py-3 text-right"><button type="button" class="text-red-500 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td>`;
+            tr.querySelector('button')?.addEventListener('click',()=>deleteGradePatched(g.id));
+            list.appendChild(tr);
+        });
+    }
+
+    async function addGradePatched() {
+        const selected=getSelectedStudentRecord();
+        if (!selected?.db_id) {
+            toast('Studente non selezionato','Apri prima una scheda studente.','error');
+            return;
+        }
+        const val=document.getElementById('new-grade-value')?.value;
+        if (!val) return;
+
+        const row={
+            student_id:selected.db_id,
+            teacher_id:currentUser?.id || null,
+            subject:currentUser?.subject || currentUser?.materia || 'Generale',
+            value:val,
+            type:document.getElementById('new-grade-type')?.value || 'Scritto',
+            date:formatDateIT(getTodayStr()).slice(0,5),
+            class_id:currentClassId
+        };
+
+        try {
+            setLoading(true,'Salvataggio voto...');
+            await window.SC_ACTIONS.grades.create(row);
+            toast('Voto salvato',`${selected.name} • ${gradeDisplay(val)}`,'success');
+            await loadScopedSchoolData();
+            await loadTeacherGradesViewPatched();
+            if (!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModalPatched();
+        } catch(e) {
+            console.error(e);
+            toast('Errore salvataggio voto',e.message||'Operazione non riuscita.','error');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function deleteGradePatched(id) {
+        if (!id || !confirm('Eliminare questo voto?')) return;
+        try {
+            await window.SC_ACTIONS.grades.remove(id);
+            toast('Voto eliminato','','success');
+            await loadScopedSchoolData();
+            await loadTeacherGradesViewPatched();
+            if (!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModalPatched();
+        } catch(e) {
+            toast('Errore eliminazione',e.message||'Operazione non riuscita.','error');
+        }
+    }
+
+    function renderCalendarStripPatched() {
+        const container=document.getElementById('cv-calendar-container');
+        if(!container) return;
+        container.innerHTML='';
+        const labels=['D','L','M','M','G','V','S'];
+        const selected=new Date(`${selectedDate}T12:00:00`);
+        for(let i=-3;i<=3;i++) {
+            const d=new Date(selected);
+            d.setDate(selected.getDate()+i);
+            const iso=d.toISOString().slice(0,10);
+            const isFuture=iso>getTodayStr();
+            const day=document.createElement('button');
+            day.type='button';
+            day.className=`cv-day ${iso===selectedDate?'active':''} ${iso===getTodayStr()?'today':''} ${isFuture?'future':''}`;
+            day.disabled=isFuture;
+            day.innerHTML=`<span class="cv-day-letter">${labels[d.getDay()]}</span><div class="cv-day-number">${d.getDate()}</div>`;
+            if(!isFuture) day.addEventListener('click',()=>changeDatePatched(iso));
+            container.appendChild(day);
+        }
+    }
+
+    function openDatePickerPatched(e) {
+        if (e) e.stopPropagation();
+        const input=document.getElementById('date-picker');
+        if(!input) return;
+        try {
+            if(typeof input.showPicker === 'function') input.showPicker();
+            else { input.focus(); input.click(); }
+        } catch {
+            input.focus(); input.click();
+        }
+    }
+
+    async function subscribeRealtimeForCurrentClass() {
+        try {
+            if (SC.realtimeChannel) {
+                await _supabase.removeChannel(SC.realtimeChannel);
+                SC.realtimeChannel=null;
+            }
+
+            const channelName=`smartcheck-${currentClassId || currentClass || 'demo'}`;
+            let channel=_supabase.channel(channelName);
+
+            if (currentClassId) {
+                channel = channel.on('postgres_changes',
+                    {event:'*',schema:'public',table:'attendance',filter:`class_id=eq.${currentClassId}`},
+                    payload=>{
+                        if(payload.new?.date===selectedDate) {
+                            updateLocalCache(payload.new ? [payload.new] : []);
+                        }
+                    });
+                channel = channel.on('postgres_changes',
+                    {event:'*',schema:'public',table:'grades',filter:`class_id=eq.${currentClassId}`},
+                    async ()=>{
+                        await loadScopedSchoolData();
+                        if(!document.getElementById('modal-grades')?.classList.contains('hidden')) openGradesModalPatched();
+                        if(!document.getElementById('content-grades')?.classList.contains('hidden')) loadTeacherGradesViewPatched();
+                    });
+                channel = channel.on('postgres_changes',
+                    {event:'*',schema:'public',table:'notes',filter:`class_id=eq.${currentClassId}`},
+                    async ()=>{
+                        await loadScopedSchoolData();
+                        renderGridPatched(localSchoolDB[currentClass]);
+                        if(selectedStudentId) loadNotes();
+                    });
+            }
+
+            channel = channel.on('postgres_changes',{event:'*',schema:'public',table:'signatures'},
+                async payload=>{
+                    const cls=payload.new?.class || payload.old?.class;
+                    if(!cls || cls===currentClass) {
+                        await loadDayDataPatched(selectedDate);
+                        renderSignaturesList();
+                        updateSignatureDisplay();
+                    }
+                });
+
+            channel = channel.on('postgres_changes',{event:'*',schema:'public',table:'agenda'},
+                async payload=>{
+                    const cls=payload.new?.class || payload.old?.class;
+                    if(!cls || cls===currentClass) {
+                        await loadScopedSchoolData();
+                        if(!document.getElementById('modal-agenda')?.classList.contains('hidden')) renderAgendaList();
+                    }
+                });
+
+            SC.realtimeChannel=channel;
+            await channel.subscribe();
+        } catch(e) {
+            console.warn('Realtime setup',e);
+        }
+    }
+
+    async function initRealtimePatched() {
+        // Do not download entire school tables. Current class load owns its data scope.
+        if (currentClass) {
+            await loadScopedSchoolData();
+            await subscribeRealtimeForCurrentClass();
+        }
+    }
+
+    async function renderClassSelectorPatched() {
+        const container=document.getElementById('classes-container');
+        if(!container) return;
+        container.innerHTML='<div class="w-full text-center text-slate-500 py-10">Caricamento classi...</div>';
+
+        try {
+            const rows = await window.SC_API.select('classes', q =>
+                q.select('*').order('name')
+            );
+
+            const groups = {};
+            rows.forEach(row => {
+                const name = row.name || row.class_name || row.code;
+                if (!name) return;
+                const dept = row.department || row.indirizzo || row.track || 'CLASSI';
+                if (!groups[dept]) groups[dept] = [];
+                groups[dept].push({ id: row.id, name });
+            });
+
+            container.innerHTML='';
+            const groupEntries=Object.entries(groups);
+            if(!groupEntries.length){
+                container.innerHTML='<div class="w-full text-center text-slate-500 py-10">Nessuna classe disponibile nel database.</div>';
+                return;
+            }
+
+            for(const [dept,classes] of groupEntries) {
+                const col=document.createElement('div');
+                col.className='min-w-[200px]';
+                const title=document.createElement('div');
+                title.className='text-xs text-slate-500 font-bold uppercase tracking-widest mb-4 border-b border-slate-700 pb-1 text-center';
+                title.textContent=dept;
+                const list=document.createElement('div');
+                list.className='space-y-3';
+
+                classes.forEach(item=>{
+                    const btn=document.createElement('button');
+                    btn.type='button';
+                    btn.className=`w-full h-16 bg-[#1e293b] border ${item.name===currentClass?'border-blue-500 bg-blue-600/20':'border-slate-700/50'} rounded-xl hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all text-lg font-black shadow-lg tracking-widest group`;
+                    btn.textContent=item.name;
+                    btn.addEventListener('click',()=>loadClassroomPatched(item.name));
+                    list.appendChild(btn);
+                });
+                col.append(title,list);
+                container.appendChild(col);
+            }
+        } catch(e) {
+            console.error('Caricamento classi',e);
+            container.innerHTML='<div class="w-full text-center text-red-400 py-10">Impossibile caricare le classi dal database.</div>';
+            toast('Errore classi', e.message || 'Impossibile caricare l’elenco classi.', 'error');
+        }
+    }
+
+    async function resolveTeacherSubject() {
+        if (currentUser?.subject || currentUser?.materia) return currentUser.subject || currentUser.materia;
+        if (!currentUser?.id || !currentClassId) return 'Generale';
+        try {
+            const rows=await window.SC_API.select('teacher_assignments', q =>
+                q.select('*').eq('teacher_id',currentUser.id).eq('class_id',currentClassId).limit(5)
+            );
+            const row=rows[0];
+            if (row) return row.subject || row.subject_name || row.materia || 'Generale';
+        } catch(e) {
+            // Tabella opzionale durante la migrazione.
+        }
+        return 'Generale';
+    }
+
+    async function openUserHome() {
+        if (!currentUser) return;
+        if (currentUser.role !== 'studente') {
+            initHub();
+            return;
+        }
+
+        try {
+            // Se la sessione locale è vecchia e non contiene class_id, recuperalo dal DB.
+            if (!currentUser.class_id && currentUser.u) {
+                const rows = await window.SC_API.select('registry', q =>
+                    q.select('id,username,full_name,role,class_id,subject,materia').eq('username', currentUser.u).limit(1)
+                );
+                const profile = rows[0];
+                if (profile) {
+                    currentUser = { ...currentUser, ...profile };
+                    localStorage.setItem('SC_USER', JSON.stringify(currentUser));
+                }
+            }
+
+            if (!currentUser.class_id) {
+                toast('Classe non assegnata','L’account studente non risulta associato a una classe nel database.','error');
+                return;
+            }
+
+            const classes = await window.SC_API.select('classes', q =>
+                q.select('*').eq('id', currentUser.class_id).limit(1)
+            );
+            const classRecord = classes[0];
+            const className = classRecord?.name || classRecord?.class_name || classRecord?.code;
+            if (!className) {
+                toast('Classe non trovata','L’associazione dell’account punta a una classe inesistente.','error');
+                return;
+            }
+            await loadClassroomPatched(className, {navigate:false});
+        } catch (e) {
+            console.error('openUserHome', e);
+            toast('Errore apertura classe', e.message || 'Impossibile determinare la classe dell’utente.', 'error');
+        }
+    }
+    window.openUserHome = openUserHome;
+
+    function backToHubPatched() {
+        if (location.hash.startsWith('#/classes/')) {
+            history.pushState({},'', '#/dashboard');
+        }
+        document.getElementById('view-classroom')?.classList.add('hidden');
+        document.getElementById('view-hub')?.classList.remove('hidden');
+        currentClass=null;
+        selectedStudentId=null;
+        updateRoute();
+        renderClassSelectorPatched();
+        if (SC.realtimeChannel) {
+            _supabase.removeChannel(SC.realtimeChannel).catch(()=>{});
+            SC.realtimeChannel=null;
+        }
+    }
+
+    // Harden the status update UX while preserving the existing DB schema.
+    async function confirmStatusChangePatched() {
+        if(!pendingStatus) return;
+        const student=getSelectedStudentRecord();
+        if(!student?.db_id) {
+            toast('Studente non disponibile','Il banco non è associato a uno studente presente nel database.','error');
+            student && (student.status=pendingStatus, student.time=pendingStatus==='assente'?'--:--':new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}));
+            renderGridPatched(localSchoolDB[currentClass]);
+            return;
+        }
+
+        const oldStatus=student.status;
+        const now=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+        student.status=pendingStatus;
+        student.time=pendingStatus==='presente'?'08:00':(pendingStatus==='assente'?'--:--':now);
+
+        if(pendingStatus==='bagno' && oldStatus!=='bagno') student.history.push({out:now,in:null});
+        else if(oldStatus==='bagno' && pendingStatus!=='bagno') {
+            const open=student.history.slice().reverse().find(h=>!h.in);
+            if(open) open.in=now;
+        }
+
+        renderGridPatched(localSchoolDB[currentClass]);
+        try {
+            await window.SC_API.update('attendance',{
+                student_id:student.db_id,class_id:currentClassId,date:selectedDate,status:pendingStatus,time:student.time
+            },q=>q.eq('student_id',student.db_id).eq('class_id',currentClassId).eq('date',selectedDate));
+            toast('Presenza aggiornata',`${student.name} → ${pendingStatus.replace('_',' ')}`,'success',2200);
+        } catch(e) {
+            toast('Errore aggiornamento',e.message||'La modifica non è stata salvata.','error');
+        }
+        try { openStudentDetail(selectedStudentId); } catch {}
+    }
+
+    // Patch global functions used by existing inline handlers.
+    window.loadClassroom = loadClassroomPatched;
+    window.renderGrid = renderGridPatched;
+    window.createDeskCard = createDeskCardPatched;
+    window.changeDate = changeDatePatched;
+    window.openDatePicker = openDatePickerPatched;
+    window.openGradesModal = openGradesModalPatched;
+    window.loadTeacherGradesView = loadTeacherGradesViewPatched;
+    window.addGrade = addGradePatched;
+    window.deleteGrade = deleteGradePatched;
+    window.initRealtime = initRealtimePatched;
+    window.renderClassSelector = renderClassSelectorPatched;
+    window.backToHub = backToHubPatched;
+    window.confirmStatusChange = confirmStatusChangePatched;
+    window.resetToToday = () => changeDatePatched(getTodayStr());
+
+    // Make legacy modal function safe when a user clicks "VOTI" before selecting a desk.
+    const legacyOpenStudentDetail = window.openStudentDetail;
+    window.openStudentDetail = function(id) {
+        selectedStudentId=id;
+        if (!localSchoolDB[currentClass]?.[id]) {
+            toast('Banco non disponibile','Lo studente non è presente nella classe caricata.','error');
+            return;
+        }
+        return legacyOpenStudentDetail ? legacyOpenStudentDetail(id) : undefined;
+    };
+
+    // Fix grade tab visibility and notes refresh after opening a student.
+    const legacySwitchTab = window.switchTab;
+    window.switchTab = function(t) {
+        if (legacySwitchTab) legacySwitchTab(t);
+        if (t==='grades') loadTeacherGradesViewPatched();
+        if (t==='notes') loadNotes();
+    };
+
+    // Safer agenda render: scope to current class and escape free text.
+    window.renderAgendaList = function() {
+        const list=document.getElementById('agenda-list');
+        if(!list) return;
+        const items=(onlineAgenda||[]).filter(item=>{
+            if(!currentClass) return true;
+            if(item.class_id && currentClassId) return item.class_id===currentClassId;
+            if(item.class) return item.class===currentClass;
+            return true;
+        });
+        list.innerHTML='';
+        if(!items.length) {
+            list.innerHTML='<div class="sc-empty">Nessun impegno presente per questa classe.</div>';
+            return;
+        }
+        items.forEach(item=>{
+            const el=document.createElement('div');
+            el.className=`cv-event ${item.type==='compito'?'cv-compito':'cv-verifica'} p-4 rounded-r-lg mb-2 flex justify-between items-start`;
+            const canDelete=currentUser?.role!=='studente';
+            el.innerHTML=`<div><span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${esc(item.date||'--')} • ${esc(item.subject||'')}</span><p class="text-sm text-slate-300 mt-1">${esc(item.description||'')}</p></div>`;
+            if(canDelete && item.id) {
+                const b=document.createElement('button');
+                b.className='bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors ml-4 z-50 flex-shrink-0';
+                b.innerHTML='<i class="fa-solid fa-trash"></i>';
+                b.addEventListener('click',()=>window.deleteAgendaItem(item.id));
+                el.appendChild(b);
+            }
+            list.appendChild(el);
+        });
+    };
+
+    // Direct date controls and route restore.
+    window.addEventListener('popstate', async ()=>{
+        if(location.hash.startsWith('#/classes/')) {
+            const match=location.hash.match(/^#\/classes\/([^?]+)/);
+            const cls=match ? decodeURIComponent(match[1]) : null;
+            const params=new URLSearchParams(location.hash.split('?')[1]||'');
+            const date=params.get('date') || getTodayStr();
+            if(cls) {
+                SC.routeSyncing=true;
+                selectedDate=date;
+                await loadClassroomPatched(cls,{navigate:false});
+                SC.routeSyncing=false;
+            }
+        } else {
+            backToHubPatched();
+        }
+    });
+
+    window.addEventListener('load', () => {
+        // Current build still supports the legacy login/session flow.
+        // Automatically restore a class route after login/session recovery.
+        if (!SC.clockStarted) {
+            SC.clockStarted=true;
+            try { startClock(); } catch {}
+        }
+
+        // Ensure the picker cannot be swallowed by the old parent click handler.
+        const input=document.getElementById('date-picker');
+        input?.addEventListener('click',e=>e.stopPropagation());
+
+        // Se uno studente è già autenticato, ricava la classe esclusivamente dal database.
+        if (currentUser && currentUser.role==='studente' && !currentClass) {
+            openUserHome().catch(console.error);
+        }
+
+        // When no session exists, keep normal login UI.
+        const title=document.querySelector('#view-login .font-mono');
+        if(title) title.textContent='v140.0 • Action Layer + DB Only';
+
+        // Restore current route after a refresh if a session exists.
+        if (currentUser && location.hash.startsWith('#/classes/')) {
+            const match=location.hash.match(/^#\/classes\/([^?]+)/);
+            const cls=match ? decodeURIComponent(match[1]) : null;
+            const params=new URLSearchParams(location.hash.split('?')[1]||'');
+            if(cls) {
+                selectedDate=params.get('date') || getTodayStr();
+                loadClassroomPatched(cls,{navigate:false}).catch(console.error);
+            }
+        }
+    });
+
+    // Expose a small set of future-ready helpers for the next refactor.
+    window.SC_ROUTER = {
+        goDashboard() { history.pushState({},'', '#/dashboard'); backToHubPatched(); },
+        goClass(cls) { loadClassroomPatched(cls); },
+        current() { return {classId:currentClassId,className:currentClass,date:selectedDate}; }
+    };
+
+    console.info('[SmartCheck v138] Functional core loaded.');
+})();
+</script>
+
 </body>
 </html>
