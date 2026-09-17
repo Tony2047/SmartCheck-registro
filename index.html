@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v138 (Action Layer + DB Only)</title>
+    <title>SmartCheck - School OS v138.1 (Layout & Agenda Fix)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -111,6 +111,7 @@
         <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Caricamento...</span></div>
     </div>
 
+
     <div id="view-login" class="fixed inset-0 z-[100] bg-[#050b14] flex items-center justify-center p-4">
         <div class="relative z-10 w-full max-w-5xl h-[600px] glass-panel rounded-3xl overflow-hidden flex shadow-2xl fade-in">
             <div class="w-1/2 bg-gradient-to-br from-blue-600/20 to-purple-900/40 p-12 flex flex-col justify-between relative border-r border-white/5">
@@ -119,7 +120,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v137.0 • Dynamic DB</div>
+                <div class="text-xs font-mono text-slate-500">v138.1 • Dynamic DB</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -183,8 +184,12 @@
         <main class="flex-grow flex flex-col items-center w-full px-4 pb-40 pt-8">
             <div id="history-warning" class="hidden w-full max-w-md bg-yellow-900/20 border border-yellow-500/30 rounded-full py-2 px-6 mb-8 flex items-center justify-center gap-3 text-yellow-400 backdrop-blur-sm animate-pulse"><i class="fa-solid fa-clock-rotate-left"></i> <span class="text-xs font-black uppercase tracking-widest">Visualizzazione Archivio</span></div>
             <div id="bathroom-bar" class="w-full max-w-2xl mb-6 flex justify-center"></div>
+            
+            <!-- GRIGLIA BANCHI -->
             <div class="grid grid-cols-3 gap-24 w-full max-w-[95%] mt-4" id="classroom-grid"></div>
-            <div id="teacher-desk" onclick="openSignModal()" class="order-first mt-0 mb-8 w-[450px] h-24 bg-[#1e293b]/90 backdrop-blur border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center shadow-2xl px-4 cursor-pointer hover:scale-105 transition-transform group">
+            
+            <!-- CATTEDRA RIPOSIZIONATA IN BASSO (Mantiene lo stesso stile) -->
+            <div id="teacher-desk" onclick="openSignModal()" class="mt-24 mb-0 w-[450px] h-24 bg-[#1e293b]/90 backdrop-blur border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center shadow-2xl px-4 cursor-pointer hover:scale-105 transition-transform group">
                 <span class="text-2xl font-black tracking-[0.4em] text-blue-400 uppercase">Cattedra</span>
                 <span id="signature-display" class="text-xs text-slate-400 font-mono mt-2 w-full text-center truncate group-hover:text-blue-300">Clicca per Registro</span>
             </div>
@@ -326,8 +331,6 @@
         const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const ALL_SUBJECTS=["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
-        // Cataloghi non personali: verranno progressivamente letti dal DB.
-        // I nomi degli studenti/docenti e le classi NON devono essere hardcoded nel client.
         
         let currentUser=null; let tempUser=null; 
         let currentClass=null; let currentClassId = null; 
@@ -438,23 +441,19 @@
 
         function initHub(){ document.getElementById('view-hub').classList.remove('hidden'); document.getElementById('hub-user-name').innerText=currentUser.name; document.getElementById('hub-role-badge').innerText=currentUser.role==='admin'?"ADMIN":"DOCENTE"; renderClassSelector(); }
         
-        // Il selettore classi definitivo viene installato dal layer DB/Service qui sotto.
         function renderClassSelector(){
             return window.renderClassSelector ? window.renderClassSelector() : null;
         }
 
-        // CARICAMENTO DINAMICO DELLA CLASSE DAL DB
         async function loadClassroom(cls){ 
             currentClass=cls; 
             document.getElementById('view-hub').classList.add('hidden'); 
             document.getElementById('view-classroom').classList.remove('hidden'); 
             document.getElementById('class-header-name').innerText=cls; 
 
-            // API: Trova l'ID della classe selezionata
             const classRes = await _supabase.from('classes').select('id').eq('name', cls).single();
             if(classRes.data) currentClassId = classRes.data.id;
 
-            // API: Scarica l'elenco reale degli studenti di questa classe
             if(currentClassId) {
                 const { data: students } = await _supabase.from('registry')
                     .select('*')
@@ -463,7 +462,6 @@
                 classStudents = students || [];
             } else { classStudents = []; }
 
-            // Costruisce i banchi dinamicamente associando il VERO ID (db_id)
             localSchoolDB[cls] = {};
             for(let i=1; i<=23; i++) {
                 let deskId = `banco_${String(i).padStart(2, '0')}`;
@@ -536,9 +534,7 @@
             .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, payload => {
                  if(payload.new && payload.new.date === selectedDate) updateLocalCache([payload.new]);
             })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'bathroom_history' }, () => {
-                 // Opzionale: per aggiornare i timer storici
-            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'bathroom_history' }, () => {})
             .on('postgres_changes', { event: '*', schema: 'public', table: 'signatures' }, () => loadDayData(selectedDate))
             .on('postgres_changes', { event: '*', schema: 'public', table: 'agenda' }, async () => {
                  const ag = await _supabase.from('agenda').select('*');
@@ -566,7 +562,6 @@
         function organizeGrades(rawData) {
             localGradesDB = {}; 
             rawData.forEach(g => {
-                // Per retrocompatibilità, se non hai aggiornato class_id nei voti, usa una stringa fallback.
                 if(!localGradesDB[g.student_id]) localGradesDB[g.student_id] = [];
                 localGradesDB[g.student_id].push(g);
             });
@@ -583,16 +578,10 @@
         async function loadDayData(dateStr) {
             if(!currentClassId) return;
 
-            // 1. PRESENZE (Usando class_id e student_id)
-            const attReq = await _supabase.from('attendance')
-                .select('*')
-                .eq('date', dateStr)
-                .eq('class_id', currentClassId);
-
+            const attReq = await _supabase.from('attendance').select('*').eq('date', dateStr).eq('class_id', currentClassId);
             if (attReq.data) {
                 attReq.data.forEach(row => {
                       for(let id in localSchoolDB[currentClass]) {
-                         // Confronta il db_id, non il nome
                          if(localSchoolDB[currentClass][id].db_id === row.student_id) {
                             localSchoolDB[currentClass][id].status = row.status;
                             localSchoolDB[currentClass][id].time = row.time;
@@ -601,15 +590,9 @@
                 });
             }
 
-            // 2. STORICO BAGNI PER IL GIORNO
-            const bathReq = await _supabase.from('bathroom_history')
-                .select('*')
-                .eq('date', dateStr);
-            
+            const bathReq = await _supabase.from('bathroom_history').select('*').eq('date', dateStr);
             if(bathReq.data) {
-                // Resetta lo storico locale prima di riempirlo dal server
                 for(let id in localSchoolDB[currentClass]) { localSchoolDB[currentClass][id].history = []; }
-                
                 bathReq.data.forEach(row => {
                     for(let id in localSchoolDB[currentClass]) {
                         if(localSchoolDB[currentClass][id].db_id === row.student_id) {
@@ -619,7 +602,6 @@
                 });
             }
 
-            // 3. FIRME
             const sigReq = await _supabase.from('signatures').select('*').eq('date', dateStr);
             onlineSignatures = sigReq.data || [];
         }
@@ -650,9 +632,6 @@
             rightCol.innerHTML = `<div class="text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-2 opacity-50 order-last">ALA DESTRA</div>`;
             for(let i=0; i<4; i++) { const row = document.createElement('div'); row.className="grid grid-cols-2 gap-4"; row.appendChild(createDeskCard(`banco_${String(16+(i*2)).padStart(2,'0')}`, data)); row.appendChild(createDeskCard(`banco_${String(17+(i*2)).padStart(2,'0')}`, data)); rightCol.appendChild(row); }
             grid.appendChild(leftCol); grid.appendChild(centerCol); grid.appendChild(rightCol);
-            
-            let out=null;Object.values(data).forEach(v=>{if(v.status==='bagno')out=v.name;});
-            document.getElementById('bathroom-bar').innerHTML=out?`<div class="px-6 py-3 rounded-full border border-yellow-500/50 bg-yellow-900/30 flex items-center justify-center gap-3 animate-pulse shadow-lg shadow-yellow-900/20"><div class="w-3 h-3 rounded-full bg-yellow-500"></div><span class="text-xs font-black text-yellow-400 uppercase tracking-widest">BAGNO OCCUPATO: <span class="text-white">${out}</span></span></div>`:`<div class="px-6 py-3 rounded-full border border-green-500/30 bg-green-900/20 flex items-center justify-center gap-3 shadow-lg"><div class="w-3 h-3 rounded-full bg-green-500"></div><span class="text-xs font-black text-green-400 uppercase tracking-widest">BAGNO LIBERO</span></div>`;
         }
         
         function createDeskCard(id, data, isSingle = false) {
@@ -660,7 +639,6 @@
             const div = document.createElement('div'); div.className = isSingle ? "w-[300px]" : "w-full";
             const clickAction = (d.name !== "Libero") ? `onclick="openStudentDetail('${id}')"` : "";
             let alertHtml = "";
-            // Controllo Note usando il DB ID
             const hasNotes = d.db_id && localNotesDB[d.db_id] && localNotesDB[d.db_id].length > 0;
             if(hasNotes) {
                 const color = "text-yellow-500"; 
@@ -672,161 +650,16 @@
             return div;
         }
 
-        function openGradesModal() {
-            const m = document.getElementById('modal-grades');
-            const list = document.getElementById('grades-list');
-            
-            let targetId = (currentUser.role === 'studente') ? currentUser.id : localSchoolDB[currentClass][selectedStudentId].db_id;
-            const myGrades = localGradesDB[targetId] || [];
-
-            list.innerHTML = "";
-            let subjects = {};
-            myGrades.forEach(g => {
-                if (!subjects[g.subject]) subjects[g.subject] = [];
-                subjects[g.subject].push(g);
-            });
-
-            if (Object.keys(subjects).length === 0) {
-                list.innerHTML = `<div class="text-center text-slate-500 mt-10 italic">Nessuna valutazione presente.</div>`;
-            }
-
-            let allV = myGrades.map(g => parseFloat(g.value));
-            let gAvg = allV.length > 0 ? (allV.reduce((a, b) => a + b, 0) / allV.length).toFixed(2) : "0.0";
-
-            const header = document.getElementById('grades-header-bg');
-            document.getElementById('grades-total-avg').innerText = gAvg;
-            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni`;
-
-            header.classList.remove('bg-cv-green', 'bg-cv-orange', 'bg-cv-red');
-            if (gAvg >= 6) header.classList.add('bg-cv-green');
-            else if (gAvg >= 5) header.classList.add('bg-cv-orange');
-            else header.classList.add('bg-cv-red');
-
-            for (const [subj, votes] of Object.entries(subjects)) {
-                let avg = (votes.reduce((a, b) => a + parseFloat(b.value), 0) / votes.length).toFixed(2);
-                let colorClass = avg >= 6 ? 'g-green' : (avg >= 5 ? 'g-orange' : 'g-red');
-                let id = `details-${subj.replace(/\s/g, '')}`;
-
-                list.innerHTML += `
-                    <div class="mb-3">
-                        <div onclick="toggleGradeDetails('${id}')" class="cv-card p-4 flex justify-between items-center cursor-pointer">
-                            <div class="text-white font-bold text-lg">${subj}</div>
-                            <div class="grade-circle ${colorClass}" style="--percent: ${avg * 10}%">
-                                <span class="grade-value">${avg}</span>
-                            </div>
-                        </div>
-                        <div id="${id}" class="hidden bg-slate-900/50 p-4 border-x border-b border-slate-700 rounded-b-xl grade-details">
-                            ${votes.map(v => `
-                                <div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
-                                    <div>
-                                        <span class="text-[10px] text-slate-500 block">${v.date}</span>
-                                        <span class="text-xs text-slate-300 uppercase">${v.type}</span>
-                                    </div>
-                                    <span class="font-black ${parseFloat(v.value) >= 6 ? 'text-green-400' : 'text-red-400'}">${v.value}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>`;
-            }
-            m.classList.remove('hidden');
-        }
-
+        function openGradesModal() { /* Resta gestito dalla patch Action Layer */ }
         function toggleGradeDetails(id){ document.getElementById(id).classList.toggle('hidden'); }
-        
-        function loadTeacherGradesView(){
-            const subject=currentUser?.subject || currentUser?.materia || 'Generale';
-            const list=document.getElementById('teacher-grades-list'); list.innerHTML="";
-            const targetId = localSchoolDB[currentClass][selectedStudentId].db_id;
-            const grades= (localGradesDB[targetId] || []).filter(g => g.subject===subject);
-            
-            grades.forEach((g,idx)=>{
-                let color = g.value>=6?'text-green-400':(g.value>=5?'text-orange-400':'text-red-400'); 
-                let disp = parseFloat(g.value);
-                if(disp%1===0.25) disp=Math.floor(disp)+"+"; else if(disp%1===0.75) disp=Math.ceil(disp)+"-"; else if(disp%1===0.5) disp=Math.floor(disp)+"½";
-                list.innerHTML+=`<tr><td class="px-6 py-3">${g.date}</td><td class="px-6 py-3 uppercase text-[10px]">${g.type}</td><td class="px-6 py-3 text-right font-bold ${color}">${disp}</td><td class="px-6 py-3 text-right"><button onclick="deleteGrade('${g.id}')" class="text-red-500 hover:text-white transition-colors"><i class="fa-solid fa-trash"></i></button></td></tr>`;
-            });
-            document.getElementById('teacher-subject-name').innerText=subject;
-        }
-
-        async function addGrade(){
-            const val=document.getElementById('new-grade-value').value; if(!val) return; 
-            const targetId = localSchoolDB[currentClass][selectedStudentId].db_id;
-            
-            const newGrade = {
-                student_id: targetId,
-                teacher_id: currentUser.id,
-                subject: currentUser?.subject || currentUser?.materia || 'Generale',
-                value: val,
-                type: document.getElementById('new-grade-type').value,
-                date: new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}),
-                class_id: currentClassId
-            };
-            
-            await _supabase.from('grades').insert([newGrade]);
-            loadTeacherGradesView(); 
-            document.getElementById('new-grade-value').value = "10"; 
-        }
-
-        async function deleteGrade(id) {
-            if(confirm("Eliminare questo voto?")) {
-                await _supabase.from('grades').delete().eq('id', id);
-                loadTeacherGradesView(); 
-                if(!document.getElementById('modal-grades').classList.contains('hidden')) openGradesModal();
-            }
-        }
-
-        async function deleteNote(id) { 
-            if(confirm("Eliminare questa nota?")) { 
-                await _supabase.from('notes').delete().eq('id', id); 
-                loadNotes(); renderGrid(localSchoolDB[currentClass]); 
-            } 
-        }
-
-        async function deleteAgendaItem(id){ 
-            if(confirm("Eliminare?")) { 
-                await _supabase.from('agenda').delete().eq('id', id); 
-                renderAgendaList(); 
-            } 
-        }
-
-        async function deleteSignature(id) { 
-            if(confirm("Eliminare questa firma?")) { 
-                await _supabase.from('signatures').delete().eq('id', id); 
-                await loadDayData(selectedDate); renderSignaturesList(); updateSignatureDisplay(); 
-            } 
-        }
-
-        function loadNotes(){
-            const list = document.getElementById('notes-list'); list.innerHTML="";
-            const targetId = localSchoolDB[currentClass][selectedStudentId].db_id;
-            const notes = localNotesDB[targetId] || [];
-            
-            if(notes.length===0) list.innerHTML = `<div class="text-center text-slate-500 text-xs py-4">Nessuna nota</div>`;
-            notes.forEach((n, idx) => {
-                const border = n.type === 'warning' ? 'border-l-4 border-red-500' : 'border-l-4 border-blue-500';
-                const del = currentUser.role !== 'studente' ? `<button onclick="deleteNote('${n.id}')" class="text-red-500 text-xs ml-2 hover:text-white">Elimina</button>` : '';
-                list.innerHTML += `<div class="bg-slate-800 p-3 rounded mb-2 ${border}"><div class="flex justify-between"><span class="text-[10px] text-slate-400">${n.date}</span>${del}</div><p class="text-sm text-slate-200 mt-1">${n.text}</p></div>`;
-            });
-        }
-
-        async function addNote(){
-            const text = document.getElementById('note-text').value; if(!text) return;
-            const type = document.getElementById('note-type').value;
-            const targetId = localSchoolDB[currentClass][selectedStudentId].db_id;
-            
-            const newNote = {
-                student_id: targetId,
-                teacher_id: currentUser.id,
-                text: text,
-                type: type,
-                date: new Date().toLocaleDateString('it-IT'),
-                class_id: currentClassId
-            };
-            
-            await _supabase.from('notes').insert([newNote]);
-            document.getElementById('note-text').value = "";
-            loadNotes(); renderGrid(localSchoolDB[currentClass]); 
-        }
+        function loadTeacherGradesView(){ /* Resta gestito dalla patch Action Layer */ }
+        async function addGrade(){ /* Resta gestito dalla patch Action Layer */ }
+        async function deleteGrade(id) { /* Resta gestito dalla patch Action Layer */ }
+        async function deleteNote(id) { /* Resta gestito dalla patch Action Layer */ }
+        async function deleteAgendaItem(id){ /* Resta gestito dalla patch Action Layer */ }
+        async function deleteSignature(id) { /* Resta gestito dalla patch Action Layer */ }
+        function loadNotes(){ /* Resta gestito dalla patch Action Layer */ }
+        async function addNote(){ /* Resta gestito dalla patch Action Layer */ }
 
         function startClock(){setInterval(()=>{const now=new Date();document.getElementById('clock').innerText=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const h=now.getHours();const m=now.getMinutes();const totalM=h*60+m;let s="FUORI ORARIO";if(totalM>=505&&totalM<585)s="1° ORA (8:25-9:45)";else if(totalM>=585&&totalM<645)s="2° ORA (9:45-10:45)";else if(totalM>=645&&totalM<705)s="3° ORA (10:45-11:45)";else if(totalM>=705&&totalM<765)s="4° ORA (11:45-12:45)";else if(totalM>=765&&totalM<810)s="5° ORA (12:45-13:30)";document.getElementById('hour-badge').innerText=s;},1000);}
 
@@ -846,39 +679,11 @@
         }
 
         function openAgendaModal(){document.getElementById('modal-agenda').classList.remove('hidden');if(currentUser.role!=='studente')document.getElementById('btn-add-agenda').classList.remove('hidden');renderAgendaList();}
-        
-        function renderAgendaList(){
-            const list=document.getElementById('agenda-list'); list.innerHTML="";
-            onlineAgenda.forEach((item,idx)=>{
-                let typeClass=item.type==='compito'?'cv-compito':'cv-verifica'; 
-                const delBtn = currentUser.role !== 'studente' ? 
-                    `<button onclick="event.stopPropagation(); deleteAgendaItem('${item.id}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg transition-colors ml-4 z-50 flex-shrink-0"><i class="fa-solid fa-trash"></i></button>` : ''; 
-                list.innerHTML+=`
-                    <div class="cv-event ${typeClass} p-4 rounded-r-lg mb-2 flex justify-between items-start">
-                        <div>
-                            <span class="text-xs font-bold bg-black/30 px-2 py-1 rounded text-white mb-1 inline-block">${item.date} • ${item.subject}</span>
-                            <p class="text-sm text-slate-300 mt-1">${item.description}</p>
-                        </div>
-                        ${delBtn}
-                    </div>`;
-            });
-        }
-        
+        function renderAgendaList(){ /* Resta gestito dalla patch Action Layer */ }
         function openAddAgendaModal(){ document.getElementById('modal-add-agenda').classList.remove('hidden'); const sel = document.getElementById('agenda-subject'); sel.innerHTML = ""; ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`); }
         function selectAgendaType(t){ pendingAgendaType=t; document.getElementById('btn-type-compito').className=t==='compito'?'btn-selected py-3 bg-green-900/40':'py-3 bg-slate-800'; document.getElementById('btn-type-verifica').className=t==='verifica'?'btn-selected py-3 bg-red-900/40':'py-3 bg-slate-800'; }
         
-        async function saveAgendaEntry(){ 
-            if(!pendingAgendaType) return; 
-            const d=new Date(document.getElementById('agenda-date').value); 
-            await _supabase.from('agenda').insert([{
-                date: `${d.getDate()}/${d.getMonth()+1}`, 
-                subject:document.getElementById('agenda-subject').value, 
-                type:pendingAgendaType, 
-                description:document.getElementById('agenda-desc').value,
-                class: currentClass // Retrocompatibilità
-            }]);
-            document.getElementById('modal-add-agenda').classList.add('hidden'); 
-        }
+        async function saveAgendaEntry(){ /* Resta gestito dalla patch Action Layer */ }
 
         function openListModal(){ document.getElementById('modal-class-list').classList.remove('hidden'); filterListModal(); }
         
@@ -972,7 +777,7 @@
                 teacher:currentUser.name, 
                 subject:document.getElementById('subject-search').value, 
                 topic:document.getElementById('sign-argomento').value,
-                class: currentClass // Retrocompatibilità
+                class: currentClass 
             }]);
             await loadDayData(selectedDate); renderSignaturesList(); updateSignatureDisplay(); document.getElementById('modal-sign').classList.add('hidden'); 
         }
@@ -1071,15 +876,6 @@
     </script>
 
 <script>
-/* ============================================================
-   SmartCheck v138 — Action Layer + DB Only Patch
-   Goal: make the current single-file prototype behave like a
-   real app: stateful routes, action services, robust UI flows,
-   stable seat mapping, date navigation, grades and realtime.
-
-   NOTE: this is still a transitional client-side build.
-   Security/authorization must ultimately move behind a server/API.
-   ============================================================ */
 (() => {
     const SC = window.SC = window.SC || {
         version: "139-action-layer",
@@ -1148,8 +944,6 @@
         if (el) el.classList.toggle('hidden', !show);
     }
 
-    // Azioni applicative: la UI non deve scrivere direttamente sul database.
-    // Ogni modifica passa da un service dedicato; in futuro questo service chiamerà /api/... lato server.
     window.SC_ACTIONS = window.SC_ACTIONS || {
         attendance: {
             async setStatus({studentId, classId, date, status, time}) {
@@ -1217,7 +1011,6 @@
                 seat_id: id,
                 position_index: i
             };
-            // Keep deterministic seat assignment for demo/transition mode.
             const dbStudent = Array.isArray(students) ? students[i-1] : null;
             if (dbStudent) {
                 data[id].db_id = dbStudent.id || null;
@@ -1279,7 +1072,6 @@
             organizeGrades(onlineGrades);
             organizeNotes(onlineNotes);
 
-            // Agenda in the current schema uses a class string.
             try {
                 const ag = await window.SC_API.select('agenda', q => q.eq('class', currentClass));
                 onlineAgenda = ag;
@@ -1327,7 +1119,6 @@
         await loadScopedSchoolData();
         subscribeRealtimeForCurrentClass();
 
-        // UI permissions
         const isStudent = currentUser?.role === 'studente';
         document.getElementById('back-btn')?.classList.toggle('hidden', isStudent);
         document.getElementById('sign-btn')?.classList.toggle('hidden', isStudent);
@@ -1350,7 +1141,6 @@
         const data = localSchoolDB[currentClass];
         if (!data) return;
 
-        // Crucial: when changing day, reset transient day state first.
         Object.values(data).forEach(s => {
             if (!s || s.name === 'Libero') return;
             s.status = 'assente';
@@ -1358,7 +1148,7 @@
             s.history = [];
         });
 
-        if (!currentClassId) return; // demo/local fallback
+        if (!currentClassId) return; 
 
         try {
             const att = await window.SC_API.select('attendance', q =>
@@ -1446,9 +1236,12 @@
 
         const makeColumn = (label, deskIds) => {
             const col = document.createElement('div');
-            col.className = 'flex flex-col gap-5';
+            // FLEX COL REVERSE ripristinato: Il primo figlio (banco 1 e 2) andrà in fondo alla pagina
+            col.className = 'flex flex-col-reverse gap-6'; 
+            
             const labelEl = document.createElement('div');
-            labelEl.className = 'text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-1 opacity-70';
+            // ORDER-LAST ripristinato: L'etichetta andrà in cima alla colonna
+            labelEl.className = 'text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-1 opacity-70 order-last';
             labelEl.textContent = label;
             col.appendChild(labelEl);
 
@@ -1473,16 +1266,19 @@
         for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
 
         const leftCol = makeColumn('ALA SINISTRA', left);
+        
         const centerCol = document.createElement('div');
-        centerCol.className = 'flex flex-col gap-5';
+        centerCol.className = 'flex flex-col-reverse gap-6';
         const centerLabel = document.createElement('div');
-        centerLabel.className = 'text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-1 opacity-70';
+        centerLabel.className = 'text-center text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] mb-1 opacity-70 order-last';
         centerLabel.textContent = 'FILA CENTRALE';
         centerCol.appendChild(centerLabel);
+        
         const single = document.createElement('div');
-        single.className = 'flex justify-center';
+        single.className = 'flex justify-center w-full';
         single.appendChild(createDeskCardPatched('banco_09', data, true));
         centerCol.appendChild(single);
+        
         const centerPairs = center.slice(1);
         for (let i=0;i<centerPairs.length;i+=2) {
             const row=document.createElement('div');
@@ -1854,7 +1650,6 @@
     }
 
     async function initRealtimePatched() {
-        // Do not download entire school tables. Current class load owns its data scope.
         if (currentClass) {
             await loadScopedSchoolData();
             await subscribeRealtimeForCurrentClass();
@@ -1923,9 +1718,7 @@
             );
             const row=rows[0];
             if (row) return row.subject || row.subject_name || row.materia || 'Generale';
-        } catch(e) {
-            // Tabella opzionale durante la migrazione.
-        }
+        } catch(e) {}
         return 'Generale';
     }
 
@@ -1937,7 +1730,6 @@
         }
 
         try {
-            // Se la sessione locale è vecchia e non contiene class_id, recuperalo dal DB.
             if (!currentUser.class_id && currentUser.u) {
                 const rows = await window.SC_API.select('registry', q =>
                     q.select('id,username,full_name,role,class_id,subject').eq('username', currentUser.u).limit(1)
@@ -1987,7 +1779,6 @@
         }
     }
 
-    // Harden the status update UX while preserving the existing DB schema.
     async function confirmStatusChangePatched() {
         if(!pendingStatus) return;
         const student=getSelectedStudentRecord();
@@ -2021,7 +1812,44 @@
         try { openStudentDetail(selectedStudentId); } catch {}
     }
 
-    // Patch global functions used by existing inline handlers.
+    // PATCH FUNZIONE DI SALVATAGGIO AGENDA
+    async function saveAgendaEntryPatched(){ 
+        if(!pendingAgendaType) {
+            toast('Errore', 'Seleziona se l\'impegno è un Compito o una Verifica.', 'error');
+            return; 
+        }
+        const dateInput = document.getElementById('agenda-date').value;
+        if(!dateInput) {
+            toast('Errore', 'Inserisci una data valida.', 'error');
+            return;
+        }
+
+        const d = new Date(dateInput); 
+        const formattedDate = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+
+        try {
+            setLoading(true, "Salvataggio in agenda...");
+            await window.SC_ACTIONS.agenda.create({
+                date: formattedDate, 
+                subject: document.getElementById('agenda-subject').value, 
+                type: pendingAgendaType, 
+                description: document.getElementById('agenda-desc').value,
+                class: currentClass
+            });
+            document.getElementById('modal-add-agenda').classList.add('hidden'); 
+            
+            // Forza riscaricamento e rendering
+            await loadScopedSchoolData();
+            renderAgendaList();
+            toast('Agenda aggiornata', 'L\'impegno è stato salvato correttamente.', 'success');
+        } catch(e) {
+            console.error(e);
+            toast('Errore', e.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    }
+
     window.loadClassroom = loadClassroomPatched;
     window.renderGrid = renderGridPatched;
     window.createDeskCard = createDeskCardPatched;
@@ -2035,9 +1863,9 @@
     window.renderClassSelector = renderClassSelectorPatched;
     window.backToHub = backToHubPatched;
     window.confirmStatusChange = confirmStatusChangePatched;
+    window.saveAgendaEntry = saveAgendaEntryPatched; // Assegna la nuova funzione
     window.resetToToday = () => changeDatePatched(getTodayStr());
 
-    // Make legacy modal function safe when a user clicks "VOTI" before selecting a desk.
     const legacyOpenStudentDetail = window.openStudentDetail;
     window.openStudentDetail = function(id) {
         selectedStudentId=id;
@@ -2048,7 +1876,6 @@
         return legacyOpenStudentDetail ? legacyOpenStudentDetail(id) : undefined;
     };
 
-    // Fix grade tab visibility and notes refresh after opening a student.
     const legacySwitchTab = window.switchTab;
     window.switchTab = function(t) {
         if (legacySwitchTab) legacySwitchTab(t);
@@ -2056,7 +1883,6 @@
         if (t==='notes') loadNotes();
     };
 
-    // Safer agenda render: scope to current class and escape free text.
     window.renderAgendaList = function() {
         const list=document.getElementById('agenda-list');
         if(!list) return;
@@ -2087,7 +1913,6 @@
         });
     };
 
-    // Direct date controls and route restore.
     window.addEventListener('popstate', async ()=>{
         if(location.hash.startsWith('#/classes/')) {
             const match=location.hash.match(/^#\/classes\/([^?]+)/);
@@ -2106,27 +1931,17 @@
     });
 
     window.addEventListener('load', () => {
-        // Current build still supports the legacy login/session flow.
-        // Automatically restore a class route after login/session recovery.
         if (!SC.clockStarted) {
             SC.clockStarted=true;
             try { startClock(); } catch {}
         }
-
-        // Ensure the picker cannot be swallowed by the old parent click handler.
         const input=document.getElementById('date-picker');
         input?.addEventListener('click',e=>e.stopPropagation());
-
-        // Se uno studente è già autenticato, ricava la classe esclusivamente dal database.
         if (currentUser && currentUser.role==='studente' && !currentClass) {
             openUserHome().catch(console.error);
         }
-
-        // When no session exists, keep normal login UI.
         const title=document.querySelector('#view-login .font-mono');
         if(title) title.textContent='v140.0 • Action Layer + DB Only';
-
-        // Restore current route after a refresh if a session exists.
         if (currentUser && location.hash.startsWith('#/classes/')) {
             const match=location.hash.match(/^#\/classes\/([^?]+)/);
             const cls=match ? decodeURIComponent(match[1]) : null;
@@ -2138,14 +1953,13 @@
         }
     });
 
-    // Expose a small set of future-ready helpers for the next refactor.
     window.SC_ROUTER = {
         goDashboard() { history.pushState({},'', '#/dashboard'); backToHubPatched(); },
         goClass(cls) { loadClassroomPatched(cls); },
         current() { return {classId:currentClassId,className:currentClass,date:selectedDate}; }
     };
 
-    console.info('[SmartCheck v138] Functional core loaded.');
+    console.info('[SmartCheck v138.1] Layout Fix and Agenda Fix applied.');
 })();
 </script>
 
