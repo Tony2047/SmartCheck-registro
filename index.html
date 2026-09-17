@@ -14,33 +14,33 @@
     
     <style>
         :root {
-            --bg-deep: #060913;
-            --panel-bg: rgba(13, 20, 36, 0.75);
-            --panel-border: rgba(255, 255, 255, 0.08);
+            --bg-deep: #050811;
+            --panel-bg: rgba(11, 17, 32, 0.85);
+            --panel-border: rgba(255, 255, 255, 0.09);
         }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-deep); 
-            background-image: radial-gradient(rgba(59, 130, 246, 0.07) 1px, transparent 1px);
-            background-size: 28px 28px;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.08) 1.5px, transparent 1.5px);
+            background-size: 32px 32px;
             -webkit-tap-highlight-color: transparent; 
         }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .glass-panel { 
             background: var(--panel-bg); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px); 
             border: 1px solid var(--panel-border); 
-            box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.7); 
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8); 
         }
         .hidden { display: none !important; }
         
         input[type="date"] { color-scheme: dark; background-color: transparent; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #0b1120; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #080e1a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
 
         .fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(6px); }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
@@ -71,7 +71,7 @@
         .grade-value { position: relative; z-index: 10; font-size: 13px; font-family: 'JetBrains Mono', monospace; }
         .g-green { background: conic-gradient(#10b981 var(--percent), #1e293b 0); }
         .g-orange { background: conic-gradient(#f59e0b var(--percent), #1e293b 0); }
-        .g-red { background: conic-gradient(#ef4444 var(--percent), #1e293b 0); }
+        .g-red { background: conic-gradient(#ef4444 var(--percent), #333 0); }
         .g-gray { background: #334155; }
         .bg-cv-green { background: linear-gradient(135deg, #059669, #10b981); }
         .bg-cv-orange { background: linear-gradient(135deg, #d97706, #f59e0b); }
@@ -96,8 +96,8 @@
         @keyframes toastSlide { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
 
         .sc-loading { position: fixed; inset: 0; background: rgba(3, 7, 18, 0.7); backdrop-filter: blur(8px); z-index: 280; display: flex; align-items: center; justify-content: center; }
-        .sc-loading-card { display: flex; align-items: center; gap: 14px; padding: 14px 24px; border-radius: 18px; background: #0f172a; border: 1px solid #334155; font-size: 13px; font-weight: 700; box-shadow: 0 25px 60px rgba(0,0,0,0.6); }
-        .sc-spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .sc-loading-card { display: flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 20px; background: #0f172a; border: 1px solid #334155; font-size: 14px; font-weight: 700; box-shadow: 0 25px 60px rgba(0,0,0,0.6); }
+        .sc-spinner { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -108,76 +108,76 @@
         <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Sincronizzazione in corso...</span></div>
     </div>
 
-    <!-- ================= 1. REINVENTED & EXPANDED LOGIN SCREEN ================= -->
-    <div id="view-login" class="fixed inset-0 z-[100] bg-[#060913] flex items-center justify-center p-6 md:p-10">
-        <div class="relative z-10 w-full max-w-5xl glass-panel rounded-3xl overflow-hidden shadow-2xl border border-slate-700/60 grid grid-cols-1 md:grid-cols-12 fade-in">
+    <!-- ================= 1. REINVENTED EXPANDED LOGIN (WIDE & COMFORTABLE) ================= -->
+    <div id="view-login" class="fixed inset-0 z-[100] bg-[#050811] flex items-center justify-center p-4 md:p-10">
+        <div class="relative z-10 w-full max-w-6xl glass-panel rounded-[32px] overflow-hidden shadow-2xl border border-slate-700/70 grid grid-cols-1 md:grid-cols-12 fade-in">
             
-            <!-- Left Info Panel (Spacious) -->
-            <div class="md:col-span-6 bg-gradient-to-br from-blue-950/40 via-slate-900/60 to-purple-950/30 p-12 md:p-16 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800/80">
+            <!-- Left Info Panel (Rich and Large) -->
+            <div class="md:col-span-6 bg-gradient-to-br from-blue-950/50 via-slate-900/70 to-purple-950/40 p-12 md:p-16 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800/80">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono font-bold text-blue-400 mb-8 uppercase tracking-wider">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span> Sistema Scolastico Digitale
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-xs font-mono font-bold text-blue-400 mb-8 uppercase tracking-wider shadow-inner">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span> Terminale Scolastico Sicuro
                     </div>
-                    <h1 class="text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-none mb-6">
+                    <h1 class="text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
                         Smart<span class="text-blue-500">Check</span><span class="text-slate-500 text-4xl font-mono">.OS</span>
                     </h1>
                     <p class="text-slate-300 text-base md:text-lg leading-relaxed font-light">
-                        Piattaforma centralizzata per la gestione di presenze, registri di classe, uscite e monitoraggio didattico in tempo reale.
+                        Piattaforma scolastica avanzata per il controllo presenze in tempo reale, gestione banchi dinamica, registri di classe e storico delle valutazioni.
                     </p>
                 </div>
                 
-                <div class="mt-12 pt-8 border-t border-slate-800/60 flex items-center justify-between text-sm font-mono text-slate-400">
-                    <div>ANNO SCOL. <span class="text-white font-bold">2026/2027</span></div>
-                    <div class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 font-bold text-xs">v140.0</div>
+                <div class="mt-12 pt-8 border-t border-slate-800/80 flex items-center justify-between text-sm font-mono text-slate-400">
+                    <div>ANNO SCOLastico: <span class="text-white font-bold">2026/2027</span></div>
+                    <div class="px-3 py-1 rounded-lg bg-slate-800/90 text-slate-300 font-bold text-xs border border-slate-700">v140.2</div>
                 </div>
             </div>
 
-            <!-- Right Form Panel (Spacious) -->
-            <div class="md:col-span-6 p-12 md:p-16 flex flex-col justify-center bg-[#090e1c]/90">
-                <div class="w-full max-w-md mx-auto space-y-7">
+            <!-- Right Form Panel (Spacious & Readable) -->
+            <div class="md:col-span-6 p-12 md:p-16 flex flex-col justify-center bg-[#080d1a]/95">
+                <div class="w-full max-w-md mx-auto space-y-8">
                     <div>
-                        <h2 class="text-3xl font-extrabold text-white tracking-tight">Autenticazione</h2>
-                        <p class="text-slate-400 text-sm mt-1.5">Accedi al terminale con le tue credenziali d'istituto</p>
+                        <h2 class="text-3xl font-extrabold text-white tracking-tight">Accesso Autenticato</h2>
+                        <p class="text-slate-400 text-sm mt-2">Digita le tue credenziali per avviare la sessione di lavoro</p>
                     </div>
                     
-                    <div id="login-form-container" class="space-y-5">
+                    <div id="login-form-container" class="space-y-6">
                         <div>
                             <label class="block text-xs font-mono uppercase font-bold text-slate-300 mb-2">Identificativo Utente</label>
                             <div class="relative">
-                                <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                <input type="text" id="input-username" placeholder="cognome.nome / admin" class="w-full bg-[#11192e] border border-slate-700 text-white pl-11 pr-4 py-3.5 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none font-medium text-base transition-all">
+                                <i class="fa-solid fa-user absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                <input type="text" id="input-username" placeholder="cognome.nome / admin" class="w-full bg-[#11192e] border border-slate-700 text-white pl-12 pr-4 py-4 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none font-medium text-base transition-all">
                             </div>
                         </div>
 
-                        <div id="password-container" class="hidden space-y-5 pt-1">
-                            <div class="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-sm">
+                        <div id="password-container" class="hidden space-y-6 pt-1">
+                            <div class="p-4 bg-blue-500/10 border border-blue-500/25 rounded-2xl flex items-center gap-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white text-base shadow-md">
                                     <i class="fa-solid fa-id-badge"></i>
                                 </div>
                                 <div class="truncate">
                                     <div class="text-[10px] uppercase font-mono font-bold text-blue-400 leading-tight">Utente Riconosciuto</div>
-                                    <div class="text-sm font-bold text-white truncate" id="user-welcome">--</div>
+                                    <div class="text-base font-extrabold text-white truncate" id="user-welcome">--</div>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-mono uppercase font-bold text-slate-300 mb-2">Chiave d'Accesso</label>
+                                <label class="block text-xs font-mono uppercase font-bold text-slate-300 mb-2">Chiave di Sicurezza</label>
                                 <div class="relative">
-                                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                    <input type="password" id="input-password" placeholder="Inserisci la password" class="w-full bg-[#11192e] border border-slate-700 text-white pl-11 pr-4 py-3.5 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-base transition-all">
+                                    <i class="fa-solid fa-lock absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                    <input type="password" id="input-password" placeholder="Inserisci la password" class="w-full bg-[#11192e] border border-slate-700 text-white pl-12 pr-4 py-4 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none text-base transition-all">
                                 </div>
                             </div>
-                            <button type="button" id="btn-entra" onclick="processAuth()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 text-base">
-                                <span>Accedi alla Piattaforma</span> <i class="fa-solid fa-arrow-right text-sm"></i>
+                            <button type="button" id="btn-entra" onclick="processAuth()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/30 flex items-center justify-center gap-2.5 text-base">
+                                <span>Avvia Sessione</span> <i class="fa-solid fa-arrow-right text-sm"></i>
                             </button>
-                            <button type="button" onclick="resetLogin()" class="w-full text-center text-xs text-slate-400 hover:text-slate-200 transition py-1">← Cambia utente</button>
+                            <button type="button" onclick="resetLogin()" class="w-full text-center text-xs text-slate-400 hover:text-slate-200 transition py-1.5 font-semibold">← Torna indietro e cambia utente</button>
                         </div>
                         
-                        <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-all border border-slate-700 hover:border-slate-600 flex items-center justify-center gap-2 text-base">
-                            <span>Continua</span> <i class="fa-solid fa-arrow-right text-sm"></i>
+                        <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-extrabold py-4 rounded-2xl transition-all border border-slate-700 hover:border-slate-600 shadow-md flex items-center justify-center gap-2.5 text-base">
+                            <span>Verifica Utente</span> <i class="fa-solid fa-arrow-right text-sm"></i>
                         </button>
                     </div>
 
-                    <p id="login-error" class="text-red-400 text-xs font-semibold text-center hidden bg-red-950/30 p-3 rounded-xl border border-red-800/40">
+                    <p id="login-error" class="text-red-400 text-xs font-semibold text-center hidden bg-red-950/40 p-3.5 rounded-2xl border border-red-800/50">
                         <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> <span id="error-text">Credenziali non valide</span>
                     </p>
                 </div>
@@ -185,133 +185,133 @@
         </div>
     </div>
 
-    <!-- ================= 2. EXPANDED CLASS HUB (ALL CLASSES) ================= -->
-    <div id="view-hub" class="hidden min-h-screen p-8 md:p-12 fade-in max-w-7xl mx-auto flex flex-col justify-between">
+    <!-- ================= 4. REDESIGNED CLASS HUB (SPACIOUS & ALL CLASSES INCLUDED) ================= -->
+    <div id="view-hub" class="hidden min-h-screen p-8 md:p-14 fade-in max-w-7xl mx-auto flex flex-col justify-between">
         <div>
             <!-- Top Bar Hub -->
-            <header class="flex flex-wrap justify-between items-center gap-4 mb-8 pb-6 border-b border-slate-800/80">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-2xl font-black">
+            <header class="flex flex-wrap justify-between items-center gap-6 mb-10 pb-6 border-b border-slate-800/90">
+                <div class="flex items-center gap-5">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 text-3xl font-black shadow-lg">
                         SC
                     </div>
                     <div>
                         <div class="flex items-center gap-3">
-                            <h2 class="text-3xl font-extrabold text-white tracking-tight">Hub Istituto</h2>
-                            <span id="hub-role-badge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg border border-slate-700 uppercase bg-slate-800/70 text-slate-300">--</span>
+                            <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Hub Istituto</h2>
+                            <span id="hub-role-badge" class="text-xs font-mono font-bold px-3 py-1 rounded-xl border border-slate-700 uppercase bg-slate-800/90 text-slate-300">--</span>
                         </div>
-                        <p class="text-sm text-slate-400 mt-1">Sessione attiva: <span id="hub-user-name" class="text-white font-bold">--</span></p>
+                        <p class="text-sm text-slate-400 mt-1.5">Operatore attivo: <span id="hub-user-name" class="text-white font-extrabold">--</span></p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="logout()" class="px-5 py-2.5 bg-red-950/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-900/30 hover:text-white transition text-xs font-bold flex items-center gap-2">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Esci
+                    <button onclick="logout()" class="px-5 py-3 bg-red-950/25 border border-red-500/35 rounded-2xl text-red-400 hover:bg-red-900/40 hover:text-white transition text-xs font-bold flex items-center gap-2.5 shadow-md">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Disconnetti
                     </button>
                 </div>
             </header>
 
             <!-- Instructions Banner -->
-            <div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
+            <div class="mb-10 p-8 rounded-3xl bg-gradient-to-r from-blue-900/25 via-slate-900/50 to-transparent border border-blue-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
                 <div>
-                    <h3 class="text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
-                    <p class="text-xs md:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi e il monitoraggio presenze per l'indirizzo di competenza.</p>
+                    <h3 class="text-2xl font-extrabold text-white tracking-tight">Seleziona la Sezione Operativa</h3>
+                    <p class="text-sm text-slate-300 mt-1 max-w-2xl">Scegli la classe d'interesse per aprire il registro elettronico interattivo, visualizzare la mappa dei banchi e monitorare gli ingressi.</p>
                 </div>
-                <div class="hidden md:flex items-center gap-2 text-xs font-mono text-slate-400 bg-black/30 px-3.5 py-2 rounded-xl border border-slate-800">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Locale Connesso
+                <div class="flex items-center gap-2.5 text-xs font-mono text-slate-300 bg-black/40 px-4 py-2.5 rounded-2xl border border-slate-800 shadow-inner">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Database Locale Sincronizzato
                 </div>
             </div>
 
-            <!-- Full Dynamic Classes Groups -->
-            <div class="glass-panel p-8 rounded-3xl border border-slate-800/80">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="classes-container"></div>
+            <!-- Full Dynamic Classes Groups Container -->
+            <div class="glass-panel p-8 md:p-10 rounded-[32px] border border-slate-800/90 space-y-10">
+                <div id="classes-container" class="space-y-10"></div>
             </div>
         </div>
 
-        <footer class="mt-12 text-center text-xs font-mono text-slate-600">
-            SmartCheck School OS • Architettura Scolastica Indipendente 2026/2027
+        <footer class="mt-16 text-center text-xs font-mono text-slate-500">
+            SmartCheck School OS • Piattaforma Ufficiale Indipendente Anno Scolastico 2026/2027
         </footer>
     </div>
 
-    <!-- ================= 3. OPTIMIZED CLASSROOM VIEW ================= -->
+    <!-- ================= 5. OPTIMIZED CLASSROOM VIEW (SPACIOUS DESKS & FIXED HEADER) ================= -->
     <div id="view-classroom" class="hidden min-h-screen flex flex-col relative fade-in">
         
-        <!-- Header HUD (Always Visible Clock) -->
-        <header class="bg-[#0b1121]/95 backdrop-blur-xl border-b border-slate-800/80 px-6 md:px-8 py-3.5 flex justify-between items-center sticky top-0 z-40">
+        <!-- Header HUD (Responsive, Clock Always Visible) -->
+        <header class="bg-[#0b1121]/95 backdrop-blur-xl border-b border-slate-800/90 px-6 md:px-10 py-4 flex flex-wrap justify-between items-center gap-4 sticky top-0 z-40 shadow-xl">
             <!-- Left -->
-            <div class="flex items-center gap-4">
-                <button id="back-btn" onclick="backToHub()" title="Torna all'Hub" class="w-10 h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 text-slate-300 transition">
-                    <i class="fa-solid fa-arrow-left text-xs"></i>
+            <div class="flex items-center gap-5">
+                <button id="back-btn" onclick="backToHub()" title="Torna all'Hub" class="w-11 h-11 flex items-center justify-center bg-slate-800/90 border border-slate-700 rounded-2xl hover:bg-slate-700 text-slate-200 transition shadow">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
                 </button>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">CLASSE ATTIVA</span>
-                        <span id="role-badge" class="px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest font-bold">--</span>
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest">CLASSE ATTIVA</span>
+                        <span id="role-badge" class="px-2.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest font-extrabold">--</span>
                     </div>
-                    <h1 class="text-xl md:text-2xl font-black text-white tracking-tight" id="class-header-name">--</h1>
+                    <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight" id="class-header-name">--</h1>
                 </div>
             </div>
             
-            <!-- Center: Date Control -->
+            <!-- Center: Date Selector -->
             <div class="relative group mx-2" id="date-control">
-                <div class="glass-panel px-4 py-2 rounded-xl flex items-center gap-3 border border-slate-700/60 hover:border-blue-500/60 transition cursor-pointer relative" onclick="openNativeDatePicker()">
-                    <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
-                        <i class="fa-regular fa-calendar text-xs"></i>
+                <div class="glass-panel px-5 py-2.5 rounded-2xl flex items-center gap-3.5 border border-slate-700/80 hover:border-blue-500 transition cursor-pointer relative shadow-md" onclick="openNativeDatePicker()">
+                    <div class="w-8 h-8 rounded-xl bg-blue-500/15 flex items-center justify-center text-blue-400">
+                        <i class="fa-regular fa-calendar text-sm"></i>
                     </div>
-                    <div class="flex flex-col text-right">
-                        <span class="text-[9px] text-slate-500 font-mono font-bold uppercase tracking-widest">DATA REGISTRO</span>
-                        <span id="date-display" class="font-mono text-xs font-bold text-white uppercase tracking-wider">OGGI</span>
+                    <div class="flex flex-col text-right pointer-events-none">
+                        <span class="text-[9px] text-slate-400 font-mono font-bold uppercase tracking-widest">DATA REGISTRO</span>
+                        <span id="date-display" class="font-mono text-xs font-extrabold text-white uppercase tracking-wider">OGGI</span>
                     </div>
                     <input type="date" id="date-picker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" onchange="changeDate(this.value)">
-                    <button type="button" onclick="event.stopPropagation(); resetToToday();" class="text-[9px] font-mono font-black uppercase tracking-wider px-2 py-1 rounded bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 z-40 relative ml-1">OGGI</button>
+                    <button type="button" onclick="event.stopPropagation(); resetToToday();" class="text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1 rounded-xl bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 z-40 relative ml-1 shadow">OGGI</button>
                 </div>
             </div>
 
-            <!-- Right Controls + Clock (Fixed & Responsive) -->
-            <div class="flex items-center gap-3">
-                <button onclick="openListModal()" class="px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition flex items-center gap-2">
+            <!-- Right Controls + Live Clock -->
+            <div class="flex items-center gap-3.5">
+                <button onclick="openListModal()" class="px-4 py-2.5 bg-slate-800/90 border border-slate-700 rounded-2xl text-xs font-extrabold text-slate-200 hover:bg-slate-700 hover:text-white transition flex items-center gap-2 shadow">
                     <i class="fa-solid fa-list-check text-slate-400"></i> <span class="hidden md:inline">Elenco</span>
                 </button>
-                <button id="sign-btn" onclick="openSignModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md shadow-blue-600/20 transition flex items-center gap-2">
+                <button id="sign-btn" onclick="openSignModal()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-xs font-extrabold uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-2">
                     <i class="fa-solid fa-pen-nib"></i> <span>Registro</span>
                 </button>
-                <button onclick="logout()" title="Disconnetti" class="w-9 h-9 flex items-center justify-center bg-red-950/20 text-red-400 border border-red-900/30 rounded-xl text-xs hover:bg-red-900/30 transition">
+                <button onclick="logout()" title="Disconnetti" class="w-10 h-10 flex items-center justify-center bg-red-950/30 text-red-400 border border-red-900/40 rounded-2xl text-xs hover:bg-red-900/40 transition shadow">
                     <i class="fa-solid fa-power-off"></i>
                 </button>
                 
-                <!-- Live Clock Engine Box -->
+                <!-- Live Clock Always Visible -->
                 <div class="text-right border-l border-slate-800 pl-4 ml-1 flex flex-col justify-center">
-                    <div id="clock" class="mono text-xl md:text-2xl font-black text-white tracking-wider leading-none">00:00:00</div>
-                    <div id="hour-badge" class="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-1">CARICAMENTO...</div>
+                    <div id="clock" class="mono text-2xl md:text-3xl font-black text-white tracking-wider leading-none">00:00:00</div>
+                    <div id="hour-badge" class="text-[10px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-1.5">CARICAMENTO...</div>
                 </div>
             </div>
         </header>
 
-        <!-- Main Classroom Space (Tightly Spaced, Generous Desks) -->
-        <main class="flex-grow flex flex-col items-center w-full px-4 pt-5 pb-32 max-w-[98%] mx-auto">
+        <!-- Main Classroom Space (Optimized for space utilization) -->
+        <main class="flex-grow flex flex-col items-center w-full px-6 pt-6 pb-36 max-w-[98%] mx-auto">
             
-            <div id="history-warning" class="hidden w-full max-w-md bg-amber-950/30 border border-amber-500/40 rounded-full py-1.5 px-5 mb-3 flex items-center justify-center gap-2 text-amber-300 backdrop-blur-md animate-pulse">
-                <i class="fa-solid fa-clock-rotate-left text-xs"></i> 
-                <span class="text-[11px] font-mono font-bold uppercase tracking-wider">Visualizzazione Archivio Storico</span>
+            <div id="history-warning" class="hidden w-full max-w-lg bg-amber-950/40 border border-amber-500/50 rounded-full py-2 px-6 mb-4 flex items-center justify-center gap-2.5 text-amber-300 backdrop-blur-md animate-pulse shadow-lg">
+                <i class="fa-solid fa-clock-rotate-left text-sm"></i> 
+                <span class="text-xs font-mono font-bold uppercase tracking-wider">Visualizzazione Archivio Storico</span>
             </div>
 
             <!-- Bathroom Telemetry HUD -->
-            <div id="bathroom-bar" class="w-full max-w-xl mb-4 flex justify-center"></div>
+            <div id="bathroom-bar" class="w-full max-w-xl mb-6 flex justify-center"></div>
 
-            <!-- Desks Grid (Expanded card height and width) -->
-            <div class="grid grid-cols-3 gap-8 md:gap-14 w-full mt-1 flex-grow items-end" id="classroom-grid"></div>
+            <!-- Desks Grid (Generous sizes, excellent spacing) -->
+            <div class="grid grid-cols-3 gap-10 md:gap-16 w-full mt-2 flex-grow items-end" id="classroom-grid"></div>
 
-            <!-- Cattedra Station (Directly under the front row, no excess gaps) -->
-            <div id="teacher-desk" onclick="openSignModal()" class="mt-8 w-full max-w-lg h-20 glass-panel border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:scale-[1.015] transition-all group shadow-2xl">
-                <div class="flex items-center gap-2 text-blue-400 font-black tracking-[0.3em] uppercase text-xs group-hover:text-blue-300">
+            <!-- Cattedra Station (Directly below front row) -->
+            <div id="teacher-desk" onclick="openSignModal()" class="mt-12 mb-2 w-full max-w-xl h-22 glass-panel border-b-4 border-blue-500 rounded-[28px] flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:scale-[1.01] transition-all group shadow-2xl">
+                <div class="flex items-center gap-2.5 text-blue-400 font-black tracking-[0.3em] uppercase text-xs group-hover:text-blue-300">
                     <i class="fa-solid fa-chalkboard-user"></i> CATTEDRA DOCENTE
                 </div>
-                <span id="signature-display" class="text-[11px] text-slate-400 font-mono mt-1 px-4 text-center truncate w-full group-hover:text-slate-200">
+                <span id="signature-display" class="text-xs text-slate-400 font-mono mt-1.5 px-6 text-center truncate w-full group-hover:text-slate-200">
                     Clicca per aprire il Registro di Classe
                 </span>
             </div>
         </main>
 
         <!-- Bottom Legend & Commands Dock -->
-        <div class="fixed bottom-5 left-1/2 -translate-x-1/2 glass-panel px-6 py-2.5 rounded-2xl flex items-center gap-6 shadow-2xl z-50 border border-slate-700/60 backdrop-blur-2xl">
+        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 glass-panel px-7 py-3 rounded-2xl flex items-center gap-6 shadow-2xl z-50 border border-slate-700/80 backdrop-blur-2xl">
             <button onclick="openAgendaModal()" class="dock-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center text-pink-400 hover:text-pink-300 group" title="Agenda Impegni">
                 <i class="fa-solid fa-calendar-check text-lg"></i>
                 <span class="text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Agenda</span>
@@ -325,17 +325,17 @@
                 <span class="text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Voti</span>
             </button>
             
-            <div class="h-6 w-[1px] bg-slate-700"></div>
+            <div class="h-7 w-[1px] bg-slate-700"></div>
 
             <!-- Complete Legend Status Display -->
-            <div class="flex items-center gap-3.5 text-[10px] font-mono uppercase text-slate-300 font-bold overflow-x-auto py-1">
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Presente</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span> Bagno</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Ritardo</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> 2° Ora</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span> Uscita Ant.</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Fuori Aula</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Assente</span>
+            <div class="hidden sm:flex items-center gap-4 text-[11px] font-mono uppercase text-slate-300 font-extrabold overflow-x-auto py-1">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 shadow"></span> Presente</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse shadow"></span> Bagno</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 shadow"></span> Ritardo</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-500 shadow"></span> 2° Ora</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-yellow-400 shadow"></span> Uscita Ant.</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-indigo-500 shadow"></span> Fuori Aula</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 shadow"></span> Assente</span>
             </div>
         </div>
     </div>
@@ -351,15 +351,15 @@
                     <p class="text-xs text-slate-400 mt-0.5">Scadenze compiti per casa e verifiche programmate</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button id="btn-add-agenda" onclick="openAddAgendaModal()" class="hidden px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <button id="btn-add-agenda" onclick="openAddAgendaModal()" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow">
                         <i class="fa-solid fa-plus text-xs"></i> Nuovo
                     </button>
                     <button onclick="document.getElementById('modal-agenda').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
                 </div>
             </div>
             <div class="flex gap-4 mb-4">
-                <span class="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase">Compiti</span>
-                <span class="px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono font-bold uppercase">Verifiche</span>
+                <span class="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-mono font-extrabold uppercase">Compiti</span>
+                <span class="px-3.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs font-mono font-extrabold uppercase">Verifiche</span>
             </div>
             <div class="overflow-y-auto flex-grow custom-scrollbar space-y-3" id="agenda-list"></div>
         </div>
@@ -372,22 +372,22 @@
             <h2 class="text-xl font-bold text-white mb-6 tracking-tight">Nuovo Impegno</h2>
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="selectAgendaType('compito')" id="btn-type-compito" class="py-2.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider">Compito</button>
-                    <button onclick="selectAgendaType('verifica')" id="btn-type-verifica" class="py-2.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider">Verifica</button>
+                    <button onclick="selectAgendaType('compito')" id="btn-type-compito" class="py-3 bg-slate-800 border border-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider">Compito</button>
+                    <button onclick="selectAgendaType('verifica')" id="btn-type-verifica" class="py-3 bg-slate-800 border border-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider">Verifica</button>
                 </div>
                 <div>
                     <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Data Scadenza</label>
-                    <input type="date" id="agenda-date" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-sm outline-none focus:border-blue-500">
+                    <input type="date" id="agenda-date" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl text-sm outline-none focus:border-blue-500">
                 </div>
                 <div>
                     <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Materia</label>
-                    <select id="agenda-subject" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-sm outline-none focus:border-blue-500"></select>
+                    <select id="agenda-subject" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl text-sm outline-none focus:border-blue-500"></select>
                 </div>
                 <div>
                     <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Descrizione Attività</label>
-                    <textarea id="agenda-desc" rows="3" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-sm outline-none focus:border-blue-500" placeholder="Pagine, capitoli o esercizi..."></textarea>
+                    <textarea id="agenda-desc" rows="3" class="w-full bg-slate-900 border border-slate-700 text-white p-3.5 rounded-xl text-sm outline-none focus:border-blue-500" placeholder="Pagine, capitoli o esercizi..."></textarea>
                 </div>
-                <button onclick="saveAgendaEntry()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-600/25">Registra Impegno</button>
+                <button onclick="saveAgendaEntry()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-600/25">Registra Impegno</button>
             </div>
         </div>
     </div>
@@ -405,7 +405,7 @@
             <div class="overflow-y-auto flex-grow space-y-3 custom-scrollbar" id="modal-notices-list"></div>
         </div>
     </div>
-
+    
     <!-- MODALE REGISTRO FIRME -->
     <div id="modal-sign" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
         <div class="glass-panel w-full max-w-xl p-8 rounded-3xl shadow-2xl max-h-[85vh] flex flex-col border border-slate-700">
@@ -435,19 +435,19 @@
             <div id="new-signature-form" class="border-t border-slate-800 pt-4 hidden">
                 <h3 class="text-xs font-mono font-bold text-blue-400 uppercase mb-2">Aggiungi Firma</h3>
                 <div class="flex gap-2 mb-3">
-                    <button onclick="selectSignHour(1)" id="hour-btn-1" class="flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">1°</button>
-                    <button onclick="selectSignHour(2)" id="hour-btn-2" class="flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">2°</button>
-                    <button onclick="selectSignHour(3)" id="hour-btn-3" class="flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">3°</button>
-                    <button onclick="selectSignHour(4)" id="hour-btn-4" class="flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">4°</button>
-                    <button onclick="selectSignHour(5)" id="hour-btn-5" class="flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">5°</button>
+                    <button onclick="selectSignHour(1)" id="hour-btn-1" class="flex-1 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">1°</button>
+                    <button onclick="selectSignHour(2)" id="hour-btn-2" class="flex-1 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">2°</button>
+                    <button onclick="selectSignHour(3)" id="hour-btn-3" class="flex-1 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">3°</button>
+                    <button onclick="selectSignHour(4)" id="hour-btn-4" class="flex-1 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">4°</button>
+                    <button onclick="selectSignHour(5)" id="hour-btn-5" class="flex-1 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">5°</button>
                 </div>
                 <div class="space-y-3">
                     <div class="relative">
-                        <input type="text" id="subject-search" placeholder="Cerca materia..." onkeyup="filterSubjects()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-2 rounded-xl text-sm outline-none focus:border-blue-500">
+                        <input type="text" id="subject-search" placeholder="Cerca materia..." onkeyup="filterSubjects()" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-sm outline-none focus:border-blue-500">
                         <div id="subject-dropdown" class="absolute z-10 w-full bg-slate-800 border border-slate-700 mt-1 rounded-xl max-h-32 overflow-y-auto hidden shadow-2xl"></div>
                     </div>
                     <textarea id="sign-argomento" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-sm outline-none focus:border-blue-500" rows="2" placeholder="Argomento della lezione..."></textarea>
-                    <button onclick="saveSignature()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition">Apponi Firma</button>
+                    <button onclick="saveSignature()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition shadow">Apponi Firma</button>
                 </div>
             </div>
         </div>
@@ -459,7 +459,7 @@
             <div id="grades-header-bg" class="cv-header p-6 pb-8 bg-slate-800">
                 <div class="flex justify-between items-start">
                     <div class="flex items-center gap-3">
-                        <button id="btn-grades-back" onclick="backToGradePicker()" class="hidden text-xs bg-black/40 hover:bg-black/60 text-white px-3 py-1 rounded-lg flex items-center gap-1.5 transition font-mono font-bold">
+                        <button id="btn-grades-back" onclick="backToGradePicker()" class="hidden text-xs bg-black/40 hover:bg-black/60 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-mono font-bold">
                             <i class="fa-solid fa-arrow-left"></i> Elenco
                         </button>
                         <h2 class="text-xl font-black uppercase tracking-tight">Valutazioni</h2>
@@ -613,14 +613,6 @@
 
         const ALL_SUBJECTS = ["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
         
-        // Elenco Istituzionale Completo Sezioni
-        const FULL_CLASSES_STRUCT = {
-            "ELETTRONICA": ["1AEE", "2AEE", "3AEE", "4AEE", "5AEE"],
-            "MECCANICA": ["1AMM", "2AMM", "3AMM", "4AMM", "5AMM", "4 MAUT", "4 MROB", "5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"],
-            "CHIMICA": ["1ACM", "2ACM", "3ACM", "4ACM", "5ACM"]
-        };
-
-        // Mappa esatta banchi (Antonio Navarroli banco_01 - primo banco fila sinistra)
         const OLD_SEAT_ORDER = [
             "Antonio Navarroli",      // banco_01 (Tu)
             "Emiliano Calò",          // banco_02
@@ -919,7 +911,6 @@
             }
         }
 
-        // Classroom Layout & Desks Rendering (Generous Desks and Height)
         function renderGrid(data) {
             if (!data) return;
             const grid = document.getElementById('classroom-grid'); 
@@ -1002,7 +993,6 @@
             const noteFlag = hasNotes ? `<i class="fa-solid fa-circle-exclamation text-amber-400 absolute top-2.5 right-2.5 text-lg z-20 drop-shadow"></i>` : '';
             const statusClass = String(d.status || 'assente').replace(/_/g,'-');
             
-            // Increased Height and Padding
             btn.innerHTML = `<div class="relative h-44 w-full rounded-2xl p-4 flex flex-col justify-between shadow-lg status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100'} transition-all ${d.name==='Libero'?'cursor-default':'cursor-pointer hover:scale-[1.025]'}">
                 ${noteFlag}
                 <div class="flex justify-between items-start">
@@ -1914,19 +1904,18 @@
             const container = document.getElementById('classes-container');
             container.innerHTML = '<div class="col-span-3 text-center text-slate-500 py-10 font-mono text-xs">Caricamento aule e sezioni...</div>';
             
-            // Usa la struttura completa di classi
             container.innerHTML = '';
             for (const [dept, classes] of Object.entries(FULL_CLASSES_STRUCT)) {
                 const col = document.createElement('div');
-                col.className = 'space-y-3';
-                col.innerHTML = `<div class="text-xs font-mono font-bold uppercase tracking-widest text-slate-300 pb-2 border-b border-slate-800 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> ${dept}
-                </div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>`;
+                col.className = 'space-y-4';
+                col.innerHTML = `<div class="text-xs font-mono font-bold uppercase tracking-widest text-slate-300 pb-2.5 border-b border-slate-800 flex items-center gap-2.5">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 shadow-sm"></span> ${dept}
+                </div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>`;
                 const list = col.querySelector('div:last-child');
                 classes.forEach(c => {
-                    list.innerHTML += `<button onclick="loadClassroom('${c}')" class="w-full h-12 bg-slate-900/80 border border-slate-800 rounded-xl hover:bg-blue-600 hover:text-white hover:border-blue-500 hover:shadow-lg hover:shadow-blue-600/20 transition-all text-sm font-extrabold tracking-wider flex items-center justify-between px-4 group">
+                    list.innerHTML += `<button onclick="loadClassroom('${c}')" class="w-full h-14 bg-slate-900/90 border border-slate-800/80 rounded-2xl hover:bg-blue-600 hover:text-white hover:border-blue-500 hover:shadow-xl hover:shadow-blue-600/25 transition-all text-sm font-extrabold tracking-wider flex items-center justify-between px-5 group">
                         <span>${c}</span>
-                        <i class="fa-solid fa-chevron-right text-[10px] opacity-40 group-hover:opacity-100 transition"></i>
+                        <i class="fa-solid fa-chevron-right text-xs opacity-40 group-hover:opacity-100 transition"></i>
                     </button>`;
                 });
                 container.appendChild(col);
