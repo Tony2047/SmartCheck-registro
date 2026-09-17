@@ -111,7 +111,6 @@
         <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Caricamento...</span></div>
     </div>
 
-
     <div id="view-login" class="fixed inset-0 z-[100] bg-[#050b14] flex items-center justify-center p-4">
         <div class="relative z-10 w-full max-w-5xl h-[600px] glass-panel rounded-3xl overflow-hidden flex shadow-2xl fade-in">
             <div class="w-1/2 bg-gradient-to-br from-blue-600/20 to-purple-900/40 p-12 flex flex-col justify-between relative border-r border-white/5">
@@ -1941,7 +1940,7 @@
             // Se la sessione locale è vecchia e non contiene class_id, recuperalo dal DB.
             if (!currentUser.class_id && currentUser.u) {
                 const rows = await window.SC_API.select('registry', q =>
-                    q.select('id,username,full_name,role,class_id,subject,materia').eq('username', currentUser.u).limit(1)
+                    q.select('id,username,full_name,role,class_id,subject').eq('username', currentUser.u).limit(1)
                 );
                 const profile = rows[0];
                 if (profile) {
