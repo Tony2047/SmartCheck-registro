@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SmartCheck - School OS v138.5 (Fixed Login & Clock)</title>
+    <title>SmartCheck - School OS v138.6 (Grades Fix)</title>
     <meta name="theme-color" content="#050b14">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -103,7 +103,7 @@
                     <div class="w-20 h-1 bg-blue-500 rounded-full mb-6"></div>
                     <p class="text-slate-300 font-light text-lg">Il sistema operativo scolastico<br>di nuova generazione.</p>
                 </div>
-                <div class="text-xs font-mono text-slate-500">v138.5 • Fixed Login & Clock</div>
+                <div class="text-xs font-mono text-slate-500">v138.6 • Grades Fix</div>
             </div>
             <div class="w-1/2 p-12 flex flex-col justify-center items-center bg-[#0a0f1c]/80">
                 <div class="w-full max-w-xs space-y-8">
@@ -296,7 +296,12 @@
         <div class="bg-[#0f172a] w-full max-w-md h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
             <div id="grades-header-bg" class="cv-header p-6 pb-8 bg-cv-green">
                 <div class="flex justify-between items-start">
-                    <h2 class="text-2xl font-black uppercase">Valutazioni</h2>
+                    <div class="flex items-center gap-3">
+                        <button id="btn-grades-back" onclick="backToGradePicker()" class="hidden text-xs bg-black/30 hover:bg-black/50 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-bold">
+                            <i class="fa-solid fa-arrow-left"></i> Elenco
+                        </button>
+                        <h2 class="text-2xl font-black uppercase">Valutazioni</h2>
+                    </div>
                     <button onclick="document.getElementById('modal-grades').classList.add('hidden')" class="text-white/80 hover:text-white text-xl">✕</button>
                 </div>
                 <div class="mt-4 flex items-center justify-between">
@@ -370,24 +375,34 @@
             
             <!-- VOTI STUDENTE -->
             <div id="content-grades" class="hidden">
-                <div id="teacher-subject-block" class="mb-4 text-center"><span class="text-xs font-bold text-slate-500 uppercase">Materia:</span><span id="teacher-subject-name" class="text-green-400 font-bold ml-2">--</span></div>
-                <div id="grade-input-area" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6 flex gap-4 items-end">
-                    <div class="flex-grow">
-                        <label class="text-[10px] text-slate-400 font-bold uppercase">Voto</label>
-                        <select id="new-grade-value" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 font-mono font-bold text-sm">
+                <div id="teacher-subject-block" class="mb-4 text-center"><span class="text-xs font-bold text-slate-500 uppercase">Filtro Materia:</span><span id="teacher-subject-name" class="text-green-400 font-bold ml-2">--</span></div>
+                <div id="grade-input-area" class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6 flex flex-wrap gap-4 items-end">
+                    <div class="flex-grow min-w-[150px]">
+                        <label class="text-[10px] text-slate-400 font-bold uppercase block mb-1">Materia</label>
+                        <select id="new-grade-subject" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 text-sm outline-none"></select>
+                    </div>
+                    <div class="w-28">
+                        <label class="text-[10px] text-slate-400 font-bold uppercase block mb-1">Voto</label>
+                        <select id="new-grade-value" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 font-mono font-bold text-sm outline-none">
                             <option value="10">10</option><option value="9.75">10-</option><option value="9.5">9 1/2</option><option value="9.25">9+</option><option value="9">9</option><option value="8.75">9-</option><option value="8.5">8 1/2</option><option value="8.25">8+</option><option value="8">8</option><option value="7.75">8-</option><option value="7.5">7 1/2</option><option value="7.25">7+</option><option value="7">7</option><option value="6.75">7-</option><option value="6.5">6 1/2</option><option value="6.25">6+</option><option value="6">6</option><option value="5.75">6-</option><option value="5.5">5 1/2</option><option value="5.25">5+</option><option value="5">5</option><option value="4.75">5-</option><option value="4.5">4 1/2</option><option value="4.25">4+</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option>
                         </select>
                     </div>
-                    <div class="flex-grow">
-                        <label class="text-[10px] text-slate-400 font-bold uppercase">Tipo</label>
-                        <select id="new-grade-type" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 text-sm"><option>Scritto</option><option>Orale</option><option>Pratico</option></select>
+                    <div class="w-28">
+                        <label class="text-[10px] text-slate-400 font-bold uppercase block mb-1">Tipo</label>
+                        <select id="new-grade-type" class="w-full bg-slate-900 border border-slate-600 text-white rounded-lg p-2 text-sm outline-none"><option>Scritto</option><option>Orale</option><option>Pratico</option></select>
                     </div>
                     <button onclick="addGrade()" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-500 h-10 uppercase text-xs">Aggiungi</button>
                 </div>
-                <div class="bg-[#1e293b] rounded-xl border border-slate-700/50 max-h-64 overflow-y-auto">
+                <div class="bg-[#1e293b] rounded-xl border border-slate-700/50 max-h-72 overflow-y-auto custom-scrollbar">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-800 text-[10px] uppercase font-bold text-slate-400">
-                            <tr><th class="px-6 py-3">Data</th><th class="px-6 py-3">Tipo</th><th class="px-6 py-3 text-right">Voto</th><th class="px-6 py-3"></th></tr>
+                        <thead class="bg-slate-800 text-[10px] uppercase font-bold text-slate-400 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-4 py-3">Data</th>
+                                <th class="px-4 py-3">Materia</th>
+                                <th class="px-4 py-3">Tipo</th>
+                                <th class="px-4 py-3 text-right">Voto</th>
+                                <th class="px-4 py-3 text-right"></th>
+                            </tr>
                         </thead>
                         <tbody id="teacher-grades-list" class="text-sm font-mono text-slate-300 divide-y divide-slate-800"></tbody>
                     </table>
@@ -504,6 +519,17 @@
             let diff = (hIn * 60 + mIn) - (hOut * 60 + mOut);
             if (diff < 0) diff += 1440; 
             return `${diff} min`;
+        }
+
+        // PARSER NUMERICO VOTI PER MEDIE CORRETTE
+        function parseGradeNum(val) {
+            if (typeof val === 'number') return val;
+            if (!val) return NaN;
+            let s = String(val).trim().replace(',', '.');
+            if (s.endsWith('+')) return parseFloat(s.slice(0, -1)) + 0.25;
+            if (s.endsWith('-')) return parseFloat(s.slice(0, -1)) - 0.25;
+            if (s.includes('½') || s.includes('1/2')) return parseFloat(s.replace(/½|1\/2/g, '')) + 0.5;
+            return parseFloat(s);
         }
 
         // CLOCK ENGINE
@@ -1142,9 +1168,15 @@
         }
 
         // VOTI & MEDIA
+        function backToGradePicker() {
+            selectedStudentId = null;
+            renderClassGradePicker();
+        }
+
         function openGradesModal() {
             const modal = document.getElementById('modal-grades');
             const list = document.getElementById('grades-list');
+            const backBtn = document.getElementById('btn-grades-back');
             if (!modal || !list) return;
 
             let targetId = null;
@@ -1153,11 +1185,15 @@
             if (currentUser?.role === 'studente') {
                 targetId = currentUser.id;
                 targetName = currentUser.name || 'I miei voti';
+                backBtn?.classList.add('hidden');
             } else {
                 const student = localSchoolDB[currentClass]?.[selectedStudentId];
                 if (student?.db_id) {
                     targetId = student.db_id;
                     targetName = student.name;
+                    backBtn?.classList.remove('hidden');
+                } else {
+                    backBtn?.classList.add('hidden');
                 }
             }
 
@@ -1175,7 +1211,7 @@
                 subjects[subj].push(g); 
             });
 
-            const allV = myGrades.map(g => Number(g.value)).filter(Number.isFinite); 
+            const allV = myGrades.map(g => parseGradeNum(g.value)).filter(n => !isNaN(n)); 
             const avg = allV.length ? (allV.reduce((a,b) => a+b, 0) / allV.length).toFixed(2) : '0.0';
             
             document.getElementById('grades-total-avg').innerText = avg; 
@@ -1191,7 +1227,8 @@
             }
 
             entries.forEach(([subj, votes], idx) => {
-                const avgSub = (votes.reduce((a,b) => a + Number(b.value), 0) / votes.length).toFixed(2); 
+                const subjNums = votes.map(v => parseGradeNum(v.value)).filter(n => !isNaN(n));
+                const avgSub = subjNums.length ? (subjNums.reduce((a,b) => a + b, 0) / subjNums.length).toFixed(2) : '0.0'; 
                 const safeId = `sc-grade-${idx}`; 
                 const card = document.createElement('div');
                 card.className = 'mb-3';
@@ -1209,7 +1246,7 @@
                         ${votes.map(v => `
                             <div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
                                 <div><span class="text-[10px] text-slate-500 block">${esc(v.date||'--')}</span><span class="text-xs text-slate-300 uppercase">${esc(v.type||'')}</span></div>
-                                <span class="font-black ${Number(v.value)>=6?'text-green-400':'text-red-400'}">${esc(v.value)}</span>
+                                <span class="font-black ${parseGradeNum(v.value)>=6?'text-green-400':'text-red-400'}">${esc(v.value)}</span>
                             </div>
                         `).join('')}
                     </div>`;
@@ -1225,6 +1262,7 @@
         function renderClassGradePicker() {
             const list = document.getElementById('grades-list');
             if (!list) return;
+            document.getElementById('btn-grades-back')?.classList.add('hidden');
             document.getElementById('grades-total-avg').innerText = '--';
             document.getElementById('grades-total-count').innerText = "Seleziona uno studente";
             document.getElementById('grades-header-bg').className = "cv-header p-6 pb-8 bg-slate-800";
@@ -1232,9 +1270,19 @@
             list.innerHTML = '<div class="text-[10px] text-slate-500 uppercase tracking-widest font-black mb-3 px-1">Studenti della classe</div>';
             
             const students = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s.name !== 'Libero');
+            
+            // Ordina per Cognome
+            students.sort((a, b) => {
+                const partsA = a[1].name.trim().split(' ');
+                const cognomeA = partsA.slice(1).join(' ') || partsA[0];
+                const partsB = b[1].name.trim().split(' ');
+                const cognomeB = partsB.slice(1).join(' ') || partsB[0];
+                return cognomeA.localeCompare(cognomeB, 'it', { sensitivity: 'base' });
+            });
+
             students.forEach(([deskId, s]) => {
                 const grades = s.db_id ? (localGradesDB[s.db_id] || []) : [];
-                const nums = grades.map(g => Number(g.value)).filter(Number.isFinite);
+                const nums = grades.map(g => parseGradeNum(g.value)).filter(n => !isNaN(n));
                 const avg = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2) : '--';
 
                 const item = document.createElement('button');
@@ -1268,18 +1316,48 @@
         function loadTeacherGradesView() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
-            const subject = currentUser?.subject || 'Generale';
-            document.getElementById('teacher-subject-name').innerText = subject;
             
+            // Popola il menu a tendina Materie per l'inserimento
+            const subjSelect = document.getElementById('new-grade-subject');
+            if (subjSelect && subjSelect.children.length === 0) {
+                ALL_SUBJECTS.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    if (currentUser?.subject && s === currentUser.subject) opt.selected = true;
+                    subjSelect.appendChild(opt);
+                });
+            }
+
+            const isTeacher = (currentUser?.role === 'docente' && currentUser?.subject);
             const list = document.getElementById('teacher-grades-list');
             list.innerHTML = "";
-            const grades = (localGradesDB[student.db_id] || []).filter(g => g.subject === subject);
+            
+            // Per l'admin mostra tutti i voti dello studente
+            const allStudentGrades = (localGradesDB[student.db_id] || []);
+            const grades = isTeacher ? allStudentGrades.filter(g => g.subject === currentUser.subject) : allStudentGrades;
+
+            document.getElementById('teacher-subject-name').innerText = isTeacher ? currentUser.subject : 'Tutte le Materie (Admin)';
+
             if (grades.length === 0) {
-                list.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-slate-500">Nessun voto presente per ${esc(student.name)}.</td></tr>`;
+                list.innerHTML = `<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Nessun voto registrato per ${esc(student.name)}.</td></tr>`;
                 return;
             }
             grades.forEach(g => {
-                list.innerHTML += `<tr><td class="px-6 py-3">${g.date}</td><td class="px-6 py-3 uppercase text-[10px]">${g.type}</td><td class="px-6 py-3 text-right font-bold ${Number(g.value)>=6?'text-green-400':'text-red-400'}">${g.value}</td><td class="px-6 py-3 text-right"><button onclick="deleteGrade('${g.id}')" class="text-red-500 hover:text-white"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                const num = parseGradeNum(g.value);
+                const color = num >= 6 ? 'text-green-400' : num >= 5 ? 'text-orange-400' : 'text-red-400';
+                list.innerHTML += `
+                    <tr class="hover:bg-slate-800/30 transition">
+                        <td class="px-4 py-3 text-xs text-slate-400">${esc(g.date)}</td>
+                        <td class="px-4 py-3 text-xs font-semibold text-slate-200">${esc(g.subject || 'Generale')}</td>
+                        <td class="px-4 py-3 uppercase text-[10px] text-slate-400">${esc(g.type)}</td>
+                        <td class="px-4 py-3 text-right font-black text-sm ${color}">${esc(g.value)}</td>
+                        <td class="px-4 py-3 text-right">
+                            <button onclick="deleteGrade('${g.id}')" class="text-red-500 hover:text-white transition p-1" title="Elimina">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
             });
         }
 
@@ -1287,12 +1365,14 @@
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
             const val = document.getElementById('new-grade-value').value;
+            const chosenSubject = document.getElementById('new-grade-subject')?.value || currentUser?.subject || 'Generale';
+            
             setLoading(true, "Salvataggio voto...");
             try {
                 await _supabase.from('grades').insert([{
                     student_id: student.db_id,
                     teacher_id: currentUser?.id,
-                    subject: currentUser?.subject || 'Generale',
+                    subject: chosenSubject,
                     value: val,
                     type: document.getElementById('new-grade-type').value,
                     date: new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}),
@@ -1300,7 +1380,7 @@
                 }]);
                 await loadScopedSchoolData();
                 loadTeacherGradesView();
-                toast('Voto inserito', `${student.name}: ${val}`, 'success');
+                toast('Voto inserito', `${student.name}: ${val} (${chosenSubject})`, 'success');
             } finally {
                 setLoading(false);
             }
@@ -1377,7 +1457,6 @@
             
             const students = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s && s.name !== 'Libero');
 
-            // Ordina per Cognome
             students.sort((a, b) => {
                 const partsA = a[1].name.trim().split(' ');
                 const cognomeA = partsA.slice(1).join(' ') || partsA[0];
@@ -1442,7 +1521,7 @@
             .subscribe();
         }
 
-        // AUTENTICAZIONE E ACCESSO PROTETTO
+        // AUTENTICAZIONE E ACCESSO
         async function verifyUser() {
             const inputEl = document.getElementById('input-username');
             const input = inputEl ? inputEl.value.trim().toLowerCase() : '';
@@ -1458,35 +1537,13 @@
             err.classList.add('hidden');
             btn.innerText = "Verifica...";
 
-            // Accesso immediato senza blocchi per admin
-            if (input === 'admin') {
-                tempUser = {
-                    id: 'admin-master',
-                    u: 'admin',
-                    name: 'Amministratore',
-                    role: 'admin',
-                    pass: 'admin',
-                    class_id: null,
-                    subject: 'Generale'
-                };
-                document.getElementById('input-username').classList.add('hidden');
-                document.getElementById('btn-next').classList.add('hidden');
-                document.getElementById('password-container').classList.remove('hidden');
-                document.getElementById('user-welcome').innerText = "Amministratore";
-                btn.innerText = "CONTINUA";
-                setTimeout(() => document.getElementById('input-password').focus(), 100);
-                return;
-            }
-
-            // Ricerca sicura senza crash per tutti gli altri utenti
             try {
+                // Recupera l'utente direttamente con il suo UUID da Supabase
                 const { data, error } = await _supabase
                     .from('registry')
                     .select('*')
                     .eq('username', input)
                     .limit(1);
-
-                if (error) throw error;
 
                 if (data && data.length > 0) {
                     const user = data[0];
@@ -1503,6 +1560,22 @@
                     document.getElementById('btn-next').classList.add('hidden');
                     document.getElementById('password-container').classList.remove('hidden');
                     document.getElementById('user-welcome').innerText = user.full_name;
+                    setTimeout(() => document.getElementById('input-password').focus(), 100);
+                } else if (input === 'admin') {
+                    // Fallback immediato se admin non fosse presente in registry
+                    tempUser = {
+                        id: '00000000-0000-0000-0000-000000000001',
+                        u: 'admin',
+                        name: 'Amministratore',
+                        role: 'admin',
+                        pass: 'admin',
+                        class_id: null,
+                        subject: 'Generale'
+                    };
+                    document.getElementById('input-username').classList.add('hidden');
+                    document.getElementById('btn-next').classList.add('hidden');
+                    document.getElementById('password-container').classList.remove('hidden');
+                    document.getElementById('user-welcome').innerText = "Amministratore";
                     setTimeout(() => document.getElementById('input-password').focus(), 100);
                 } else {
                     errText.innerText = "Utente non trovato nel DB";
