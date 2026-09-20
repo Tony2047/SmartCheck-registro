@@ -329,7 +329,7 @@
             <div id="mobile-classroom-grid" class="md:hidden w-full space-y-5"></div>
 
             <!-- DESKTOP 3-COLUMN PHYSICAL CLASSROOM GRID -->
-            <div class="hidden md:grid grid-cols-3 gap-8 lg:gap-14 w-full mt-1 flex-grow items-end" id="classroom-grid"></div>
+            <div class="hidden md:grid grid-cols-3 gap-3 lg:gap-8 xl:gap-14 w-full mt-1 flex-grow items-end" id="classroom-grid"></div>
 
             <!-- Cattedra Station -->
             <div id="teacher-desk" onclick="openSignModal()" class="mt-6 sm:mt-8 w-full max-w-lg p-3.5 sm:h-20 glass-panel border-b-4 border-blue-500 rounded-2xl sm:rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:scale-[1.015] transition-all group shadow-2xl">
@@ -1045,32 +1045,34 @@
             }
         }
 
-        // Desktop Grid Card Generator
+        // Desktop Grid Card Generator - [BUGFIX RESPONSIVE PC]
         function createDeskCard(id, data, isSingle=false) {
             const d = data[id] || {name:'Libero',status:'assente',time:'--:--'};
             const wrap = document.createElement('div'); 
-            wrap.className = isSingle ? 'w-[300px]' : 'w-full';
+            // Invece di w-[300px] fisso, usiamo una percentuale per adattarsi alla colonna
+            wrap.className = isSingle ? 'w-[80%] mx-auto' : 'w-full';
 
             const btn = document.createElement('button'); 
             btn.type = 'button'; 
-            btn.className = 'w-full block outline-none';
+            btn.className = 'w-full block outline-none h-full';
             btn.disabled = (d.name === 'Libero');
 
             const hasNotes = d.db_id && localNotesDB[d.db_id]?.length;
-            const noteFlag = hasNotes ? `<i class="fa-solid fa-circle-exclamation text-amber-400 absolute top-2.5 right-2.5 text-lg z-20 drop-shadow"></i>` : '';
+            const noteFlag = hasNotes ? `<i class="fa-solid fa-circle-exclamation text-amber-400 absolute top-2 right-2 text-sm lg:text-base z-20 drop-shadow"></i>` : '';
             const statusClass = String(d.status || 'assente').replace(/_/g,'-');
             
-            btn.innerHTML = `<div class="relative h-44 w-full rounded-2xl p-4 flex flex-col justify-between shadow-lg status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100'} transition-all ${d.name==='Libero'?'cursor-default':'cursor-pointer hover:scale-[1.025]'}">
+            // L'altezza h-44 è stata sostituita con h-24/h-28/h-32 responsive per non far esplodere la griglia su monitor normali
+            btn.innerHTML = `<div class="relative h-24 md:h-28 lg:h-32 xl:h-36 w-full rounded-xl xl:rounded-2xl p-2.5 xl:p-4 flex flex-col justify-between shadow-lg status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100'} transition-all ${d.name==='Libero'?'cursor-default':'cursor-pointer hover:scale-[1.025]'}">
                 ${noteFlag}
                 <div class="flex justify-between items-start">
-                    <span class="text-[10px] font-bold opacity-60 font-mono">#${id.split('_')[1]}</span>
-                    <span class="text-[9px] font-mono font-bold uppercase tracking-wider opacity-90 py-0.5 px-2.5 rounded-md bg-black/30">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
+                    <span class="text-[9px] xl:text-[10px] font-bold opacity-60 font-mono">#${id.split('_')[1]}</span>
+                    <span class="text-[8px] xl:text-[9px] font-mono font-bold uppercase tracking-wider opacity-90 py-0.5 px-1.5 xl:px-2.5 rounded-md bg-black/30">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
                 </div>
-                <div class="text-center flex-grow flex items-center justify-center px-1">
-                    <h3 class="font-extrabold text-base leading-snug uppercase w-full break-words text-white/95">${esc(d.name)}</h3>
+                <div class="text-center flex-grow flex items-center justify-center px-0.5 xl:px-1">
+                    <h3 class="font-extrabold text-[10px] lg:text-xs xl:text-sm leading-snug uppercase w-full break-words text-white/95">${esc(d.name)}</h3>
                 </div>
-                <div class="text-center">
-                    <span class="text-[10px] font-mono font-medium opacity-75 bg-black/30 px-2.5 py-0.5 rounded text-white">${esc(d.time || '--:--')}</span>
+                <div class="text-center pb-0.5 xl:pb-0">
+                    <span class="text-[9px] xl:text-[10px] font-mono font-medium opacity-75 bg-black/30 px-1.5 xl:px-2.5 py-0.5 rounded text-white">${esc(d.time || '--:--')}</span>
                 </div>
             </div>`;
 
@@ -1091,7 +1093,8 @@
 
             const makeColumn = (label, deskIds) => {
                 const col = document.createElement('div');
-                col.className = 'flex flex-col-reverse gap-4'; 
+                // Adattato il gap verticale per PC
+                col.className = 'flex flex-col-reverse gap-2 lg:gap-4'; 
                 const labelEl = document.createElement('div');
                 labelEl.className = 'text-center text-[10px] font-mono font-bold text-slate-500 uppercase tracking-[0.25em] mb-1 opacity-60 order-last';
                 labelEl.textContent = label;
@@ -1099,7 +1102,8 @@
                 for (let i = 0; i < deskIds.length; i += 2) {
                     const pair = deskIds.slice(i, i+2);
                     const row = document.createElement('div'); 
-                    row.className = 'grid grid-cols-2 gap-3.5';
+                    // Adattato il gap orizzontale per PC
+                    row.className = 'grid grid-cols-2 gap-2 lg:gap-3.5';
                     pair.forEach(id => row.appendChild(createDeskCard(id, data)));
                     col.appendChild(row);
                 }
@@ -1112,7 +1116,7 @@
 
             const leftCol = makeColumn('ALA SINISTRA', left);
             const centerCol = document.createElement('div'); 
-            centerCol.className = 'flex flex-col-reverse gap-4';
+            centerCol.className = 'flex flex-col-reverse gap-2 lg:gap-4';
             const centerLabel = document.createElement('div'); 
             centerLabel.className = 'text-center text-[10px] font-mono font-bold text-slate-500 uppercase tracking-[0.25em] mb-1 opacity-60 order-last'; 
             centerLabel.textContent = 'FILA CENTRALE'; 
@@ -1126,7 +1130,7 @@
             const centerPairs = center.slice(1);
             for (let i=0;i<centerPairs.length;i+=2) {
                 const row = document.createElement('div'); 
-                row.className = 'grid grid-cols-2 gap-3.5';
+                row.className = 'grid grid-cols-2 gap-2 lg:gap-3.5';
                 row.appendChild(createDeskCard(centerPairs[i], data));
                 if (centerPairs[i+1]) row.appendChild(createDeskCard(centerPairs[i+1], data));
                 centerCol.appendChild(row);
