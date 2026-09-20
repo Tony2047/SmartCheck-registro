@@ -1258,6 +1258,7 @@
             document.getElementById(`btn-${status}`)?.classList.add('btn-selected');
         }
 
+        // Conferma cambio stato presenza - [BUGFIX: Orario effettivo se FUORI ORARIO]
         async function confirmStatusChange() {
             if (!pendingStatus) {
                 toast('Seleziona Stato', 'Scegli uno stato prima di salvare.', 'info');
@@ -1267,9 +1268,14 @@
             if (!student) return;
 
             const oldStatus = student.status;
-            const now = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+            const nowObj = new Date();
+            const now = nowObj.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+            const totalM = nowObj.getHours() * 60 + nowObj.getMinutes();
+            // Durante l'orario scolastico (08:00 - 13:30) la presenza segna 08:00; fuori orario registra l'orario reale
+            const isOrarioScolastico = (totalM >= 480 && totalM < 810);
+
             student.status = pendingStatus;
-            student.time = (pendingStatus === 'presente') ? '08:00' : (pendingStatus === 'assente' ? '--:--' : now);
+            student.time = (pendingStatus === 'presente') ? (isOrarioScolastico ? '08:00' : now) : (pendingStatus === 'assente' ? '--:--' : now);
 
             if (pendingStatus === 'bagno' && oldStatus !== 'bagno') {
                 student.history.push({ out: now, in: null });
@@ -1294,7 +1300,7 @@
                         status: pendingStatus,
                         time: student.time
                     }, { onConflict: 'student_id, date' });
-                    toast('Presenza Salvata', `${student.name} → ${pendingStatus.toUpperCase().replace('_', ' ')}`, 'success');
+                    toast('Presenza Salvata', `${student.name} → ${pendingStatus.toUpperCase().replace('_', ' ')} (${student.time})`, 'success');
                 } catch(err) {
                     console.error("Errore salvataggio presenza:", err);
                     toast('Errore Sincronizzazione', 'Salvataggio non riuscito su DB.', 'error');
