@@ -269,21 +269,25 @@
     <!-- ================= 3. CLASSROOM VIEW (PC WIDESCREEN & MOBILE) ================= -->
     <div id="view-classroom" class="hidden min-h-screen flex flex-col relative fade-in">
         
-        <!-- Header HUD: Responsive 2-Righe su Mobile e Spaziatura Equidistante su PC -->
+        <!-- Header HUD: Layout Centrato, Compattato e Badge Distanziato -->
         <header class="bg-[#0b1121]/95 backdrop-blur-xl border-b border-slate-800/80 px-3 sm:px-6 lg:px-8 xl:px-10 py-2.5 sm:py-3 sticky top-0 z-40">
             <div class="w-full grid grid-cols-2 gap-y-2.5 items-center md:flex md:justify-between md:items-center">
                 
-                <!-- Blocco Sinistro: Info Classe & Tasto Back -->
-                <div class="col-start-1 row-start-1 flex items-center gap-2 sm:gap-3.5 shrink-0">
+                <!-- Blocco Sinistro: Tasto Back + Classe e Sezione Centrati e Ravvicinati + Badge Ruolo Distanziato -->
+                <div class="col-start-1 row-start-1 flex items-center gap-2.5 sm:gap-3.5 shrink-0">
                     <button id="back-btn" onclick="backToHub()" title="Torna all'Hub" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 text-slate-300 transition shrink-0">
                         <i class="fa-solid fa-arrow-left text-xs sm:text-sm"></i>
                     </button>
-                    <div>
-                        <div class="flex items-center gap-1.5 sm:gap-2">
-                            <span class="text-[9px] sm:text-[10px] font-mono text-slate-500 uppercase tracking-widest">CLASSE</span>
-                            <span id="role-badge" class="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono uppercase tracking-widest font-bold">--</span>
-                        </div>
-                        <h1 class="text-base sm:text-xl md:text-2xl font-black text-white tracking-tight leading-none mt-0.5" id="class-header-name">--</h1>
+                    
+                    <!-- Gruppo Testo Classe: 'CLASSE' e Nome Sezione uno sotto l'altro e molto vicini -->
+                    <div class="flex flex-col justify-center leading-none">
+                        <span class="text-[8px] sm:text-[9px] font-mono text-slate-400 font-bold uppercase tracking-widest leading-none mb-0.5">CLASSE</span>
+                        <h1 class="text-base sm:text-xl md:text-2xl font-black text-white tracking-tight leading-none" id="class-header-name">--</h1>
+                    </div>
+
+                    <!-- Badge Profilo Utente: Centrato verticalmente e leggermente più staccato -->
+                    <div class="flex items-center ml-2 sm:ml-3">
+                        <span id="role-badge" class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[9px] sm:text-[10px] font-mono uppercase tracking-wider font-extrabold shadow-sm">--</span>
                     </div>
                 </div>
 
@@ -408,7 +412,7 @@
             
             <div class="h-6 w-[1px] bg-slate-700 shrink-0"></div>
 
-            <div class="flex items-center gap-3 sm:gap-3.5 text-[9px] sm:text-[10px] font-mono uppercase text-slate-300 font-bold overflow-x-py-0.5 scrollbar-none shrink">
+            <div class="flex items-center gap-3 sm:gap-3.5 text-[9px] sm:text-[10px] font-mono uppercase text-slate-300 font-bold overflow-x-auto py-0.5 scrollbar-none shrink">
                 <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Presente</span>
                 <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span> Bagno</span>
                 <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Ritardo</span>
@@ -564,6 +568,7 @@
             <div class="flex justify-between items-start mb-5 sm:mb-6">
                 <div>
                     <h2 id="modal-detail-name" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Nome Cognome</h2>
+                    <!-- SCHEDE RIMASTE SEMPRE ATTIVE ANCHE PER GLI STUDENTI -->
                     <div class="flex gap-4 mt-3 text-xs font-mono uppercase font-bold" id="student-modal-tabs">
                         <button onclick="switchTab('presence')" id="tab-presence" class="text-blue-400 border-b-2 border-blue-400 pb-1">Presenze</button>
                         <button onclick="switchTab('grades')" id="tab-grades" class="text-slate-500 hover:text-white pb-1">Voti</button>
@@ -750,7 +755,7 @@
         let onlineSignatures = [];
         let localGradesDB = {}; 
         let localNotesDB = {};
-        let localUsersDB = {}; // Mappa id -> full_name per attribuzione automatica autori
+        let localUsersDB = {};
 
         function esc(val) { return String(val ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
         
@@ -926,7 +931,7 @@
                 const picker = document.getElementById('date-picker');
                 if (picker) picker.value = selectedDate;
 
-                // Carica prima tutte le note e i dati di registro per garantire la presenza del punto esclamativo
+                // Carica prima tutte le note e i dati di registro per garantire la presenza dei richiami/note
                 await loadScopedSchoolData();
                 await changeDate(selectedDate);
                 renderGrid(localSchoolDB[cls]);
@@ -942,8 +947,8 @@
                 if (badge) {
                     badge.innerText = isStud ? 'STUDENTE' : (currentUser?.role || 'DOCENTE').toUpperCase();
                     badge.className = isStud 
-                        ? 'px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-700/50'
-                        : 'px-2 py-0.5 rounded bg-blue-950/60 text-blue-300 border border-blue-700/50';
+                        ? 'px-2 py-0.5 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-700/50'
+                        : 'px-2 py-0.5 rounded-lg bg-blue-950/60 text-blue-300 border border-blue-700/50';
                 }
                 updateSignatureDisplay();
             } catch(err) {
@@ -989,7 +994,6 @@
 
         async function loadScopedSchoolData() {
             try {
-                // Caricamento anagrafica utenti per risolvere sempre i nomi dei docenti
                 const { data: allUsers } = await _supabase.from('registry').select('id, full_name, role');
                 localUsersDB = {};
                 if (allUsers) {
@@ -1226,7 +1230,7 @@
             }
         }
 
-        // Modale Dettaglio Studente
+        // Modale Dettaglio Studente: Schede sempre accessibili per tutti gli utenti
         function openStudentDetail(id) {
             const student = localSchoolDB[currentClass]?.[selectedStudentId = id];
             if (!student || student.name === 'Libero') return;
@@ -1260,9 +1264,11 @@
             const isTeacher = (currentUser?.role !== 'studente');
             document.getElementById('status-edit-hint')?.classList.toggle('hidden', !isTeacher);
             document.getElementById('teacher-note-input')?.classList.toggle('hidden', !isTeacher);
+            document.getElementById('grade-input-area')?.classList.toggle('hidden', !isTeacher);
 
             switchTab('presence');
-            document.getElementById('student-modal-tabs')?.classList.toggle('hidden', !isTeacher);
+            // Le schede rimangono SEMPRE visibili per tutti gli utenti, inclusi gli studenti
+            document.getElementById('student-modal-tabs')?.classList.remove('hidden');
 
             document.getElementById('modal-student-detail').classList.remove('hidden');
         }
@@ -1742,6 +1748,9 @@
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
             
+            const isTeacher = (currentUser?.role !== 'studente');
+            document.getElementById('grade-input-area')?.classList.toggle('hidden', !isTeacher);
+
             const subjSelect = document.getElementById('new-grade-subject');
             if (subjSelect && subjSelect.children.length === 0) {
                 ALL_SUBJECTS.forEach(s => {
@@ -1753,14 +1762,16 @@
                 });
             }
 
-            const isTeacher = (currentUser?.role === 'docente' && currentUser?.subject);
+            const isSpecificTeacher = (currentUser?.role === 'docente' && currentUser?.subject);
             const list = document.getElementById('teacher-grades-list');
             list.innerHTML = "";
             
             const allStudentGrades = (localGradesDB[student.db_id] || []);
-            const grades = isTeacher ? allStudentGrades.filter(g => g.subject === currentUser.subject) : allStudentGrades;
+            const grades = isSpecificTeacher ? allStudentGrades.filter(g => g.subject === currentUser.subject) : allStudentGrades;
 
-            document.getElementById('teacher-subject-name').innerText = isTeacher ? currentUser.subject : 'Tutte le Materie (Admin)';
+            document.getElementById('teacher-subject-name').innerText = isTeacher 
+                ? (isSpecificTeacher ? currentUser.subject : 'Tutte le Materie (Admin)') 
+                : 'Valutazioni dello Studente';
 
             if (grades.length === 0) {
                 list.innerHTML = `<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Nessun voto registrato per ${esc(student.name)}.</td></tr>`;
@@ -1769,17 +1780,18 @@
             grades.forEach(g => {
                 const num = parseGradeNum(g.value);
                 const color = num >= 6 ? 'text-emerald-400' : num >= 5 ? 'text-amber-400' : 'text-red-400';
+                const deleteBtn = isTeacher ? `
+                    <button onclick="deleteGrade('${g.id}')" class="text-red-500 hover:text-white transition p-1" title="Elimina">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>` : '';
+
                 list.innerHTML += `
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="px-4 py-2.5 text-slate-400">${esc(g.date)}</td>
                         <td class="px-4 py-2.5 font-semibold text-slate-200">${esc(g.subject || 'Generale')}</td>
                         <td class="px-4 py-2.5 uppercase text-[10px] text-slate-400">${esc(g.type)}</td>
                         <td class="px-4 py-2.5 text-right font-black ${color}">${esc(g.value)}</td>
-                        <td class="px-4 py-2.5 text-right">
-                            <button onclick="deleteGrade('${g.id}')" class="text-red-500 hover:text-white transition p-1" title="Elimina">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
-                        </td>
+                        <td class="px-4 py-2.5 text-right">${deleteBtn}</td>
                     </tr>`;
             });
         }
@@ -1892,7 +1904,7 @@
                     : '<span class="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">Annotazione</span>';
 
                 const authorName = n.teacher || n.teacher_name || localUsersDB[n.teacher_id] || (n.teacher_id === currentUser?.id ? currentUser.name : 'Docente');
-                const canDelete = (currentUser?.role === 'admin' || currentUser?.name === authorName || currentUser?.id === n.teacher_id);
+                const canDelete = (currentUser?.role === 'admin' || (currentUser?.role !== 'studente' && (currentUser?.name === authorName || currentUser?.id === n.teacher_id)));
 
                 list.innerHTML += `
                     <div class="${borderColor} p-3.5 rounded-xl mb-2.5 border-l-4 border shadow-md">
