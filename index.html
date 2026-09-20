@@ -50,6 +50,19 @@
         /* SEPARATORE HEADER DEDICATO SENZA CONFLITTI !IMPORTANT */
         .header-divider { display: none; }
 
+        /* DISTANZIAMENTO GARANTITO CASELLE CLASSI HUB */
+        .class-list-container {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+        }
+
+        @media (min-width: 640px) {
+            .class-list-container {
+                gap: 15px !important;
+            }
+        }
+
         @media (min-width: 768px) {
             #classroom-grid { display: grid !important; }
             #mobile-classroom-grid { display: none !important; }
@@ -244,7 +257,7 @@
             </div>
 
             <div class="glass-panel p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-800/80">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8" id="classes-container"></div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-start" id="classes-container"></div>
             </div>
         </div>
 
@@ -2082,7 +2095,7 @@
                 };
 
                 const col = document.createElement('div');
-                col.className = 'flex flex-col space-y-4 bg-slate-900/40 p-4 sm:p-6 rounded-3xl border border-slate-800/80 shadow-lg';
+                col.className = 'flex flex-col space-y-4 bg-slate-900/40 p-4 sm:p-6 pb-6 sm:pb-8 rounded-3xl border border-slate-800/80 shadow-lg';
                 col.innerHTML = `
                     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                         <div class="flex items-center gap-3">
@@ -2096,15 +2109,15 @@
                         </div>
                         <span class="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border ${cfg.bgBadge} hidden sm:inline-block">${cfg.badge}</span>
                     </div>
-                    <div class="flex flex-col gap-3.5 sm:gap-4.5 pt-1.5"></div>
+                    <div class="class-list-container pt-1.5"></div>
                 `;
                 
-                const list = col.querySelector('div:last-child');
+                const list = col.querySelector('.class-list-container');
                 classes.forEach(c => {
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.onclick = () => loadClassroom(c);
-                    btn.className = `w-full py-4 px-4 sm:px-5 bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} hover:text-white transition-all duration-200 text-left flex items-center justify-between group active:scale-[0.98] shadow-md hover:shadow-xl`;
+                    btn.className = `w-full py-3.5 sm:py-4 px-4 sm:px-5 bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} hover:text-white transition-all duration-200 text-left flex items-center justify-between group active:scale-[0.98] shadow-md hover:shadow-xl`;
                     btn.innerHTML = `
                         <div class="flex flex-col">
                             <span class="text-xl sm:text-2xl font-black font-mono text-white group-hover:text-white tracking-wider leading-tight">${esc(c)}</span>
