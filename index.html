@@ -408,7 +408,7 @@
             
             <div class="h-6 w-[1px] bg-slate-700 shrink-0"></div>
 
-            <div class="flex items-center gap-3 sm:gap-3.5 text-[9px] sm:text-[10px] font-mono uppercase text-slate-300 font-bold overflow-x-auto py-0.5 scrollbar-none shrink">
+            <div class="flex items-center gap-3 sm:gap-3.5 text-[9px] sm:text-[10px] font-mono uppercase text-slate-300 font-bold overflow-x-py-0.5 scrollbar-none shrink">
                 <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Presente</span>
                 <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span> Bagno</span>
                 <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Ritardo</span>
@@ -750,6 +750,7 @@
         let onlineSignatures = [];
         let localGradesDB = {}; 
         let localNotesDB = {};
+        let localUsersDB = {}; // Mappa id -> full_name per attribuzione automatica autori
 
         function esc(val) { return String(val ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
         
@@ -884,7 +885,6 @@
                     }
                 });
             } else {
-                // Per le altre sezioni (1AEE, Meccanica, Chimica) alloca unicamente gli studenti registrati su quella classe
                 students.forEach((stud, idx) => {
                     if (idx < 23) {
                         let id = `banco_${String(idx + 1).padStart(2, '0')}`;
@@ -899,7 +899,6 @@
         async function loadClassroom(cls) {
             window.scrollTo(0, 0);
             currentClass = cls;
-            // Salva classe attiva in localStorage per ripristino al reload (F5)
             localStorage.setItem('SC_ACTIVE_CLASS', cls);
 
             document.getElementById('view-hub')?.classList.add('hidden');
@@ -927,8 +926,11 @@
                 const picker = document.getElementById('date-picker');
                 if (picker) picker.value = selectedDate;
 
-                await changeDate(selectedDate);
+                // Carica prima tutte le note e i dati di registro per garantire la presenza del punto esclamativo
                 await loadScopedSchoolData();
+                await changeDate(selectedDate);
+                renderGrid(localSchoolDB[cls]);
+
                 initRealtime();
 
                 const isStud = currentUser?.role === 'studente';
@@ -987,6 +989,15 @@
 
         async function loadScopedSchoolData() {
             try {
+                // Caricamento anagrafica utenti per risolvere sempre i nomi dei docenti
+                const { data: allUsers } = await _supabase.from('registry').select('id, full_name, role');
+                localUsersDB = {};
+                if (allUsers) {
+                    allUsers.forEach(u => { localUsersDB[u.id] = u.full_name; });
+                }
+                localUsersDB['00000000-0000-0000-0000-000000000001'] = 'Amministratore';
+                if (currentUser?.id) localUsersDB[currentUser.id] = currentUser.name;
+
                 const { data: g } = await _supabase.from('grades').select('*');
                 onlineGrades = g || [];
                 localGradesDB = {};
@@ -1031,8 +1042,13 @@
             const d = data[id] || { name: 'Libero', status: 'assente', time: '--:--' };
             const isLibero = (d.name === 'Libero');
             const statusClass = String(d.status || 'assente').replace(/_/g,'-');
-            const hasNotes = d.db_id && localNotesDB[d.db_id]?.length;
-            const noteFlag = hasNotes ? `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>` : '';
+            
+            const studentNotes = (d.db_id && localNotesDB[d.db_id]) ? localNotesDB[d.db_id] : [];
+            const hasWarning = studentNotes.some(n => n.type === 'warning');
+            const hasNotes = studentNotes.length > 0;
+            const noteFlag = hasWarning 
+                ? `<span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" title="Richiamo Disciplinare"></span>` 
+                : (hasNotes ? `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping" title="Annotazione"></span>` : '');
 
             const card = document.createElement('div');
             card.className = `p-3 rounded-2xl status-${statusClass} ${isLibero ? 'opacity-30 cursor-default' : 'cursor-pointer active:scale-[0.98]'} transition-all shadow-md flex flex-col justify-between min-h-[105px]`;
@@ -1109,8 +1125,13 @@
             btn.className = 'w-full block outline-none h-full';
             btn.disabled = (d.name === 'Libero');
 
-            const hasNotes = d.db_id && localNotesDB[d.db_id]?.length;
-            const noteFlag = hasNotes ? `<i class="fa-solid fa-circle-exclamation text-amber-400 absolute top-3 right-3 text-sm lg:text-base z-20 drop-shadow"></i>` : '';
+            const studentNotes = (d.db_id && localNotesDB[d.db_id]) ? localNotesDB[d.db_id] : [];
+            const hasWarning = studentNotes.some(n => n.type === 'warning');
+            const hasNotes = studentNotes.length > 0;
+            const noteFlag = hasWarning 
+                ? `<i class="fa-solid fa-circle-exclamation text-red-500 animate-pulse absolute top-3 right-3 text-sm lg:text-base z-20 drop-shadow" title="Richiamo Disciplinare"></i>`
+                : (hasNotes ? `<i class="fa-solid fa-circle-info text-amber-400 absolute top-3 right-3 text-sm lg:text-base z-20 drop-shadow" title="Annotazione"></i>` : '');
+            
             const statusClass = String(d.status || 'assente').replace(/_/g,'-');
             
             btn.innerHTML = `<div class="relative h-28 md:h-32 lg:h-36 xl:h-44 2xl:h-48 w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between shadow-xl status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100'} transition-all ${d.name==='Libero'?'cursor-default':'cursor-pointer hover:scale-[1.03]'}">
@@ -1852,6 +1873,7 @@
             }
         }
 
+        // Visualizzazione note: mostra Badge Tipo, Data, Ora e Autore Docente
         function loadNotes() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
@@ -1863,10 +1885,33 @@
                 return;
             }
             notes.forEach(n => {
-                list.innerHTML += `<div class="bg-slate-900 p-3 rounded-xl mb-2 border-l-4 ${n.type==='warning'?'border-red-500':'border-blue-500'}"><div class="flex justify-between font-mono"><span class="text-[10px] text-slate-400">${n.date}</span><button onclick="deleteNote('${n.id}')" class="text-red-400 text-xs hover:text-white">Elimina</button></div><p class="text-xs text-slate-200 mt-1">${esc(n.text)}</p></div>`;
+                const isWarning = (n.type === 'warning');
+                const borderColor = isWarning ? 'border-red-500 bg-red-950/20' : 'border-blue-500 bg-slate-900/90';
+                const typeBadge = isWarning 
+                    ? '<span class="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">Richiamo</span>'
+                    : '<span class="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">Annotazione</span>';
+
+                const authorName = n.teacher || n.teacher_name || localUsersDB[n.teacher_id] || (n.teacher_id === currentUser?.id ? currentUser.name : 'Docente');
+                const canDelete = (currentUser?.role === 'admin' || currentUser?.name === authorName || currentUser?.id === n.teacher_id);
+
+                list.innerHTML += `
+                    <div class="${borderColor} p-3.5 rounded-xl mb-2.5 border-l-4 border shadow-md">
+                        <div class="flex justify-between items-center mb-1.5 font-mono">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                ${typeBadge}
+                                <span class="text-[10px] text-slate-400 font-bold">${esc(n.date)}</span>
+                                <span class="text-[10px] text-blue-300 font-bold flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded border border-white/5">
+                                    <i class="fa-solid fa-user-tie text-[9px] text-blue-400"></i> ${esc(authorName)}
+                                </span>
+                            </div>
+                            ${canDelete ? `<button onclick="deleteNote('${n.id}')" class="text-red-400 hover:text-red-300 text-xs p-1 transition" title="Elimina nota"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>
+                        <p class="text-xs text-slate-200 mt-1 leading-relaxed font-medium">${esc(n.text)}</p>
+                    </div>`;
             });
         }
 
+        // Salvataggio nota con attribuzione profilo docente e orario reale
         async function addNote() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
@@ -1874,19 +1919,48 @@
             if (!text) return;
             setLoading(true, "Salvataggio nota...");
             try {
-                await _supabase.from('notes').insert([{
+                const teacherName = currentUser?.name || 'Docente';
+                const nowTime = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+                const nowDate = new Date().toLocaleDateString('it-IT');
+                const noteType = document.getElementById('note-type').value;
+
+                let baseNote = {
                     student_id: student.db_id,
                     teacher_id: currentUser?.id,
                     text: text,
-                    type: document.getElementById('note-type').value,
-                    date: new Date().toLocaleDateString('it-IT'),
+                    type: noteType,
+                    date: `${nowDate} ${nowTime}`,
                     class_id: currentClassId
-                }]);
+                };
+
+                let inserted = false;
+                try {
+                    const { error: errCol } = await _supabase.from('notes').insert([{
+                        ...baseNote,
+                        teacher: teacherName
+                    }]);
+                    if (!errCol) inserted = true;
+                } catch(e) {}
+
+                if (!inserted) {
+                    const { error: errBase } = await _supabase.from('notes').insert([baseNote]);
+                    if (errBase) {
+                        const { error: errFallback } = await _supabase.from('notes').insert([{
+                            ...baseNote,
+                            date: nowDate
+                        }]);
+                        if (errFallback) throw errFallback;
+                    }
+                }
+
                 document.getElementById('note-text').value = '';
                 await loadScopedSchoolData();
                 loadNotes();
                 renderGrid(localSchoolDB[currentClass]);
-                toast('Nota Registrata', '', 'success');
+                toast('Nota Registrata', `Inserita da ${teacherName}`, 'success');
+            } catch(err) {
+                console.error("Errore salvataggio nota:", err);
+                toast('Errore Salvataggio', err.message || 'Impossibile salvare la nota.', 'error');
             } finally {
                 setLoading(false);
             }
@@ -1894,11 +1968,16 @@
 
         async function deleteNote(id) {
             if (!confirm("Eliminare questa annotazione?")) return;
-            await _supabase.from('notes').delete().eq('id', id);
-            await loadScopedSchoolData();
-            loadNotes();
-            renderGrid(localSchoolDB[currentClass]);
-            toast('Nota Eliminata', '', 'success');
+            setLoading(true, "Eliminazione...");
+            try {
+                await _supabase.from('notes').delete().eq('id', id);
+                await loadScopedSchoolData();
+                loadNotes();
+                renderGrid(localSchoolDB[currentClass]);
+                toast('Nota Eliminata', '', 'success');
+            } finally {
+                setLoading(false);
+            }
         }
 
         function openListModal() {
@@ -1973,6 +2052,13 @@
                 _supabase.from('agenda').select('*').eq('class', currentClass).then(({data}) => {
                     if (data) { onlineAgenda = data; renderAgendaList(); }
                 });
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, async () => {
+                await loadScopedSchoolData();
+                renderGrid(localSchoolDB[currentClass]);
+                if (selectedStudentId && !document.getElementById('modal-student-detail').classList.contains('hidden')) {
+                    loadNotes();
+                }
             })
             .subscribe();
         }
@@ -2137,7 +2223,7 @@
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.onclick = () => loadClassroom(c);
-                    btn.className = `w-full py-4 px-4 sm:px-5 bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} hover:text-white transition-all duration-200 text-left flex items-center justify-between group active:scale-[0.98] shadow-md hover:shadow-xl`;
+                    btn.className = `w-full py-3.5 sm:py-4 px-4 sm:px-5 bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} hover:text-white transition-all duration-200 text-left flex items-center justify-between group active:scale-[0.98] shadow-md hover:shadow-xl`;
                     btn.innerHTML = `
                         <div class="flex flex-col">
                             <span class="text-xl sm:text-2xl font-black font-mono text-white group-hover:text-white tracking-wider leading-tight">${esc(c)}</span>
