@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SmartCheck OS — Piattaforma Registro & Presenze</title>
     <meta name="theme-color" content="#060913">
     
@@ -17,6 +17,13 @@
             --bg-deep: #060913;
             --panel-bg: rgba(13, 20, 36, 0.75);
             --panel-border: rgba(255, 255, 255, 0.08);
+        }
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
         }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -38,9 +45,12 @@
         input[type="date"] { color-scheme: dark; background-color: transparent; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
 
-        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #0b1120; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
         .fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(6px); }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
@@ -89,7 +99,7 @@
         .cv-day.future { opacity: 0.2; pointer-events: none; }
 
         /* TOAST & LOADER */
-        .sc-toast-container { position: fixed; right: 24px; top: 24px; z-index: 300; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 48px)); pointer-events: none; }
+        .sc-toast-container { position: fixed; right: 16px; top: 16px; z-index: 300; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
         .sc-toast { pointer-events: auto; background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 20px 45px rgba(0,0,0,0.5); backdrop-filter: blur(16px); border-radius: 16px; padding: 12px 16px; display: flex; gap: 12px; align-items: flex-start; animation: toastSlide 0.25s ease-out; }
         .sc-toast.success { border-color: rgba(16,185,129,0.4); } .sc-toast.error { border-color: rgba(239,68,68,0.45); } .sc-toast.info { border-color: rgba(59,130,246,0.4); }
         .sc-toast-icon { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.07); font-size: 11px; flex-shrink: 0; font-weight: bold; }
@@ -101,57 +111,57 @@
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen flex flex-col overflow-x-hidden selection:bg-blue-500">
+<body class="text-slate-200 min-h-screen flex flex-col selection:bg-blue-500">
 
     <div id="sc-toast-container" class="sc-toast-container"></div>
     <div id="sc-loading" class="sc-loading hidden">
         <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Sincronizzazione in corso...</span></div>
     </div>
 
-    <!-- ================= 1. REINVENTED & EXPANDED LOGIN SCREEN ================= -->
-    <div id="view-login" class="fixed inset-0 z-[100] bg-[#060913] flex items-center justify-center p-6 md:p-10">
-        <div class="relative z-10 w-full max-w-5xl glass-panel rounded-3xl overflow-hidden shadow-2xl border border-slate-700/60 grid grid-cols-1 md:grid-cols-12 fade-in">
+    <!-- ================= 1. REINVENTED & RESPONSIVE LOGIN SCREEN ================= -->
+    <div id="view-login" class="fixed inset-0 z-[100] bg-[#060913] overflow-y-auto flex items-center justify-center p-4 sm:p-6 md:p-10">
+        <div class="relative z-10 w-full max-w-5xl glass-panel rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-700/60 grid grid-cols-1 lg:grid-cols-12 fade-in my-auto">
             
-            <!-- Left Info Panel (Spacious) -->
-            <div class="md:col-span-6 bg-gradient-to-br from-blue-950/40 via-slate-900/60 to-purple-950/30 p-12 md:p-16 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800/80">
+            <!-- Left Info Panel (Spacious & Mobile Friendly) -->
+            <div class="lg:col-span-6 bg-gradient-to-br from-blue-950/40 via-slate-900/60 to-purple-950/30 p-6 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800/80">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono font-bold text-blue-400 mb-8 uppercase tracking-wider">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono font-bold text-blue-400 mb-4 sm:mb-6 lg:mb-8 uppercase tracking-wider">
                         <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span> Sistema Scolastico Digitale
                     </div>
-                    <h1 class="text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-none mb-6">
-                        Smart<span class="text-blue-500">Check</span><span class="text-slate-500 text-4xl font-mono">.OS</span>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-none mb-3 sm:mb-5">
+                        Smart<span class="text-blue-500">Check</span><span class="text-slate-500 text-2xl sm:text-3xl lg:text-4xl font-mono">.OS</span>
                     </h1>
-                    <p class="text-slate-300 text-base md:text-lg leading-relaxed font-light">
+                    <p class="text-slate-300 text-sm sm:text-base lg:text-lg leading-relaxed font-light">
                         Piattaforma centralizzata per la gestione di presenze, registri di classe, uscite e monitoraggio didattico in tempo reale.
                     </p>
                 </div>
                 
-                <div class="mt-12 pt-8 border-t border-slate-800/60 flex items-center justify-between text-sm font-mono text-slate-400">
+                <div class="mt-6 sm:mt-8 lg:mt-12 pt-4 sm:pt-6 border-t border-slate-800/60 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-400">
                     <div>ANNO SCOL. <span class="text-white font-bold">2026/2027</span></div>
                     <div class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 font-bold text-xs">v140.0</div>
                 </div>
             </div>
 
-            <!-- Right Form Panel (Spacious) -->
-            <div class="md:col-span-6 p-12 md:p-16 flex flex-col justify-center bg-[#090e1c]/90">
-                <div class="w-full max-w-md mx-auto space-y-7">
+            <!-- Right Form Panel -->
+            <div class="lg:col-span-6 p-6 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-[#090e1c]/90">
+                <div class="w-full max-w-md mx-auto space-y-5 sm:space-y-7">
                     <div>
-                        <h2 class="text-3xl font-extrabold text-white tracking-tight">Autenticazione</h2>
-                        <p class="text-slate-400 text-sm mt-1.5">Accedi al terminale con le tue credenziali d'istituto</p>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Autenticazione</h2>
+                        <p class="text-slate-400 text-xs sm:text-sm mt-1 sm:mt-1.5">Accedi al terminale con le tue credenziali d'istituto</p>
                     </div>
                     
-                    <div id="login-form-container" class="space-y-5">
+                    <div id="login-form-container" class="space-y-4 sm:space-y-5">
                         <div>
                             <label class="block text-xs font-mono uppercase font-bold text-slate-300 mb-2">Identificativo Utente</label>
                             <div class="relative">
                                 <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                <input type="text" id="input-username" placeholder="cognome.nome / admin" class="w-full bg-[#11192e] border border-slate-700 text-white pl-11 pr-4 py-3.5 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none font-medium text-base transition-all">
+                                <input type="text" id="input-username" placeholder="cognome.nome / admin" class="w-full bg-[#11192e] border border-slate-700 text-white pl-11 pr-4 py-3 sm:py-3.5 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none font-medium text-base transition-all">
                             </div>
                         </div>
 
-                        <div id="password-container" class="hidden space-y-5 pt-1">
+                        <div id="password-container" class="hidden space-y-4 sm:space-y-5 pt-1">
                             <div class="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-sm">
+                                <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-sm shrink-0">
                                     <i class="fa-solid fa-id-badge"></i>
                                 </div>
                                 <div class="truncate">
@@ -163,16 +173,16 @@
                                 <label class="block text-xs font-mono uppercase font-bold text-slate-300 mb-2">Chiave d'Accesso</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                                    <input type="password" id="input-password" placeholder="Inserisci la password" class="w-full bg-[#11192e] border border-slate-700 text-white pl-11 pr-4 py-3.5 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-base transition-all">
+                                    <input type="password" id="input-password" placeholder="Inserisci la password" class="w-full bg-[#11192e] border border-slate-700 text-white pl-11 pr-4 py-3 sm:py-3.5 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-base transition-all">
                                 </div>
                             </div>
-                            <button type="button" id="btn-entra" onclick="processAuth()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 text-base">
+                            <button type="button" id="btn-entra" onclick="processAuth()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 sm:py-4 rounded-xl transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 text-base">
                                 <span>Accedi alla Piattaforma</span> <i class="fa-solid fa-arrow-right text-sm"></i>
                             </button>
                             <button type="button" onclick="resetLogin()" class="w-full text-center text-xs text-slate-400 hover:text-slate-200 transition py-1">← Cambia utente</button>
                         </div>
                         
-                        <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-all border border-slate-700 hover:border-slate-600 flex items-center justify-center gap-2 text-base">
+                        <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3.5 sm:py-4 rounded-xl transition-all border border-slate-700 hover:border-slate-600 flex items-center justify-center gap-2 text-base">
                             <span>Continua</span> <i class="fa-solid fa-arrow-right text-sm"></i>
                         </button>
                     </div>
@@ -185,179 +195,193 @@
         </div>
     </div>
 
-    <!-- ================= 2. EXPANDED CLASS HUB (ALL CLASSES) ================= -->
-    <div id="view-hub" class="hidden min-h-screen p-8 md:p-12 fade-in max-w-7xl mx-auto flex flex-col justify-between">
+    <!-- ================= 2. ENLARGED CLASS HUB (ALL CLASSES) ================= -->
+    <div id="view-hub" class="hidden min-h-screen p-4 sm:p-6 md:p-10 fade-in max-w-7xl mx-auto flex flex-col justify-between">
         <div>
             <!-- Top Bar Hub -->
-            <header class="flex flex-wrap justify-between items-center gap-4 mb-8 pb-6 border-b border-slate-800/80">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-2xl font-black">
+            <header class="flex flex-wrap justify-between items-center gap-4 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-slate-800/80">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl sm:text-2xl font-black shrink-0">
                         SC
                     </div>
                     <div>
-                        <div class="flex items-center gap-3">
-                            <h2 class="text-3xl font-extrabold text-white tracking-tight">Hub Istituto</h2>
-                            <span id="hub-role-badge" class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg border border-slate-700 uppercase bg-slate-800/70 text-slate-300">--</span>
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Hub Istituto</h2>
+                            <span id="hub-role-badge" class="text-[10px] sm:text-xs font-mono font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg border border-slate-700 uppercase bg-slate-800/70 text-slate-300">--</span>
                         </div>
-                        <p class="text-sm text-slate-400 mt-1">Sessione attiva: <span id="hub-user-name" class="text-white font-bold">--</span></p>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Sessione attiva: <span id="hub-user-name" class="text-white font-bold">--</span></p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="logout()" class="px-5 py-2.5 bg-red-950/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-900/30 hover:text-white transition text-xs font-bold flex items-center gap-2">
+                    <button onclick="logout()" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-red-950/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-900/30 hover:text-white transition text-xs font-bold flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Esci
                     </button>
                 </div>
             </header>
 
             <!-- Instructions Banner -->
-            <div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
+            <div class="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
                 <div>
-                    <h3 class="text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
-                    <p class="text-xs md:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi e il monitoraggio presenze per l'indirizzo di competenza.</p>
+                    <h3 class="text-lg sm:text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi e il monitoraggio presenze per l'indirizzo di competenza.</p>
                 </div>
-                <div class="hidden md:flex items-center gap-2 text-xs font-mono text-slate-400 bg-black/30 px-3.5 py-2 rounded-xl border border-slate-800">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Locale Connesso
+                <div class="hidden md:flex items-center gap-2 text-xs font-mono text-slate-400 bg-black/30 px-3.5 py-2 rounded-xl border border-slate-800 shrink-0 ml-4">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Connesso
                 </div>
             </div>
 
             <!-- Full Dynamic Classes Groups -->
-            <div class="glass-panel p-8 rounded-3xl border border-slate-800/80">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="classes-container"></div>
+            <div class="glass-panel p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-800/80">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8" id="classes-container"></div>
             </div>
         </div>
 
-        <footer class="mt-12 text-center text-xs font-mono text-slate-600">
+        <footer class="mt-8 sm:mt-12 text-center text-xs font-mono text-slate-600">
             SmartCheck School OS • Architettura Scolastica Indipendente 2026/2027
         </footer>
     </div>
 
-    <!-- ================= 3. OPTIMIZED CLASSROOM VIEW ================= -->
+    <!-- ================= 3. MOBILE-OPTIMIZED CLASSROOM VIEW ================= -->
     <div id="view-classroom" class="hidden min-h-screen flex flex-col relative fade-in">
         
-        <!-- Header HUD (Always Visible Clock) -->
-        <header class="bg-[#0b1121]/95 backdrop-blur-xl border-b border-slate-800/80 px-6 md:px-8 py-3.5 flex justify-between items-center sticky top-0 z-40">
-            <!-- Left -->
-            <div class="flex items-center gap-4">
-                <button id="back-btn" onclick="backToHub()" title="Torna all'Hub" class="w-10 h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 text-slate-300 transition">
+        <!-- Header HUD (Responsive Layout for Mobile & Desktop) -->
+        <header class="bg-[#0b1121]/95 backdrop-blur-xl border-b border-slate-800/80 px-3 sm:px-6 md:px-8 py-3 flex flex-wrap sm:flex-nowrap justify-between items-center sticky top-0 z-40 gap-2 sm:gap-4">
+            
+            <!-- Left Info -->
+            <div class="flex items-center gap-2.5 sm:gap-4">
+                <button id="back-btn" onclick="backToHub()" title="Torna all'Hub" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 text-slate-300 transition shrink-0">
                     <i class="fa-solid fa-arrow-left text-xs"></i>
                 </button>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">CLASSE ATTIVA</span>
-                        <span id="role-badge" class="px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest font-bold">--</span>
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <span class="text-[9px] sm:text-[10px] font-mono text-slate-500 uppercase tracking-widest">CLASSE</span>
+                        <span id="role-badge" class="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono uppercase tracking-widest font-bold">--</span>
                     </div>
-                    <h1 class="text-xl md:text-2xl font-black text-white tracking-tight" id="class-header-name">--</h1>
+                    <h1 class="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight leading-none mt-0.5" id="class-header-name">--</h1>
                 </div>
             </div>
             
-            <!-- Center: Date Control -->
-            <div class="relative group mx-2" id="date-control">
-                <div class="glass-panel px-4 py-2 rounded-xl flex items-center gap-3 border border-slate-700/60 hover:border-blue-500/60 transition cursor-pointer relative" onclick="openNativeDatePicker()">
-                    <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+            <!-- Center: Date Control (Mobile Clean Centering) -->
+            <div class="relative group order-3 sm:order-2 w-full sm:w-auto flex justify-center mt-1 sm:mt-0" id="date-control">
+                <div class="glass-panel px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl flex items-center gap-2 sm:gap-3 border border-slate-700/60 hover:border-blue-500/60 transition cursor-pointer relative" onclick="openNativeDatePicker()">
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
                         <i class="fa-regular fa-calendar text-xs"></i>
                     </div>
                     <div class="flex flex-col text-right">
-                        <span class="text-[9px] text-slate-500 font-mono font-bold uppercase tracking-widest">DATA REGISTRO</span>
-                        <span id="date-display" class="font-mono text-xs font-bold text-white uppercase tracking-wider">OGGI</span>
+                        <span class="text-[8px] sm:text-[9px] text-slate-500 font-mono font-bold uppercase tracking-widest leading-none">DATA REGISTRO</span>
+                        <span id="date-display" class="font-mono text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider mt-0.5">OGGI</span>
                     </div>
                     <input type="date" id="date-picker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" onchange="changeDate(this.value)">
-                    <button type="button" onclick="event.stopPropagation(); resetToToday();" class="text-[9px] font-mono font-black uppercase tracking-wider px-2 py-1 rounded bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 z-40 relative ml-1">OGGI</button>
+                    <button type="button" onclick="event.stopPropagation(); resetToToday();" class="text-[8px] sm:text-[9px] font-mono font-black uppercase tracking-wider px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 z-40 relative ml-1">OGGI</button>
                 </div>
             </div>
 
-            <!-- Right Controls + Clock (Fixed & Responsive) -->
-            <div class="flex items-center gap-3">
-                <button onclick="openListModal()" class="px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-slate-400"></i> <span class="hidden md:inline">Elenco</span>
+            <!-- Right Controls + Live Clock -->
+            <div class="flex items-center gap-2 sm:gap-3 order-2 sm:order-3 ml-auto sm:ml-0 shrink-0">
+                <button onclick="openListModal()" class="px-2.5 sm:px-3.5 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition flex items-center gap-1.5 sm:gap-2">
+                    <i class="fa-solid fa-list-check text-slate-400"></i> <span class="hidden sm:inline">Elenco</span>
                 </button>
-                <button id="sign-btn" onclick="openSignModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md shadow-blue-600/20 transition flex items-center gap-2">
+                <button id="sign-btn" onclick="openSignModal()" class="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md shadow-blue-600/20 transition flex items-center gap-1.5 sm:gap-2">
                     <i class="fa-solid fa-pen-nib"></i> <span>Registro</span>
                 </button>
-                <button onclick="logout()" title="Disconnetti" class="w-9 h-9 flex items-center justify-center bg-red-950/20 text-red-400 border border-red-900/30 rounded-xl text-xs hover:bg-red-900/30 transition">
+                <button onclick="logout()" title="Disconnetti" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-red-950/20 text-red-400 border border-red-900/30 rounded-xl text-xs hover:bg-red-900/30 transition">
                     <i class="fa-solid fa-power-off"></i>
                 </button>
                 
                 <!-- Live Clock Engine Box -->
-                <div class="text-right border-l border-slate-800 pl-4 ml-1 flex flex-col justify-center">
-                    <div id="clock" class="mono text-xl md:text-2xl font-black text-white tracking-wider leading-none">00:00:00</div>
-                    <div id="hour-badge" class="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-1">CARICAMENTO...</div>
+                <div class="text-right border-l border-slate-800 pl-2.5 sm:pl-4 ml-1 flex flex-col justify-center">
+                    <div id="clock" class="mono text-base sm:text-xl md:text-2xl font-black text-white tracking-wider leading-none">00:00:00</div>
+                    <div id="hour-badge" class="text-[8px] sm:text-[9px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-1">CARICAMENTO...</div>
                 </div>
             </div>
         </header>
 
-        <!-- Main Classroom Space (Tightly Spaced, Generous Desks) -->
-        <main class="flex-grow flex flex-col items-center w-full px-4 pt-5 pb-32 max-w-[98%] mx-auto">
+        <!-- Main Classroom Space (Fluid on Mobile, Never Squashed) -->
+        <main class="flex-grow flex flex-col items-center w-full px-2 sm:px-4 pt-4 sm:pt-5 pb-36 max-w-[100%] sm:max-w-[98%] mx-auto">
             
-            <div id="history-warning" class="hidden w-full max-w-md bg-amber-950/30 border border-amber-500/40 rounded-full py-1.5 px-5 mb-3 flex items-center justify-center gap-2 text-amber-300 backdrop-blur-md animate-pulse">
+            <div id="history-warning" class="hidden w-full max-w-md bg-amber-950/30 border border-amber-500/40 rounded-full py-1.5 px-4 mb-3 flex items-center justify-center gap-2 text-amber-300 backdrop-blur-md animate-pulse text-center">
                 <i class="fa-solid fa-clock-rotate-left text-xs"></i> 
-                <span class="text-[11px] font-mono font-bold uppercase tracking-wider">Visualizzazione Archivio Storico</span>
+                <span class="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider">Visualizzazione Archivio Storico</span>
             </div>
 
             <!-- Bathroom Telemetry HUD -->
-            <div id="bathroom-bar" class="w-full max-w-xl mb-4 flex justify-center"></div>
+            <div id="bathroom-bar" class="w-full max-w-xl mb-4 flex justify-center px-2"></div>
 
-            <!-- Desks Grid (Expanded card height and width) -->
-            <div class="grid grid-cols-3 gap-8 md:gap-14 w-full mt-1 flex-grow items-end" id="classroom-grid"></div>
+            <!-- Desks Grid Container: preserves large legible layout and adds smooth horizontal scroll on small mobile -->
+            <div class="w-full overflow-x-auto pb-4 custom-scrollbar">
+                <!-- Mobile Pan Hint (visible only on small mobile viewports) -->
+                <div class="md:hidden flex items-center justify-center gap-2 text-[10px] font-mono text-slate-400 bg-slate-900/80 py-1.5 px-4 rounded-full border border-slate-800 w-fit mx-auto mb-3 shadow">
+                    <i class="fa-solid fa-arrows-left-right text-blue-400 animate-pulse"></i>
+                    <span>Scorri in orizzontale per navigare tra le file</span>
+                </div>
+                
+                <div class="min-w-[820px] md:min-w-0 w-full px-2">
+                    <div class="grid grid-cols-3 gap-6 md:gap-14 w-full mt-1 items-end" id="classroom-grid"></div>
+                </div>
+            </div>
 
-            <!-- Cattedra Station (Directly under the front row, no excess gaps) -->
-            <div id="teacher-desk" onclick="openSignModal()" class="mt-8 w-full max-w-lg h-20 glass-panel border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:scale-[1.015] transition-all group shadow-2xl">
-                <div class="flex items-center gap-2 text-blue-400 font-black tracking-[0.3em] uppercase text-xs group-hover:text-blue-300">
+            <!-- Cattedra Station -->
+            <div id="teacher-desk" onclick="openSignModal()" class="mt-6 sm:mt-8 w-full max-w-lg h-18 sm:h-20 glass-panel border-b-4 border-blue-500 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:scale-[1.015] transition-all group shadow-2xl px-4 py-3">
+                <div class="flex items-center gap-2 text-blue-400 font-black tracking-[0.25em] sm:tracking-[0.3em] uppercase text-xs group-hover:text-blue-300">
                     <i class="fa-solid fa-chalkboard-user"></i> CATTEDRA DOCENTE
                 </div>
-                <span id="signature-display" class="text-[11px] text-slate-400 font-mono mt-1 px-4 text-center truncate w-full group-hover:text-slate-200">
+                <span id="signature-display" class="text-[11px] text-slate-400 font-mono mt-1 px-2 text-center truncate w-full group-hover:text-slate-200">
                     Clicca per aprire il Registro di Classe
                 </span>
             </div>
         </main>
 
-        <!-- Bottom Legend & Commands Dock -->
-        <div class="fixed bottom-5 left-1/2 -translate-x-1/2 glass-panel px-6 py-2.5 rounded-2xl flex items-center gap-6 shadow-2xl z-50 border border-slate-700/60 backdrop-blur-2xl">
-            <button onclick="openAgendaModal()" class="dock-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center text-pink-400 hover:text-pink-300 group" title="Agenda Impegni">
-                <i class="fa-solid fa-calendar-check text-lg"></i>
-                <span class="text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Agenda</span>
-            </button>
-            <button onclick="toggleNoticeModal()" class="dock-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center text-amber-400 hover:text-amber-300 group" title="Bacheca Circolari">
-                <i class="fa-solid fa-bullhorn text-lg"></i>
-                <span class="text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Avvisi</span>
-            </button>
-            <button id="dock-right" onclick="openGradesModal()" class="dock-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center text-emerald-400 hover:text-emerald-300 group" title="Valutazioni e Medie">
-                <i class="fa-solid fa-chart-pie text-lg"></i>
-                <span class="text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Voti</span>
-            </button>
+        <!-- Bottom Legend & Commands Dock (Auto-adapted for Phones) -->
+        <div class="fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-auto max-w-5xl glass-panel px-3 sm:px-6 py-2 sm:py-2.5 rounded-2xl flex items-center justify-between sm:justify-center gap-3 sm:gap-6 shadow-2xl z-50 border border-slate-700/60 backdrop-blur-2xl">
             
-            <div class="h-6 w-[1px] bg-slate-700"></div>
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                <button onclick="openAgendaModal()" class="dock-btn w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex flex-col items-center justify-center text-pink-400 hover:text-pink-300 group" title="Agenda Impegni">
+                    <i class="fa-solid fa-calendar-check text-base sm:text-lg"></i>
+                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Agenda</span>
+                </button>
+                <button onclick="toggleNoticeModal()" class="dock-btn w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex flex-col items-center justify-center text-amber-400 hover:text-amber-300 group" title="Bacheca Circolari">
+                    <i class="fa-solid fa-bullhorn text-base sm:text-lg"></i>
+                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Avvisi</span>
+                </button>
+                <button id="dock-right" onclick="openGradesModal()" class="dock-btn w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex flex-col items-center justify-center text-emerald-400 hover:text-emerald-300 group" title="Valutazioni e Medie">
+                    <i class="fa-solid fa-chart-pie text-base sm:text-lg"></i>
+                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Voti</span>
+                </button>
+            </div>
+            
+            <div class="h-6 w-[1px] bg-slate-700 shrink-0"></div>
 
-            <!-- Complete Legend Status Display -->
-            <div class="flex items-center gap-3.5 text-[10px] font-mono uppercase text-slate-300 font-bold overflow-x-auto py-1">
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Presente</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span> Bagno</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Ritardo</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> 2° Ora</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span> Uscita Ant.</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Fuori Aula</span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Assente</span>
+            <!-- Complete Legend Status Display (Fluid scrollable on mobile) -->
+            <div class="flex items-center gap-3 sm:gap-3.5 text-[9px] sm:text-[10px] font-mono uppercase text-slate-300 font-bold overflow-x-auto py-1 scrollbar-none shrink">
+                <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Presente</span>
+                <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span> Bagno</span>
+                <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Ritardo</span>
+                <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> 2° Ora</span>
+                <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span> Uscita Ant.</span>
+                <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Fuori Aula</span>
+                <span class="flex items-center gap-1.5 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Assente</span>
             </div>
         </div>
     </div>
 
-    <!-- ================= MODALS SECTION ================= -->
+    <!-- ================= MODALS SECTION (RESPONSIVE & TOUCH READY) ================= -->
     
     <!-- MODALE AGENDA -->
-    <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl flex flex-col border border-slate-700 relative">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+    <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
+        <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
                 <div>
-                    <h2 class="text-2xl font-extrabold text-white tracking-tight">Agenda di Classe</h2>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Agenda di Classe</h2>
                     <p class="text-xs text-slate-400 mt-0.5">Scadenze compiti per casa e verifiche programmate</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button id="btn-add-agenda" onclick="openAddAgendaModal()" class="hidden px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button id="btn-add-agenda" onclick="openAddAgendaModal()" class="hidden px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fa-solid fa-plus text-xs"></i> Nuovo
                     </button>
                     <button onclick="document.getElementById('modal-agenda').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
                 </div>
             </div>
-            <div class="flex gap-4 mb-4">
+            <div class="flex gap-3 mb-3">
                 <span class="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase">Compiti</span>
                 <span class="px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono font-bold uppercase">Verifiche</span>
             </div>
@@ -366,10 +390,10 @@
     </div>
 
     <!-- MODALE AGGIUNGI AGENDA -->
-    <div id="modal-add-agenda" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-md p-8 rounded-3xl shadow-2xl relative border border-slate-700">
-            <button onclick="document.getElementById('modal-add-agenda').classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white">✕</button>
-            <h2 class="text-xl font-bold text-white mb-6 tracking-tight">Nuovo Impegno</h2>
+    <div id="modal-add-agenda" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
+        <div class="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl relative border border-slate-700">
+            <button onclick="document.getElementById('modal-add-agenda').classList.add('hidden')" class="absolute top-5 right-5 text-slate-400 hover:text-white">✕</button>
+            <h2 class="text-xl font-bold text-white mb-5 tracking-tight">Nuovo Impegno</h2>
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <button onclick="selectAgendaType('compito')" id="btn-type-compito" class="py-2.5 bg-slate-800 border border-slate-700 text-slate-300 font-bold rounded-xl text-xs uppercase tracking-wider">Compito</button>
@@ -393,11 +417,11 @@
     </div>
 
     <!-- MODALE BACHECA -->
-    <div id="modal-notices" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-2xl h-[75vh] p-8 rounded-3xl flex flex-col border border-slate-700">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+    <div id="modal-notices" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
+        <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
                 <div>
-                    <h2 class="text-2xl font-black text-white tracking-tight">Circolari & Bacheca</h2>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Circolari & Bacheca</h2>
                     <p class="text-xs text-slate-400 mt-0.5">Comunicazioni ufficiali d'istituto</p>
                 </div>
                 <button onclick="toggleNoticeModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
@@ -407,11 +431,11 @@
     </div>
 
     <!-- MODALE REGISTRO FIRME -->
-    <div id="modal-sign" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-xl p-8 rounded-3xl shadow-2xl max-h-[85vh] flex flex-col border border-slate-700">
+    <div id="modal-sign" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
+        <div class="glass-panel w-full max-w-xl p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl max-h-[90vh] flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-white tracking-tight" id="reg-title">Giornale del Professore</h2>
+                    <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight" id="reg-title">Giornale del Professore</h2>
                     <p class="text-xs text-slate-400 mt-0.5">Firme e argomenti svolti in aula</p>
                 </div>
                 <button onclick="document.getElementById('modal-sign').classList.add('hidden')" class="text-slate-400 hover:text-white">✕</button>
@@ -424,17 +448,17 @@
                  <span class="text-slate-400 text-xs font-mono uppercase font-bold">Attività Didattica Registrata</span>
             </div>
             
-            <div class="flex-grow overflow-y-auto custom-scrollbar mb-6 bg-slate-900/60 rounded-2xl p-4 border border-slate-800 min-h-[180px]">
+            <div class="flex-grow overflow-y-auto custom-scrollbar mb-4 sm:mb-6 bg-slate-900/60 rounded-2xl p-3 sm:p-4 border border-slate-800 min-h-[160px]">
                 <div id="signatures-list" class="space-y-3"></div>
-                <div id="no-signatures" class="flex flex-col items-center justify-center h-full text-slate-500 opacity-60 py-10">
+                <div id="no-signatures" class="flex flex-col items-center justify-center h-full text-slate-500 opacity-60 py-8">
                     <i class="fa-regular fa-folder-open text-3xl mb-2"></i>
                     <span class="text-xs font-mono font-bold uppercase tracking-wider">Nessuna firma registrata</span>
                 </div>
             </div>
 
-            <div id="new-signature-form" class="border-t border-slate-800 pt-4 hidden">
+            <div id="new-signature-form" class="border-t border-slate-800 pt-3 sm:pt-4 hidden">
                 <h3 class="text-xs font-mono font-bold text-blue-400 uppercase mb-2">Aggiungi Firma</h3>
-                <div class="flex gap-2 mb-3">
+                <div class="flex gap-1.5 sm:gap-2 mb-3">
                     <button onclick="selectSignHour(1)" id="hour-btn-1" class="flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">1°</button>
                     <button onclick="selectSignHour(2)" id="hour-btn-2" class="flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">2°</button>
                     <button onclick="selectSignHour(3)" id="hour-btn-3" class="flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300">3°</button>
@@ -454,15 +478,15 @@
     </div>
 
     <!-- MODALE VALUTAZIONI (VOTI) -->
-    <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-[#0b1220] w-full max-w-md h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col">
-            <div id="grades-header-bg" class="cv-header p-6 pb-8 bg-slate-800">
+    <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
+        <div class="bg-[#0b1220] w-full max-w-md max-h-[88vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col">
+            <div id="grades-header-bg" class="cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-slate-800">
                 <div class="flex justify-between items-start">
                     <div class="flex items-center gap-3">
                         <button id="btn-grades-back" onclick="backToGradePicker()" class="hidden text-xs bg-black/40 hover:bg-black/60 text-white px-3 py-1 rounded-lg flex items-center gap-1.5 transition font-mono font-bold">
                             <i class="fa-solid fa-arrow-left"></i> Elenco
                         </button>
-                        <h2 class="text-xl font-black uppercase tracking-tight">Valutazioni</h2>
+                        <h2 class="text-lg sm:text-xl font-black uppercase tracking-tight">Valutazioni</h2>
                     </div>
                     <button onclick="document.getElementById('modal-grades').classList.add('hidden')" class="text-white/80 hover:text-white">✕</button>
                 </div>
@@ -471,7 +495,7 @@
                         <div class="text-xs font-mono uppercase tracking-wider opacity-80">Media Globale</div>
                         <div class="text-xs opacity-75 mt-0.5" id="grades-total-count">0 valutazioni</div>
                     </div>
-                    <div class="w-16 h-16 rounded-2xl border-2 border-white/20 flex items-center justify-center text-2xl font-black font-mono bg-white/10" id="grades-total-avg">0</div>
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 border-white/20 flex items-center justify-center text-xl sm:text-2xl font-black font-mono bg-white/10" id="grades-total-avg">0</div>
                 </div>
             </div>
             <div class="bg-[#0b1220] flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar" id="grades-list"></div>
@@ -479,11 +503,11 @@
     </div>
 
     <!-- MODALE SCHEDA STUDENTE -->
-    <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-3xl rounded-3xl p-8 border border-slate-700/80 shadow-2xl relative">
-            <div class="flex justify-between items-start mb-6">
+    <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
+        <div class="glass-panel w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-700/80 shadow-2xl relative">
+            <div class="flex justify-between items-start mb-5 sm:mb-6">
                 <div>
-                    <h2 id="modal-detail-name" class="text-3xl font-extrabold text-white tracking-tight">Nome Cognome</h2>
+                    <h2 id="modal-detail-name" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Nome Cognome</h2>
                     <div class="flex gap-4 mt-3 text-xs font-mono uppercase font-bold" id="student-modal-tabs">
                         <button onclick="switchTab('presence')" id="tab-presence" class="text-blue-400 border-b-2 border-blue-400 pb-1">Presenze</button>
                         <button onclick="switchTab('grades')" id="tab-grades" class="text-slate-500 hover:text-white pb-1">Voti</button>
@@ -495,11 +519,11 @@
             
             <!-- PRESENZE -->
             <div id="content-presence">
-                <div class="grid grid-cols-2 gap-5 mb-6">
-                    <div id="status-card" class="bg-[#11192e] p-5 rounded-2xl border border-slate-800 group transition-all">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 mb-5 sm:mb-6">
+                    <div id="status-card" class="bg-[#11192e] p-4 sm:p-5 rounded-2xl border border-slate-800 group transition-all">
                         <div class="text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Stato in Aula</div>
                         <div id="status-view-mode" class="cursor-pointer" onclick="toggleStatusEdit()">
-                            <div id="modal-detail-status" class="text-2xl font-black text-white">--</div>
+                            <div id="modal-detail-status" class="text-xl sm:text-2xl font-black text-white">--</div>
                             <div id="status-edit-hint" class="text-[10px] text-blue-400 mt-2 font-mono flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
                                 <i class="fa-solid fa-pen text-[9px]"></i> Clicca per modificare
                             </div>
@@ -520,15 +544,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-[#11192e] p-5 rounded-2xl border border-slate-800 flex flex-col justify-center">
+                    <div class="bg-[#11192e] p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-center">
                         <div class="text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Uscite Registrate Oggi</div>
-                        <div id="modal-detail-count" class="text-3xl font-black text-white font-mono">0</div>
+                        <div id="modal-detail-count" class="text-2xl sm:text-3xl font-black text-white font-mono">0</div>
                     </div>
                 </div>
                 <div class="bg-[#0e1628] rounded-2xl overflow-hidden border border-slate-800">
                     <table class="w-full text-left text-xs font-mono text-slate-300">
                         <thead class="bg-slate-900 text-[10px] uppercase font-bold text-slate-400">
-                            <tr><th class="px-5 py-2.5">Uscita</th><th class="px-5 py-2.5">Rientro</th><th class="px-5 py-2.5 text-right">Stato</th></tr>
+                            <tr><th class="px-4 sm:px-5 py-2.5">Uscita</th><th class="px-4 sm:px-5 py-2.5">Rientro</th><th class="px-4 sm:px-5 py-2.5 text-right">Stato</th></tr>
                         </thead>
                         <tbody id="modal-history-body" class="divide-y divide-slate-800/60"></tbody>
                     </table>
@@ -588,18 +612,18 @@
     </div>
 
     <!-- MODALE ELENCO ALUNNI -->
-    <div id="modal-class-list" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-2xl h-[80vh] p-8 rounded-3xl flex flex-col border border-slate-700">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
+    <div id="modal-class-list" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
+        <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
                 <div>
-                    <h2 class="text-2xl font-black text-white tracking-tight">Elenco Studenti</h2>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Elenco Studenti</h2>
                     <p class="text-xs text-slate-400 mt-0.5">Ordinamento alfabetico per cognome • <span id="list-class-name" class="text-blue-400 font-bold"></span></p>
                 </div>
                 <button onclick="document.getElementById('modal-class-list').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
             </div>
-            <div class="relative mb-4">
+            <div class="relative mb-3 sm:mb-4">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                <input type="text" id="list-search" placeholder="Filtra studente per cognome o nome..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white pl-10 pr-4 py-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                <input type="text" id="list-search" placeholder="Filtra per cognome o nome..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white pl-10 pr-4 py-2.5 sm:py-3 rounded-xl text-sm outline-none focus:border-blue-500">
             </div>
             <div class="overflow-y-auto flex-grow custom-scrollbar space-y-2" id="full-student-list"></div>
         </div>
@@ -620,9 +644,33 @@
             "CHIMICA": ["1ACM", "2ACM", "3ACM", "4ACM", "5ACM"]
         };
 
+        const DEPT_CONFIG = {
+            "ELETTRONICA": {
+                icon: "fa-microchip",
+                badge: "Tecnologico",
+                color: "text-blue-400",
+                bgBadge: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+                hoverBorder: "hover:border-blue-500 hover:shadow-blue-500/25 hover:from-blue-950/60 hover:to-slate-900/90"
+            },
+            "MECCANICA": {
+                icon: "fa-gears",
+                badge: "Meccatronica & Meccanica",
+                color: "text-amber-400",
+                bgBadge: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+                hoverBorder: "hover:border-amber-500 hover:shadow-amber-500/25 hover:from-amber-950/60 hover:to-slate-900/90"
+            },
+            "CHIMICA": {
+                icon: "fa-flask-vial",
+                badge: "Biotecnologie & Materiali",
+                color: "text-emerald-400",
+                bgBadge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+                hoverBorder: "hover:border-emerald-500 hover:shadow-emerald-500/25 hover:from-emerald-950/60 hover:to-slate-900/90"
+            }
+        };
+
         // Mappa esatta banchi (Antonio Navarroli banco_01 - primo banco fila sinistra)
         const OLD_SEAT_ORDER = [
-            "Antonio Navarroli",      // banco_01 (Tu)
+            "Antonio Navarroli",      // banco_01
             "Emiliano Calò",          // banco_02
             "Filippo Agnitti",        // banco_03
             "Ivan Garofalo",          // banco_04
@@ -919,7 +967,7 @@
             }
         }
 
-        // Classroom Layout & Desks Rendering (Generous Desks and Height)
+        // Classroom Layout & Desks Rendering
         function renderGrid(data) {
             if (!data) return;
             const grid = document.getElementById('classroom-grid'); 
@@ -977,12 +1025,12 @@
             const bath = document.getElementById('bathroom-bar');
             if (bath && !bath.classList.contains('hidden')) {
                 bath.innerHTML = out 
-                    ? `<div class="px-6 py-2 rounded-full border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-center gap-3 animate-pulse shadow-lg shadow-cyan-950/50 backdrop-blur-md">
-                         <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                    ? `<div class="px-5 py-2 rounded-full border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-center gap-3 animate-pulse shadow-lg shadow-cyan-950/50 backdrop-blur-md">
+                         <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0"></span>
                          <span class="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider">BAGNO OCCUPATO: <span class="text-white font-sans font-extrabold">${esc(out)}</span></span>
                        </div>` 
-                    : `<div class="px-6 py-2 rounded-full border border-emerald-500/30 bg-emerald-950/20 flex items-center justify-center gap-3 shadow-md backdrop-blur-md">
-                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    : `<div class="px-5 py-2 rounded-full border border-emerald-500/30 bg-emerald-950/20 flex items-center justify-center gap-3 shadow-md backdrop-blur-md">
+                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
                          <span class="text-xs font-mono font-bold text-emerald-300 uppercase tracking-wider">BAGNO LIBERO</span>
                        </div>`;
             }
@@ -1002,7 +1050,6 @@
             const noteFlag = hasNotes ? `<i class="fa-solid fa-circle-exclamation text-amber-400 absolute top-2.5 right-2.5 text-lg z-20 drop-shadow"></i>` : '';
             const statusClass = String(d.status || 'assente').replace(/_/g,'-');
             
-            // Increased Height and Padding
             btn.innerHTML = `<div class="relative h-44 w-full rounded-2xl p-4 flex flex-col justify-between shadow-lg status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100'} transition-all ${d.name==='Libero'?'cursor-default':'cursor-pointer hover:scale-[1.025]'}">
                 ${noteFlag}
                 <div class="flex justify-between items-start">
@@ -1026,9 +1073,8 @@
 
         // Student Detail Modal
         function openStudentDetail(id) {
-            const student = localSchoolDB[currentClass]?.[id];
+            const student = localSchoolDB[currentClass]?.[selectedStudentId = id];
             if (!student || student.name === 'Libero') return;
-            selectedStudentId = id;
             pendingStatus = student.status;
 
             document.getElementById('modal-detail-name').innerText = student.name;
@@ -1043,14 +1089,14 @@
                 uscita_anticipata: "text-yellow-400",
                 fuori_aula: "text-indigo-400"
             };
-            statusEl.className = `text-2xl font-black ${colorMap[student.status] || 'text-white'}`;
+            statusEl.className = `text-xl sm:text-2xl font-black ${colorMap[student.status] || 'text-white'}`;
             document.getElementById('modal-detail-count').innerText = student.history.length;
 
             const tbody = document.getElementById('modal-history-body');
             tbody.innerHTML = "";
             student.history.slice().reverse().forEach(h => {
                 let durataStringa = h.in ? `<span class="text-[10px] text-amber-300 font-mono font-bold ml-2 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-500/30">⏱ ${calcolaDurata(h.out, h.in)}</span>` : '';
-                tbody.innerHTML += `<tr class="hover:bg-slate-800/25 transition"><td class="px-5 py-3 font-bold text-cyan-400 font-mono">${h.out}</td><td class="px-5 py-3 font-bold text-emerald-400 font-mono">${h.in || '--:--'} ${durataStringa}</td><td class="px-5 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
+                tbody.innerHTML += `<tr class="hover:bg-slate-800/25 transition"><td class="px-4 sm:px-5 py-3 font-bold text-cyan-400 font-mono">${h.out}</td><td class="px-4 sm:px-5 py-3 font-bold text-emerald-400 font-mono">${h.in || '--:--'} ${durataStringa}</td><td class="px-4 sm:px-5 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
             });
 
             document.getElementById('status-view-mode').classList.remove('hidden');
@@ -1414,7 +1460,7 @@
             const header = document.getElementById('grades-header-bg');
 
             if (!hasGrades || avgNum === 0) {
-                header.className = "cv-header p-6 pb-8 bg-slate-800";
+                header.className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-slate-800";
                 totalAvgEl.innerText = "0";
                 totalCountEl.innerText = `0 valutazioni • ${targetName}`;
             } else {
@@ -1423,11 +1469,11 @@
                 totalCountEl.innerText = `${allV.length} valutazioni • ${targetName}`;
 
                 if (avgNum >= 6) {
-                    header.className = "cv-header p-6 pb-8 bg-cv-green";
+                    header.className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-cv-green";
                 } else if (avgNum >= 5) {
-                    header.className = "cv-header p-6 pb-8 bg-cv-orange";
+                    header.className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-cv-orange";
                 } else {
-                    header.className = "cv-header p-6 pb-8 bg-cv-red";
+                    header.className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-cv-red";
                 }
             }
 
@@ -1480,7 +1526,7 @@
             document.getElementById('btn-grades-back')?.classList.add('hidden');
             document.getElementById('grades-total-avg').innerText = '--';
             document.getElementById('grades-total-count').innerText = "Seleziona uno studente";
-            document.getElementById('grades-header-bg').className = "cv-header p-6 pb-8 bg-slate-800";
+            document.getElementById('grades-header-bg').className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-slate-800";
 
             list.innerHTML = '<div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold mb-3 px-1">Seleziona Studente</div>';
             
@@ -1755,8 +1801,8 @@
                 ul.innerHTML += `
                     <div onclick="document.getElementById('modal-class-list').classList.add('hidden'); openStudentDetail('${deskId}')" class="p-3.5 bg-[#11192e] border border-slate-800 rounded-xl flex justify-between items-center cursor-pointer hover:border-slate-700 hover:bg-[#15203a] transition">
                         <div>
-                            <span class="font-extrabold text-white text-base">${esc(cognome.toUpperCase())}</span> 
-                            <span class="text-slate-300 font-medium text-base ml-1.5">${esc(nome)}</span>
+                            <span class="font-extrabold text-white text-sm sm:text-base">${esc(cognome.toUpperCase())}</span> 
+                            <span class="text-slate-300 font-medium text-sm sm:text-base ml-1.5">${esc(nome)}</span>
                             <span class="text-xs text-slate-500 font-mono ml-2">#${deskId.split('_')[1]}</span>
                         </div>
                         <span class="text-[10px] font-mono uppercase font-bold px-2.5 py-1 rounded ${statusBg}">${esc(s.status.replace('_',' '))}</span>
@@ -1910,24 +1956,57 @@
             renderClassSelector();
         }
 
+        // Expanded & Prominent Class Selection Cards
         async function renderClassSelector() {
             const container = document.getElementById('classes-container');
-            container.innerHTML = '<div class="col-span-3 text-center text-slate-500 py-10 font-mono text-xs">Caricamento aule e sezioni...</div>';
-            
-            // Usa la struttura completa di classi
+            if (!container) return;
             container.innerHTML = '';
+            
             for (const [dept, classes] of Object.entries(FULL_CLASSES_STRUCT)) {
+                const cfg = DEPT_CONFIG[dept] || {
+                    icon: "fa-chalkboard",
+                    badge: "Indirizzo",
+                    color: "text-blue-400",
+                    bgBadge: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+                    hoverBorder: "hover:border-blue-500 hover:shadow-blue-500/20"
+                };
+
                 const col = document.createElement('div');
-                col.className = 'space-y-3';
-                col.innerHTML = `<div class="text-xs font-mono font-bold uppercase tracking-widest text-slate-300 pb-2 border-b border-slate-800 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> ${dept}
-                </div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>`;
+                col.className = 'flex flex-col space-y-4 bg-slate-900/40 p-4 sm:p-6 rounded-3xl border border-slate-800/80 shadow-lg';
+                col.innerHTML = `
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center ${cfg.color} text-lg shadow-inner shrink-0">
+                                <i class="fa-solid ${cfg.icon}"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base sm:text-lg font-black text-white tracking-wide uppercase">${dept}</h3>
+                                <div class="text-[10px] font-mono text-slate-400">${classes.length} Sezioni Attive</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border ${cfg.bgBadge} hidden sm:inline-block">${cfg.badge}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 pt-1"></div>
+                `;
+                
                 const list = col.querySelector('div:last-child');
                 classes.forEach(c => {
-                    list.innerHTML += `<button onclick="loadClassroom('${c}')" class="w-full h-12 bg-slate-900/80 border border-slate-800 rounded-xl hover:bg-blue-600 hover:text-white hover:border-blue-500 hover:shadow-lg hover:shadow-blue-600/20 transition-all text-sm font-extrabold tracking-wider flex items-center justify-between px-4 group">
-                        <span>${c}</span>
-                        <i class="fa-solid fa-chevron-right text-[10px] opacity-40 group-hover:opacity-100 transition"></i>
-                    </button>`;
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.onclick = () => loadClassroom(c);
+                    btn.className = `w-full py-4 px-4 sm:px-5 bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} hover:text-white transition-all duration-200 text-left flex items-center justify-between group active:scale-[0.98] shadow-md hover:shadow-xl`;
+                    btn.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="text-xl sm:text-2xl font-black font-mono text-white group-hover:text-white tracking-wider leading-tight">${esc(c)}</span>
+                            <span class="text-[10px] font-mono text-slate-400 group-hover:text-slate-200 mt-1 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Registro & Banchi
+                            </span>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-slate-800/90 border border-slate-700/80 group-hover:bg-blue-600 group-hover:border-blue-400 group-hover:text-white text-slate-400 flex items-center justify-center transition-all shadow shrink-0 ml-2">
+                            <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-0.5"></i>
+                        </div>
+                    `;
+                    list.appendChild(btn);
                 });
                 container.appendChild(col);
             }
