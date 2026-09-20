@@ -47,10 +47,14 @@
         #mobile-classroom-grid { display: flex; flex-direction: column; }
         .desk-switcher-mobile { display: block; }
 
+        /* SEPARATORE HEADER DEDICATO SENZA CONFLITTI !IMPORTANT */
+        .header-divider { display: none; }
+
         @media (min-width: 768px) {
             #classroom-grid { display: grid !important; }
             #mobile-classroom-grid { display: none !important; }
             .desk-switcher-mobile { display: none !important; }
+            .header-divider { display: block !important; }
         }
         
         input[type="date"] { color-scheme: dark; background-color: transparent; }
@@ -270,8 +274,8 @@
                     </div>
                 </div>
 
-                <!-- Controlli: Data, Elenco, Registro (Row 2 su mobile, blocco espanso sul bordo destro su PC) -->
-                <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex items-center justify-between md:justify-end gap-2.5 sm:gap-3.5 lg:gap-4 xl:gap-5 md:ml-auto md:order-2">
+                <!-- Controlli: Data, Elenco, Registro (Row 2 su mobile, gruppo allineato a destra su PC) -->
+                <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex items-center justify-between md:justify-end gap-2.5 sm:gap-3 lg:gap-4 xl:gap-5 md:ml-auto md:order-2">
                     <!-- Selettore Data Ingrandito -->
                     <div class="relative group cursor-pointer flex-grow md:flex-grow-0" onclick="openNativeDatePicker()">
                         <div class="glass-panel px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl lg:rounded-2xl flex items-center gap-2.5 border border-slate-700/70 hover:border-blue-500/60 transition relative">
@@ -296,11 +300,11 @@
                     </button>
                 </div>
 
-                <!-- Separatore Visivo Desktop Equidistante -->
-                <div class="hidden md:block h-7 w-[1px] bg-slate-700/70 mx-3.5 lg:mx-4.5 xl:mx-5 md:order-3"></div>
+                <!-- Separatore Visivo Desktop Equidistante Garantito -->
+                <div class="header-divider shrink-0 h-8 w-[1.5px] bg-slate-700/80 mx-2.5 sm:mx-3 lg:mx-4 xl:mx-5 md:order-3"></div>
 
-                <!-- Blocco Orologio & Logout (Row 1 a destra su mobile, bordo estremo a destra su PC) -->
-                <div class="col-start-2 row-start-1 justify-self-end flex items-center gap-2.5 sm:gap-3.5 lg:gap-4 xl:gap-5 md:order-4 shrink-0">
+                <!-- Blocco Orologio & Logout (Row 1 a destra su mobile, estrema destra su PC) -->
+                <div class="col-start-2 row-start-1 justify-self-end flex items-center gap-2.5 sm:gap-3 lg:gap-4 xl:gap-5 md:order-4 shrink-0">
                     <div class="text-right flex flex-col justify-center">
                         <div id="clock" class="mono text-sm sm:text-xl lg:text-2xl font-black text-white tracking-wider leading-none">00:00:00</div>
                         <div id="hour-badge" class="text-[7px] sm:text-[9px] lg:text-[10px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-0.5 sm:mt-1">CARICAMENTO...</div>
