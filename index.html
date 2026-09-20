@@ -223,8 +223,8 @@
         </div>
     </div>
 
-    <!-- ================= 2. CLASS HUB ================= -->
-    <div id="view-hub" class="hidden min-h-screen p-4 sm:p-6 md:p-10 fade-in max-w-7xl mx-auto flex flex-col justify-between">
+    <!-- ================= 2. ENLARGED & WIDESCREEN CLASS HUB ================= -->
+    <div id="view-hub" class="hidden min-h-screen p-4 sm:p-6 md:p-10 fade-in w-full max-w-[1850px] mx-auto flex flex-col justify-between">
         <div>
             <header class="flex flex-wrap justify-between items-center gap-4 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-slate-800/80">
                 <div class="flex items-center gap-3 sm:gap-4">
@@ -256,8 +256,8 @@
                 </div>
             </div>
 
-            <div class="glass-panel p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-800/80">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-start" id="classes-container"></div>
+            <div class="glass-panel p-4 sm:p-6 md:p-8 lg:p-10 rounded-3xl border border-slate-800/80">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 items-start" id="classes-container"></div>
             </div>
         </div>
 
@@ -858,6 +858,7 @@
             }
         }
 
+        // Creazione stato classe: assegna gli studenti solo alla loro classe reale
         function buildLocalClassState(cls, students) {
             const data = {};
             for (let i=1; i<=23; i++) {
@@ -865,28 +866,42 @@
                 data[id] = { db_id: null, name: 'Libero', status: 'assente', time: '--:--', history: [] };
             }
             
-            students.forEach(stud => {
-                let seatIndex = OLD_SEAT_ORDER.indexOf(stud.full_name);
-                if (seatIndex !== -1) {
-                    let id = `banco_${String(seatIndex + 1).padStart(2, '0')}`;
-                    if (data[id]) {
+            if (cls === '5AEE') {
+                students.forEach(stud => {
+                    let seatIndex = OLD_SEAT_ORDER.indexOf(stud.full_name);
+                    if (seatIndex !== -1) {
+                        let id = `banco_${String(seatIndex + 1).padStart(2, '0')}`;
+                        if (data[id]) {
+                            data[id].db_id = stud.id;
+                            data[id].name = stud.full_name;
+                        }
+                    } else {
+                        let emptySeat = Object.keys(data).find(k => data[k].name === 'Libero');
+                        if (emptySeat) {
+                            data[emptySeat].db_id = stud.id;
+                            data[emptySeat].name = stud.full_name;
+                        }
+                    }
+                });
+            } else {
+                // Per le altre sezioni (1AEE, Meccanica, Chimica) alloca unicamente gli studenti registrati su quella classe
+                students.forEach((stud, idx) => {
+                    if (idx < 23) {
+                        let id = `banco_${String(idx + 1).padStart(2, '0')}`;
                         data[id].db_id = stud.id;
                         data[id].name = stud.full_name;
                     }
-                } else {
-                    let emptySeat = Object.keys(data).find(k => data[k].name === 'Libero');
-                    if (emptySeat) {
-                        data[emptySeat].db_id = stud.id;
-                        data[emptySeat].name = stud.full_name;
-                    }
-                }
-            });
+                });
+            }
             return data;
         }
 
         async function loadClassroom(cls) {
             window.scrollTo(0, 0);
             currentClass = cls;
+            // Salva classe attiva in localStorage per ripristino al reload (F5)
+            localStorage.setItem('SC_ACTIVE_CLASS', cls);
+
             document.getElementById('view-hub')?.classList.add('hidden');
             document.getElementById('view-classroom')?.classList.remove('hidden');
             document.getElementById('class-header-name').innerText = cls;
@@ -903,12 +918,6 @@
                         .eq('class_id', currentClassId)
                         .eq('role', 'studente');
                     students = st || [];
-                }
-                if (!students || students.length === 0) {
-                    const { data: allSt } = await _supabase.from('registry')
-                        .select('id, username, full_name, role, class_id')
-                        .eq('role', 'studente');
-                    students = allSt || [];
                 }
 
                 classStudents = students;
@@ -1258,7 +1267,7 @@
             document.getElementById(`btn-${status}`)?.classList.add('btn-selected');
         }
 
-        // Conferma cambio stato presenza - [BUGFIX: Orario effettivo se FUORI ORARIO]
+        // Conferma cambio stato presenza: orario effettivo se FUORI ORARIO
         async function confirmStatusChange() {
             if (!pendingStatus) {
                 toast('Seleziona Stato', 'Scegli uno stato prima di salvare.', 'info');
@@ -1271,7 +1280,6 @@
             const nowObj = new Date();
             const now = nowObj.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
             const totalM = nowObj.getHours() * 60 + nowObj.getMinutes();
-            // Durante l'orario scolastico (08:00 - 13:30) la presenza segna 08:00; fuori orario registra l'orario reale
             const isOrarioScolastico = (totalM >= 480 && totalM < 810);
 
             student.status = pendingStatus;
@@ -2054,7 +2062,12 @@
                 if (currentUser.role === 'studente') {
                     openUserHome();
                 } else {
-                    initHub();
+                    const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
+                    if (activeCls) {
+                        loadClassroom(activeCls);
+                    } else {
+                        initHub();
+                    }
                 }
                 startClock();
                 toast('Accesso Eseguito', `Benvenuto/a, ${currentUser.name}`, 'success');
@@ -2076,6 +2089,7 @@
 
         function logout() {
             localStorage.removeItem('SC_USER');
+            localStorage.removeItem('SC_ACTIVE_CLASS');
             location.reload();
         }
 
@@ -2101,9 +2115,9 @@
                 };
 
                 const col = document.createElement('div');
-                col.className = 'flex flex-col space-y-4 bg-slate-900/40 p-4 sm:p-6 pb-6 sm:pb-8 rounded-3xl border border-slate-800/80 shadow-lg';
+                col.className = 'flex flex-col space-y-4 bg-slate-900/40 p-5 sm:p-6 lg:p-7 pb-6 sm:pb-8 rounded-3xl border border-slate-800/80 shadow-lg';
                 col.innerHTML = `
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                    <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center ${cfg.color} text-lg shadow-inner shrink-0">
                                 <i class="fa-solid ${cfg.icon}"></i>
@@ -2123,7 +2137,7 @@
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.onclick = () => loadClassroom(c);
-                    btn.className = `w-full py-3.5 sm:py-4 px-4 sm:px-5 bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} hover:text-white transition-all duration-200 text-left flex items-center justify-between group active:scale-[0.98] shadow-md hover:shadow-xl`;
+                    btn.className = `w-full py-4 px-4 sm:px-5 bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} hover:text-white transition-all duration-200 text-left flex items-center justify-between group active:scale-[0.98] shadow-md hover:shadow-xl`;
                     btn.innerHTML = `
                         <div class="flex flex-col">
                             <span class="text-xl sm:text-2xl font-black font-mono text-white group-hover:text-white tracking-wider leading-tight">${esc(c)}</span>
@@ -2152,6 +2166,7 @@
 
         function backToHub() {
             window.scrollTo(0, 0);
+            localStorage.removeItem('SC_ACTIVE_CLASS');
             document.getElementById('view-classroom').classList.add('hidden');
             document.getElementById('view-hub').classList.remove('hidden');
             currentClass = null;
@@ -2179,9 +2194,20 @@
                         }
                     }
                     document.getElementById('view-login').classList.add('hidden');
-                    if (currentUser.role === 'studente') openUserHome(); else initHub();
+                    
+                    if (currentUser.role === 'studente') {
+                        openUserHome();
+                    } else {
+                        const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
+                        if (activeCls) {
+                            loadClassroom(activeCls);
+                        } else {
+                            initHub();
+                        }
+                    }
                 } catch(e) {
                     localStorage.removeItem('SC_USER');
+                    localStorage.removeItem('SC_ACTIVE_CLASS');
                 }
             }
         });
