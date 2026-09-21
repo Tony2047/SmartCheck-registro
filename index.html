@@ -241,28 +241,84 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <!-- Tasto Accesso Console Flotta & AI (Solo Admin) -->
-                    <button id="btn-open-admin-console" onclick="openAdminConsoleModal()" class="hidden px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600/20 border border-blue-500/40 rounded-xl text-blue-400 hover:bg-blue-600 hover:text-white transition text-xs font-bold flex items-center gap-2 shadow-lg">
-                        <i class="fa-solid fa-microchip"></i> Console Flotta & AI
-                    </button>
                     <button onclick="logout()" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-red-950/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-900/30 hover:text-white transition text-xs font-bold flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Esci
                     </button>
                 </div>
             </header>
 
-            <div class="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi e il monitoraggio presenze per l'indirizzo di competenza.</p>
+            <!-- TABS SWITCHER: SEZIONI DIDATTICHE VS FLOTTA DISPOSITIVI ISTITUTO -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center gap-2 text-xs font-mono font-bold shadow-lg">
+                    <button onclick="switchHubSection('classes')" id="btn-tab-hub-classes" class="px-5 py-2.5 rounded-xl transition bg-blue-600 text-white shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-chalkboard"></i> Sezioni Didattiche
+                    </button>
+                    <button onclick="switchHubSection('fleet')" id="btn-tab-hub-fleet" class="px-5 py-2.5 rounded-xl transition text-slate-400 hover:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-network-wired text-cyan-400"></i> Flotta Nodi SmartCheck32 
+                        <span id="hub-fleet-online-badge" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">5 Nodi</span>
+                    </button>
                 </div>
-                <div class="hidden md:flex items-center gap-2 text-xs font-mono text-slate-400 bg-black/30 px-3.5 py-2 rounded-xl border border-slate-800 shrink-0 ml-4">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Connesso
+
+                <div class="hidden md:flex items-center gap-2 text-xs font-mono text-slate-400 bg-black/30 px-3.5 py-2 rounded-xl border border-slate-800 shrink-0">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Rete Locale LAN Operativa
                 </div>
             </div>
 
-            <div class="glass-panel p-4 sm:p-6 md:p-8 lg:p-10 rounded-3xl border border-slate-800/80">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 items-start" id="classes-container"></div>
+            <!-- SEZIONE 1: SELETTORE DELLE CLASSI E SEZIONI -->
+            <div id="hub-section-classes">
+                <div class="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi e il monitoraggio presenze per l'indirizzo di competenza.</p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 sm:p-6 md:p-8 lg:p-10 rounded-3xl border border-slate-800/80">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 items-start" id="classes-container"></div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 2: PANNELLO COMPLETO FLOTTA DISPOSITIVI ISTITUTO (INTEGRATO NELL'HUB) -->
+            <div id="hub-section-fleet" class="hidden space-y-6 fade-in">
+                <!-- Header Sezione Flotta -->
+                <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-cyan-950/30 via-slate-900/60 to-purple-950/20 border border-cyan-500/20 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2.5">
+                            <i class="fa-solid fa-microchip text-cyan-400"></i> Monitoraggio Hardware d'Istituto
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Telemetria in tempo reale di tutti i nodi SmartCheck32 installati nelle aule e nei laboratori.</p>
+                    </div>
+                    <button onclick="openClassDiagnosticsModal()" class="px-4 py-2.5 bg-purple-600/30 hover:bg-purple-600 border border-purple-500/50 hover:text-white text-purple-300 font-bold text-xs rounded-xl transition flex items-center gap-2">
+                        <i class="fa-solid fa-robot"></i> Assistente AI Diagnostico
+                    </button>
+                </div>
+
+                <!-- Cruscotto Metriche Generali -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                    <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] font-mono uppercase font-bold text-slate-400">Nodi Rilevati</div>
+                        <div class="text-2xl sm:text-3xl font-black text-white font-mono mt-1" id="hub-metric-total-nodes">0</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Nodi Online (LAN)</div>
+                        <div class="text-2xl sm:text-3xl font-black text-emerald-400 font-mono mt-1" id="hub-metric-online-nodes">0</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] font-mono uppercase font-bold text-amber-400">Batteria Bassa (&lt;20%)</div>
+                        <div class="text-2xl sm:text-3xl font-black text-amber-400 font-mono mt-1" id="hub-metric-battery-warning">0</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] font-mono uppercase font-bold text-red-400">Allarmi Strappo (Tamper)</div>
+                        <div class="text-2xl sm:text-3xl font-black text-red-400 font-mono mt-1" id="hub-metric-tamper-alerts">0</div>
+                    </div>
+                </div>
+
+                <!-- Griglia Dispositivi Hardware dell'Istituto -->
+                <div class="glass-panel p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-800/80">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="hub-devices-grid">
+                        <!-- Popolato dinamicamente da renderFleetDashboard() -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -294,8 +350,8 @@
                     </div>
                 </div>
 
-                <!-- Controlli: Data, Elenco, Registro -->
-                <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex items-center justify-between md:justify-end gap-2.5 sm:gap-3.5 lg:gap-4 xl:gap-5 md:ml-auto md:order-2">
+                <!-- Controlli: Data, Elenco, Tasto Diagnostica Classe, Registro -->
+                <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex items-center justify-between md:justify-end gap-2 sm:gap-2.5 lg:gap-3 xl:gap-3.5 md:ml-auto md:order-2">
                     <!-- Selettore Data Ingrandito -->
                     <div class="relative group cursor-pointer flex-grow md:flex-grow-0" onclick="openNativeDatePicker()">
                         <div class="glass-panel px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl lg:rounded-2xl flex items-center gap-2.5 border border-slate-700/70 hover:border-blue-500/60 transition relative">
@@ -312,6 +368,11 @@
                     <!-- Tasto Elenco -->
                     <button onclick="openListModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl lg:rounded-2xl text-xs sm:text-sm font-bold text-slate-200 transition flex items-center gap-2 shadow-sm shrink-0">
                         <i class="fa-solid fa-list-check text-slate-400 text-xs sm:text-sm"></i> <span>Elenco</span>
+                    </button>
+
+                    <!-- TASTO DIAGNOSTICA IN OGNI CLASSE (CON CONSOLE HARDWARE ED EVENTI) -->
+                    <button onclick="openClassDiagnosticsModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 text-purple-300 hover:text-white rounded-xl lg:rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm shrink-0">
+                        <i class="fa-solid fa-microchip text-purple-400"></i> <span>Diagnostica</span>
                     </button>
 
                     <!-- Tasto Registro Ingrandito -->
@@ -432,62 +493,54 @@
         </div>
     </div>
 
-    <!-- ================= MODALI ESISTENTI & NUOVI ================= -->
+    <!-- ================= MODALI ESISTENTI & CONSOLE DIAGNOSTICA ================= -->
     
-    <!-- MODALE PANNELLO ADMIN: FLOTTA SMARTCHECK32 & ASSISTENTE AI -->
+    <!-- MODALE DIAGNOSTICA HARDWARE & COPILOT AI (ACCESSIBILE DA OGNI CLASSE E DALL'HUB) -->
     <div id="modal-admin-console" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-lg p-3 sm:p-6">
-        <div class="glass-panel w-full max-w-6xl max-h-[92vh] p-5 sm:p-8 rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
+        <div class="glass-panel w-full max-w-5xl max-h-[92vh] p-5 sm:p-8 rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
             
             <!-- Header Console -->
             <div class="flex flex-wrap justify-between items-center gap-3 pb-4 border-b border-slate-800">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-blue-600/25 border border-blue-500/40 flex items-center justify-center text-blue-400 text-xl font-black shrink-0">
+                    <div class="w-11 h-11 rounded-2xl bg-purple-600/25 border border-purple-500/40 flex items-center justify-center text-purple-400 text-xl font-black shrink-0">
                         <i class="fa-solid fa-microchip"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Console Hardware & Diagnostica AI</h2>
-                            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold uppercase">Admin Root</span>
+                            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight" id="diagnostics-modal-title">Diagnostica Nodo SmartCheck32</h2>
+                            <span id="diagnostics-scope-badge" class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-mono font-bold uppercase">Aula Attiva</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Telemetria nodi ESP32 d'istituto e assistente virtuale dedicato</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Telemetria dell'hardware di sala, sensori di passaggio ToF e assistente AI locale</p>
                     </div>
                 </div>
                 
                 <div class="flex items-center gap-2">
                     <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs font-mono font-bold">
-                        <button onclick="switchAdminTab('fleet')" id="tab-admin-fleet" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md">Flotta Nodi</button>
+                        <button onclick="switchAdminTab('node')" id="tab-admin-node" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md">Nodo Aula</button>
                         <button onclick="switchAdminTab('ai')" id="tab-admin-ai" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Assistente AI</button>
                     </div>
                     <button onclick="closeAdminConsoleModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition ml-2">✕</button>
                 </div>
             </div>
 
-            <!-- SCHEDA 1: MONITORAGGIO FLOTTA HARDWARE ESP32 -->
-            <div id="content-admin-fleet" class="flex-grow flex flex-col overflow-hidden pt-4">
-                <!-- Barra Metriche Rapide -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                    <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
-                        <div class="text-[10px] font-mono uppercase font-bold text-slate-400">Nodi Rilevati</div>
-                        <div class="text-xl sm:text-2xl font-black text-white font-mono mt-0.5" id="metric-total-nodes">0</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
-                        <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Nodi Online (15s)</div>
-                        <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono mt-0.5" id="metric-online-nodes">0</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
-                        <div class="text-[10px] font-mono uppercase font-bold text-amber-400">Batteria Bassa (&lt;20%)</div>
-                        <div class="text-xl sm:text-2xl font-black text-amber-400 font-mono mt-0.5" id="metric-battery-warning">0</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
-                        <div class="text-[10px] font-mono uppercase font-bold text-red-400">Allarmi Strappo (Tamper)</div>
-                        <div class="text-xl sm:text-2xl font-black text-red-400 font-mono mt-0.5" id="metric-tamper-alerts">0</div>
-                    </div>
+            <!-- SCHEDA 1: DIAGNOSTICA SPECIFICA DEL NODO DI QUESTA CLASSE -->
+            <div id="content-admin-node" class="flex-grow flex flex-col overflow-y-auto custom-scrollbar pt-4 space-y-4">
+                <div id="node-detail-card" class="bg-[#0e1628] border border-slate-800 p-5 rounded-2xl shadow-lg">
+                    <!-- Generato dinamicamente via renderNodeDetails() -->
                 </div>
 
-                <!-- Griglia Dispositivi ESP32 -->
-                <div class="flex-grow overflow-y-auto custom-scrollbar pr-1">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" id="devices-grid-container">
-                        <!-- Generato dinamicamente via JS -->
+                <!-- Azioni Hardware di Test -->
+                <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+                    <div class="text-xs font-mono text-slate-400">
+                        <i class="fa-solid fa-wrench text-blue-400 mr-1.5"></i> Test e Manutenzione Nodo
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="pingCurrentNode()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold font-mono transition">
+                            <i class="fa-solid fa-satellite-dish mr-1 text-blue-400"></i> Heartbeat Ping
+                        </button>
+                        <button onclick="simulateTamperCurrentNode()" class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/60 rounded-xl text-xs font-bold font-mono transition">
+                            <i class="fa-solid fa-bell mr-1"></i> Simula Allarme Strappo
+                        </button>
                     </div>
                 </div>
             </div>
@@ -497,9 +550,9 @@
                 <div class="p-3 bg-gradient-to-r from-purple-950/30 to-blue-950/20 border border-purple-500/20 rounded-2xl mb-3 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-xs font-mono text-purple-300">
                         <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-                        Modello Diagnostico Locale SmartCheck AI • Analisi Log & Hardware
+                        Assistente Virtuale Locale SmartCheck Copilot • Modello Ollama/vLLM
                     </div>
-                    <span class="text-[10px] font-mono text-slate-400">Ollama / vLLM Endpoint Ready</span>
+                    <span class="text-[10px] font-mono text-slate-400">Locale &amp; Conforme GDPR</span>
                 </div>
 
                 <!-- Cronologia Chat -->
@@ -507,22 +560,21 @@
                     <div class="flex items-start gap-2.5">
                         <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div>
                         <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">
-                            Ciao Amministratore. Sono l'assistente virtuale di <strong>SmartCheck OS</strong>. Posso analizzare la flotta dei nodi ESP32, verificare disconnessioni, allarmi di manomissione a parete o controllare anomalie nelle uscite scolastiche. Come posso aiutarti?
+                            Ciao! Sono l'assistente virtuale di <strong>SmartCheck OS</strong>. Posso analizzare lo stato dell'hardware, verificare il funzionamento del lettore NFC/sensori di passaggio, controllare le anomalie di uscita o l'occupazione della coda bagno. Come posso aiutarti?
                         </div>
                     </div>
                 </div>
 
                 <!-- Prompt Rapidi -->
                 <div class="flex items-center gap-2 py-2 overflow-x-auto scrollbar-none text-[11px] font-mono">
-                    <button onclick="sendQuickAiPrompt('Stato generale dei nodi ESP32 e anomalie')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔍 Stato Nodi</button>
-                    <button onclick="sendQuickAiPrompt('Quali dispositivi hanno batteria bassa o segnale scarso?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Batterie</button>
-                    <button onclick="sendQuickAiPrompt('Ci sono allarmi di manomissione o nodi disconnessi?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
+                    <button onclick="sendQuickAiPrompt('Stato del nodo hardware di quest\'aula e batteria')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Nodo</button>
+                    <button onclick="sendQuickAiPrompt('Ci sono allarmi o manomissioni registrate?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
                     <button onclick="sendQuickAiPrompt('Mostrami la situazione attuale delle uscite e della coda bagno')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚻 Coda Bagno</button>
                 </div>
 
                 <!-- Input Chat -->
                 <div class="flex items-center gap-2 pt-1">
-                    <input type="text" id="ai-chat-input" placeholder="Chiedi un controllo o diagnostica di sistema..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
+                    <input type="text" id="ai-chat-input" placeholder="Chiedi una verifica tecnica o diagnostica di sistema..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
                     <button onclick="sendAiMessage()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-2 shadow-lg shadow-purple-600/25">
                         <span>Invia</span> <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
@@ -900,7 +952,7 @@
         // SISTEMA CODA BAGNO IN TEMPO REALE
         let bathroomQueue = [];
 
-        // SISTEMA FLOTTA DISPOSITIVI SMARTCHECK32
+        // FLOTTA DISPOSITIVI SMARTCHECK32
         let schoolDevices = [
             { id: '1', device_code: 'SC32-5AEE', device_name: 'SmartCheck32 Aula 5AEE', class_name: '5AEE', location: 'Piano 1 - Aula 104', ip_address: '192.168.30.15', mac_address: '24:6F:28:B4:A1:0C', status: 'online', battery_voltage: 4.15, battery_level: 98, rssi: -58, is_tampered: false, last_ping: '10s fa' },
             { id: '2', device_code: 'SC32-4AEE', device_name: 'SmartCheck32 Aula 4AEE', class_name: '4AEE', location: 'Piano 1 - Aula 102', ip_address: '192.168.30.16', mac_address: '24:6F:28:C2:59:1E', status: 'online', battery_voltage: 3.82, battery_level: 64, rssi: -72, is_tampered: false, last_ping: '14s fa' },
@@ -1084,6 +1136,7 @@
 
                 await loadScopedSchoolData();
                 await loadBathroomQueueData();
+                await loadDevicesData();
                 await changeDate(selectedDate);
                 renderGrid(localSchoolDB[cls]);
 
@@ -1174,6 +1227,302 @@
             } catch (e) {
                 console.warn(e);
             }
+        }
+
+        // ================= SWITCHER SEZIONI NELL'HUB =================
+        function switchHubSection(section) {
+            const isClasses = (section === 'classes');
+            document.getElementById('hub-section-classes')?.classList.toggle('hidden', !isClasses);
+            document.getElementById('hub-section-fleet')?.classList.toggle('hidden', isClasses);
+
+            const btnClasses = document.getElementById('btn-tab-hub-classes');
+            const btnFleet = document.getElementById('btn-tab-hub-fleet');
+
+            if (isClasses) {
+                btnClasses.className = "px-5 py-2.5 rounded-xl transition bg-blue-600 text-white shadow-md flex items-center gap-2";
+                btnFleet.className = "px-5 py-2.5 rounded-xl transition text-slate-400 hover:text-white flex items-center gap-2";
+            } else {
+                btnFleet.className = "px-5 py-2.5 rounded-xl transition bg-cyan-600 text-white shadow-md flex items-center gap-2";
+                btnClasses.className = "px-5 py-2.5 rounded-xl transition text-slate-400 hover:text-white flex items-center gap-2";
+                renderHubFleetView();
+            }
+        }
+
+        // Render Flotta Nodi a Monte nell'Hub
+        function renderHubFleetView() {
+            const container = document.getElementById('hub-devices-grid');
+            if (!container) return;
+
+            let totalNodes = schoolDevices.length;
+            let onlineNodes = schoolDevices.filter(d => d.status === 'online').length;
+            let batteryWarnings = schoolDevices.filter(d => d.battery_level < 20).length;
+            let tamperAlerts = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper').length;
+
+            document.getElementById('hub-metric-total-nodes').innerText = totalNodes;
+            document.getElementById('hub-metric-online-nodes').innerText = onlineNodes;
+            document.getElementById('hub-metric-battery-warning').innerText = batteryWarnings;
+            document.getElementById('hub-metric-tamper-alerts').innerText = tamperAlerts;
+            document.getElementById('hub-fleet-online-badge').innerText = `${onlineNodes}/${totalNodes} Nodi Online`;
+
+            container.innerHTML = '';
+            schoolDevices.forEach(d => {
+                let statusColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+                let statusText = "Online";
+                let borderStyle = "border-slate-800";
+
+                if (d.is_tampered || d.status === 'tamper') {
+                    statusColor = "bg-red-500/30 text-red-400 border-red-500/60 animate-pulse";
+                    statusText = "MANOMESSO";
+                    borderStyle = "border-red-500/80 shadow-red-950/50 shadow-lg";
+                } else if (d.battery_level < 20 || d.status === 'warning') {
+                    statusColor = "bg-amber-500/20 text-amber-400 border-amber-500/40";
+                    statusText = "Batteria Scarica";
+                } else if (d.status === 'offline') {
+                    statusColor = "bg-slate-800 text-slate-500 border-slate-700";
+                    statusText = "Disconnesso";
+                }
+
+                let battColor = d.battery_level < 20 ? 'text-red-400' : (d.battery_level < 50 ? 'text-amber-400' : 'text-emerald-400');
+                let openBtn = d.class_name && d.class_name !== 'Laboratorio' && d.class_name !== 'Palestra'
+                    ? `<button onclick="loadClassroom('${d.class_name}')" class="px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white font-mono font-bold text-xs rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-chalkboard"></i> Vai all'Aula</button>`
+                    : '';
+
+                container.innerHTML += `
+                    <div class="bg-slate-900/90 border ${borderStyle} p-4 sm:p-5 rounded-2xl flex flex-col justify-between transition hover:border-slate-700 shadow-md">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full ${d.status === 'online' ? 'bg-emerald-400 animate-pulse' : (d.status === 'tamper' ? 'bg-red-500 animate-ping' : 'bg-slate-600')}"></span>
+                                    <span class="font-extrabold text-sm text-white">${esc(d.device_name)}</span>
+                                </div>
+                                <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${statusColor}">${statusText}</span>
+                            </div>
+
+                            <div class="text-[11px] text-slate-400 font-mono mb-3 flex items-center justify-between">
+                                <span><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i>${esc(d.location)}</span>
+                                <span class="text-[10px] text-slate-500">${esc(d.device_code)}</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-black/30 p-2.5 rounded-xl border border-white/5 mb-3">
+                                <div>
+                                    <span class="text-slate-500 text-[10px] block">BATTERIA 18650</span>
+                                    <span class="font-bold ${battColor}"><i class="fa-solid fa-battery-half mr-1"></i>${d.battery_level}% (${d.battery_voltage}V)</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 text-[10px] block">SEGNALE WI-FI</span>
+                                    <span class="font-bold text-blue-400"><i class="fa-solid fa-wifi mr-1"></i>${d.rssi} dBm</span>
+                                </div>
+                                <div class="col-span-2 pt-1 border-t border-white/5 flex justify-between text-slate-400 text-[10px]">
+                                    <span>IP: ${esc(d.ip_address || 'DHCP')}</span>
+                                    <span>MAC: ${esc(d.mac_address || '--')}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+                            <span class="text-[10px] font-mono text-slate-500">Ping: ${esc(d.last_ping)}</span>
+                            <div class="flex gap-2">
+                                <button onclick="pingDeviceNode('${d.device_code}')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition" title="Test Heartbeat"><i class="fa-solid fa-satellite-dish"></i></button>
+                                ${openBtn}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // ================= CONSOLE DIAGNOSTICA NODO AULA E AI CHAT =================
+        async function loadDevicesData() {
+            try {
+                const { data, error } = await _supabase.from('devices').select('*');
+                if (!error && data && data.length > 0) {
+                    schoolDevices = data;
+                }
+            } catch(e) {}
+            renderFleetDashboard();
+        }
+
+        function openClassDiagnosticsModal() {
+            document.getElementById('modal-admin-console')?.classList.remove('hidden');
+            const targetScope = currentClass || 'Istituto';
+            document.getElementById('diagnostics-modal-title').innerText = currentClass ? `Diagnostica SmartCheck32 — ${currentClass}` : `Diagnostica Flotta SmartCheck32`;
+            document.getElementById('diagnostics-scope-badge').innerText = targetScope;
+            
+            renderNodeDetails();
+            switchAdminTab('node');
+        }
+
+        function closeAdminConsoleModal() {
+            document.getElementById('modal-admin-console')?.classList.add('hidden');
+        }
+
+        function switchAdminTab(tab) {
+            document.getElementById('content-admin-node')?.classList.toggle('hidden', tab !== 'node');
+            document.getElementById('content-admin-ai')?.classList.toggle('hidden', tab !== 'ai');
+            
+            const btnNode = document.getElementById('tab-admin-node');
+            const btnAi = document.getElementById('tab-admin-ai');
+            
+            if (tab === 'node') {
+                btnNode.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md";
+                btnAi.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+            } else {
+                btnAi.className = "px-3.5 py-1.5 rounded-lg bg-purple-600 text-white shadow-md";
+                btnNode.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+            }
+        }
+
+        function renderNodeDetails() {
+            const card = document.getElementById('node-detail-card');
+            if (!card) return;
+
+            // Trova dispositivo associato alla classe corrente o primo nodo
+            let d = schoolDevices.find(dev => dev.class_name === currentClass) || schoolDevices[0];
+
+            let statusColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+            let statusText = "Online (Connesso)";
+            if (d.is_tampered || d.status === 'tamper') {
+                statusColor = "bg-red-500/30 text-red-400 border-red-500/60 animate-pulse";
+                statusText = "ALLARME STRAPPO PARETE";
+            } else if (d.status === 'offline') {
+                statusColor = "bg-slate-800 text-slate-500 border-slate-700";
+                statusText = "Disconnesso";
+            }
+
+            card.innerHTML = `
+                <div class="flex flex-wrap justify-between items-start gap-2 mb-4 pb-3 border-b border-slate-800">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full ${d.status === 'online' ? 'bg-emerald-400 animate-pulse' : (d.is_tampered ? 'bg-red-500 animate-ping' : 'bg-slate-600')}"></span>
+                            <h4 class="text-base sm:text-lg font-black text-white font-sans">${esc(d.device_name)}</h4>
+                        </div>
+                        <p class="text-xs font-mono text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${esc(d.location)} • Codice: <span class="text-slate-300 font-bold">${esc(d.device_code)}</span></p>
+                    </div>
+                    <span class="text-[10px] font-mono font-bold uppercase px-3 py-1 rounded-lg border ${statusColor}">${statusText}</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Stato Batteria</span>
+                        <span class="text-sm font-black ${d.battery_level < 20 ? 'text-red-400' : 'text-emerald-400'}"><i class="fa-solid fa-battery-half mr-1"></i>${d.battery_level}% (${d.battery_voltage}V)</span>
+                    </div>
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Segnale Antenna</span>
+                        <span class="text-sm font-black text-blue-400"><i class="fa-solid fa-wifi mr-1"></i>${d.rssi} dBm</span>
+                    </div>
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Tamper a Muro</span>
+                        <span class="text-sm font-black ${d.is_tampered ? 'text-red-400' : 'text-emerald-400'}"><i class="fa-solid fa-shield mr-1"></i>${d.is_tampered ? 'APERTO' : 'OK (Chiuso)'}</span>
+                    </div>
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Gate ToF / NFC</span>
+                        <span class="text-sm font-black text-emerald-400"><i class="fa-solid fa-door-open mr-1"></i>Attivo</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-slate-400">
+                    <div>Indirizzo IP Locale: <span class="text-white font-bold">${esc(d.ip_address)}</span></div>
+                    <div>Indirizzo Fisico MAC: <span class="text-white font-bold">${esc(d.mac_address)}</span></div>
+                </div>
+            `;
+        }
+
+        function pingCurrentNode() {
+            let d = schoolDevices.find(dev => dev.class_name === currentClass) || schoolDevices[0];
+            toast('Ping Trasmesso', `Heartbeat inviato a ${d.device_name} (15ms)`, 'info');
+        }
+
+        function simulateTamperCurrentNode() {
+            let d = schoolDevices.find(dev => dev.class_name === currentClass) || schoolDevices[0];
+            d.is_tampered = !d.is_tampered;
+            d.status = d.is_tampered ? 'tamper' : 'online';
+            renderNodeDetails();
+            renderHubFleetView();
+            if (d.is_tampered) {
+                toast('ALLARME MANOMISSIONE', `Rilevato distacco dalla parete del nodo ${d.device_name}!`, 'error', 5000);
+            } else {
+                toast('Ripristino Tamper', `Interruttore a parete riallineato correttamente.`, 'success');
+            }
+        }
+
+        function pingDeviceNode(code) {
+            toast('Ping Inviato', `Pacchetto MQTT Heartbeat trasmesso al nodo ${code}`, 'info');
+        }
+
+        // ================= ASSISTENTE AI =================
+        function sendQuickAiPrompt(text) {
+            const input = document.getElementById('ai-chat-input');
+            if (input) {
+                input.value = text;
+                sendAiMessage();
+            }
+        }
+
+        function sendAiMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const history = document.getElementById('ai-chat-history');
+            if (!input || !history) return;
+
+            const text = input.value.trim();
+            if (!text) return;
+
+            history.innerHTML += `
+                <div class="flex items-start justify-end gap-2.5">
+                    <div class="bg-blue-600 p-3 rounded-2xl rounded-tr-none text-xs text-white max-w-xl leading-relaxed shadow">
+                        ${esc(text)}
+                    </div>
+                    <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-black shrink-0">Tu</div>
+                </div>
+            `;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            setTimeout(() => {
+                const response = generateLocalAiResponse(text);
+                history.innerHTML += `
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div>
+                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">
+                            ${response}
+                        </div>
+                    </div>
+                `;
+                history.scrollTop = history.scrollHeight;
+            }, 400);
+        }
+
+        function generateLocalAiResponse(query) {
+            const q = query.toLowerCase();
+            const total = schoolDevices.length;
+            const online = schoolDevices.filter(d => d.status === 'online').length;
+            const offline = schoolDevices.filter(d => d.status === 'offline');
+            const tamp = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper');
+            const lowBatt = schoolDevices.filter(d => d.battery_level < 20);
+
+            if (q.includes('tamper') || q.includes('strappo') || q.includes('manomiss') || q.includes('rubato')) {
+                if (tamp.length > 0) {
+                    return `🚨 <strong>ATTENZIONE:</strong> Rilevato allarme di manomissione attivo sul nodo <strong>${tamp[0].device_name}</strong> (${tamp[0].location}). Il microswitch posteriore a parete è aperto.`;
+                }
+                return `✅ Nessun allarme di manomissione registrato. Tutti i microswitch a parete risultano chiusi e protetti.`;
+            }
+
+            if (q.includes('batteri') || q.includes('scaric') || q.includes('18650')) {
+                if (lowBatt.length > 0) {
+                    return `⚠️ <strong>Report Batterie:</strong> Il nodo <strong>${lowBatt[0].device_name}</strong> (${lowBatt[0].location}) ha carica residua al <strong>${lowBatt[0].battery_level}%</strong> (${lowBatt[0].battery_voltage}V). Si consiglia la ricarica.`;
+                }
+                return `🔋 Tutte le celle 18650 dell'istituto presentano voltaggio ottimale compreso tra 3.82V e 4.18V.`;
+            }
+
+            if (q.includes('bagno') || q.includes('coda') || q.includes('uscita')) {
+                let occ = null;
+                if (localSchoolDB[currentClass]) {
+                    occ = Object.values(localSchoolDB[currentClass]).find(s => s.status === 'bagno');
+                }
+                return `🚻 <strong>Telemetria Bagni:</strong><br>• Stato Bagno: ${occ ? `Occupato da <strong>${occ.name}</strong>` : 'Attualmente Libero'}<br>• Alunni in coda d'attesa: <strong>${bathroomQueue.length}</strong>`;
+            }
+
+            let offlineText = offline.length > 0 ? `<br>⚠️ Nodi disconnessi: <strong>${offline.map(d=>d.device_name).join(', ')}</strong>.` : '<br>Tutti i nodi sono operativi.';
+            return `📊 <strong>Diagnostica SmartCheck32:</strong><br>• Dispositivi totali: <strong>${total}</strong><br>• Connessi regolarmente (LAN): <strong>${online} / ${total}</strong>${offlineText}`;
         }
 
         // ================= GESTIONE CODA BAGNO =================
@@ -1500,223 +1849,6 @@
             } catch(e) {}
         }
 
-        // ================= CONSOLE FLOTTA HARDWARE & ASSISTENTE AI (ADMIN) =================
-        async function loadDevicesData() {
-            try {
-                const { data, error } = await _supabase.from('devices').select('*');
-                if (!error && data && data.length > 0) {
-                    schoolDevices = data;
-                }
-            } catch(e) {}
-            renderFleetDashboard();
-        }
-
-        function openAdminConsoleModal() {
-            if (currentUser?.role !== 'admin') return;
-            document.getElementById('modal-admin-console')?.classList.remove('hidden');
-            loadDevicesData();
-        }
-
-        function closeAdminConsoleModal() {
-            document.getElementById('modal-admin-console')?.classList.add('hidden');
-        }
-
-        function switchAdminTab(tab) {
-            document.getElementById('content-admin-fleet')?.classList.toggle('hidden', tab !== 'fleet');
-            document.getElementById('content-admin-ai')?.classList.toggle('hidden', tab !== 'ai');
-            
-            const btnFleet = document.getElementById('tab-admin-fleet');
-            const btnAi = document.getElementById('tab-admin-ai');
-            
-            if (tab === 'fleet') {
-                btnFleet.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md";
-                btnAi.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
-            } else {
-                btnAi.className = "px-3.5 py-1.5 rounded-lg bg-purple-600 text-white shadow-md";
-                btnFleet.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
-            }
-        }
-
-        function renderFleetDashboard() {
-            const container = document.getElementById('devices-grid-container');
-            if (!container) return;
-
-            let totalNodes = schoolDevices.length;
-            let onlineNodes = schoolDevices.filter(d => d.status === 'online').length;
-            let batteryWarnings = schoolDevices.filter(d => d.battery_level < 20).length;
-            let tamperAlerts = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper').length;
-
-            document.getElementById('metric-total-nodes').innerText = totalNodes;
-            document.getElementById('metric-online-nodes').innerText = onlineNodes;
-            document.getElementById('metric-battery-warning').innerText = batteryWarnings;
-            document.getElementById('metric-tamper-alerts').innerText = tamperAlerts;
-
-            container.innerHTML = '';
-            schoolDevices.forEach(d => {
-                let statusColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
-                let statusText = "Online";
-                let borderPulse = "border-slate-800";
-
-                if (d.is_tampered || d.status === 'tamper') {
-                    statusColor = "bg-red-500/30 text-red-400 border-red-500/60 animate-pulse";
-                    statusText = "MANOMESSO (STRAPPO)";
-                    borderPulse = "border-red-500/80 shadow-red-950/50 shadow-lg";
-                } else if (d.status === 'warning' || d.battery_level < 20) {
-                    statusColor = "bg-amber-500/20 text-amber-400 border-amber-500/40";
-                    statusText = "Batteria Scarica";
-                } else if (d.status === 'offline') {
-                    statusColor = "bg-slate-800 text-slate-500 border-slate-700";
-                    statusText = "Disconnesso";
-                }
-
-                let battColor = d.battery_level < 20 ? 'text-red-400' : (d.battery_level < 50 ? 'text-amber-400' : 'text-emerald-400');
-                let rssiColor = d.rssi < -75 ? 'text-amber-400' : 'text-blue-400';
-
-                container.innerHTML += `
-                    <div class="bg-slate-900/90 border ${borderPulse} p-4 rounded-2xl flex flex-col justify-between transition hover:border-slate-700">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full ${d.status === 'online' ? 'bg-emerald-400 animate-pulse' : (d.status === 'tamper' ? 'bg-red-500 animate-ping' : 'bg-slate-600')}"></span>
-                                    <span class="font-extrabold text-sm text-white">${esc(d.device_name)}</span>
-                                </div>
-                                <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${statusColor}">${statusText}</span>
-                            </div>
-
-                            <div class="text-[11px] text-slate-400 font-mono mb-3 flex items-center justify-between">
-                                <span><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i>${esc(d.location)}</span>
-                                <span class="text-[10px] text-slate-500">${esc(d.device_code)}</span>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-black/30 p-2.5 rounded-xl border border-white/5 mb-3">
-                                <div>
-                                    <span class="text-slate-500 text-[10px] block">BATTERIA 18650</span>
-                                    <span class="font-bold ${battColor}"><i class="fa-solid fa-battery-half mr-1"></i>${d.battery_level}% (${d.battery_voltage}V)</span>
-                                </div>
-                                <div>
-                                    <span class="text-slate-500 text-[10px] block">SEGNALE WI-FI</span>
-                                    <span class="font-bold ${rssiColor}"><i class="fa-solid fa-wifi mr-1"></i>${d.rssi} dBm</span>
-                                </div>
-                                <div class="col-span-2 pt-1 border-t border-white/5 flex justify-between text-slate-400 text-[10px]">
-                                    <span>IP: ${esc(d.ip_address || 'DHCP')}</span>
-                                    <span>Ultimo ping: ${esc(d.last_ping || 'adesso')}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 pt-1 border-t border-slate-800/80">
-                            <button onclick="pingDeviceNode('${d.device_code}')" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] rounded-lg transition">
-                                <i class="fa-solid fa-satellite-dish mr-1 text-blue-400"></i> Ping
-                            </button>
-                            <button onclick="toggleTamperTest('${d.device_code}')" class="py-1.5 px-3 bg-red-950/40 hover:bg-red-900/40 text-red-400 border border-red-800/50 font-bold text-[11px] rounded-lg transition" title="Simula o ripristina allarme strappo parete">
-                                <i class="fa-solid fa-bell"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function pingDeviceNode(code) {
-            toast('Ping Inviato', `Pacchetto MQTT Heartbeat trasmesso al nodo ${code}`, 'info');
-        }
-
-        function toggleTamperTest(code) {
-            const d = schoolDevices.find(dev => dev.device_code === code);
-            if (d) {
-                d.is_tampered = !d.is_tampered;
-                d.status = d.is_tampered ? 'tamper' : 'online';
-                renderFleetDashboard();
-                if (d.is_tampered) {
-                    toast('ALLARME TAMPER', `Rilevato distacco dalla parete per il dispositivo ${d.device_name}!`, 'error', 5000);
-                } else {
-                    toast('Allarme Ripristinato', `Nodo ${d.device_name} riallineato correttamente.`, 'success');
-                }
-            }
-        }
-
-        // ================= CHAT ASSISTENTE AI DIAGNOSTICO =================
-        function sendQuickAiPrompt(text) {
-            const input = document.getElementById('ai-chat-input');
-            if (input) {
-                input.value = text;
-                sendAiMessage();
-            }
-        }
-
-        function sendAiMessage() {
-            const input = document.getElementById('ai-chat-input');
-            const history = document.getElementById('ai-chat-history');
-            if (!input || !history) return;
-
-            const text = input.value.trim();
-            if (!text) return;
-
-            // Messaggio utente
-            history.innerHTML += `
-                <div class="flex items-start justify-end gap-2.5">
-                    <div class="bg-blue-600 p-3 rounded-2xl rounded-tr-none text-xs text-white max-w-xl leading-relaxed shadow">
-                        ${esc(text)}
-                    </div>
-                    <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-black shrink-0">Tu</div>
-                </div>
-            `;
-            input.value = '';
-            history.scrollTop = history.scrollHeight;
-
-            // Risposta dell'AI locale con analisi diagnostica reale
-            setTimeout(() => {
-                const response = generateLocalAiResponse(text);
-                history.innerHTML += `
-                    <div class="flex items-start gap-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div>
-                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">
-                            ${response}
-                        </div>
-                    </div>
-                `;
-                history.scrollTop = history.scrollHeight;
-            }, 450);
-        }
-
-        function generateLocalAiResponse(query) {
-            const q = query.toLowerCase();
-            const total = schoolDevices.length;
-            const online = schoolDevices.filter(d => d.status === 'online').length;
-            const offline = schoolDevices.filter(d => d.status === 'offline');
-            const tamp = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper');
-            const lowBatt = schoolDevices.filter(d => d.battery_level < 20);
-
-            if (q.includes('tamper') || q.includes('strappo') || q.includes('manomiss') || q.includes('rubato')) {
-                if (tamp.length > 0) {
-                    return `🚨 <strong>ATTENZIONE:</strong> Rilevato allarme di manomissione attivo sul nodo <strong>${tamp[0].device_name}</strong> (${tamp[0].location}). Il microswitch posteriore a parete è aperto. Verifica fisicamente la postazione.`;
-                }
-                return `✅ Nessun allarme di manomissione o distacco a parete registrato. Tutti i microswitch tamper risultano integri e chiusi.`;
-            }
-
-            if (q.includes('batteri') || q.includes('scaric') || q.includes('18650')) {
-                if (lowBatt.length > 0) {
-                    return `⚠️ <strong>Report Batterie:</strong> Il dispositivo <strong>${lowBatt[0].device_name}</strong> (${lowBatt[0].location}) ha la carica residua al <strong>${lowBatt[0].battery_level}%</strong> (${lowBatt[0].battery_voltage}V). Si consiglia la sostituzione o l'allacciamento temporaneo alla canalina PoE.`;
-                }
-                return `🔋 Tutte le celle 18650 della flotta presentano una tensione ottimale compresa tra 3.8V e 4.18V (&gt;60% di carica).`;
-            }
-
-            if (q.includes('bagno') || q.includes('uscita') || q.includes('coda')) {
-                let occupante = null;
-                if (localSchoolDB[currentClass]) {
-                    occupante = Object.values(localSchoolDB[currentClass]).find(s => s.status === 'bagno');
-                }
-                return `🚻 <strong>Telemetria Bagni (${currentClass || 'Istituto'}):</strong><br>• Stato Bagno: ${occupante ? `Occupato da <strong>${occupante.name}</strong>` : 'Attualmente Libero'}<br>• Alunni in coda d'attesa: <strong>${bathroomQueue.length}</strong>`;
-            }
-
-            if (q.includes('stato') || q.includes('nodi') || q.includes('offline') || q.includes('dispositivi')) {
-                let offlineText = offline.length > 0 ? `<br>⚠️ Nodi disconnessi: <strong>${offline.map(d=>d.device_name).join(', ')}</strong>.` : '<br>Tutti i nodi sono regolarmente sincronizzati.';
-                return `📊 <strong>Diagnostica Flotta SmartCheck32:</strong><br>• Nodi totali censiti: <strong>${total}</strong><br>• Connessi regolarmente (MQTT LAN): <strong>${online} / ${total}</strong>${offlineText}`;
-            }
-
-            return `Ho analizzato i log di sistema dell'infrastruttura scolastica. Tutti i servizi interni (Database locale PostgreSQL, MQTT Broker e WebSockets) sono operativi sulla subnet LAN. Puoi chiedermi lo stato delle batterie, i nodi offline o verificare gli allarmi di manomissione a parete.`;
-        }
-
         // Selettore Ala Mobile
         function switchMobileAisle(aisle) {
             currentMobileAisle = aisle;
@@ -1988,7 +2120,6 @@
             document.getElementById(`btn-${status}`)?.classList.add('btn-selected');
         }
 
-        // Conferma cambio stato presenza
         async function confirmStatusChange() {
             if (!pendingStatus) {
                 toast('Seleziona Stato', 'Scegli uno stato prima di salvare.', 'info');
@@ -2579,6 +2710,7 @@
             }
         }
 
+        // Visualizzazione note: mostra Badge Tipo, Data, Ora e Autore Docente
         function loadNotes() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
@@ -2616,6 +2748,7 @@
             });
         }
 
+        // Salvataggio nota con attribuzione profilo docente e orario reale
         async function addNote() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
@@ -2903,13 +3036,9 @@
             document.getElementById('hub-user-name').innerText = currentUser.name;
             document.getElementById('hub-role-badge').innerText = (currentUser.role === 'admin' ? "ADMIN" : "DOCENTE");
             
-            // Abilita pulsante Console Flotta & AI se Admin
-            const btnAdmin = document.getElementById('btn-open-admin-console');
-            if (btnAdmin) {
-                btnAdmin.classList.toggle('hidden', currentUser.role !== 'admin');
-            }
-
             renderClassSelector();
+            loadDevicesData();
+            switchHubSection('classes');
         }
 
         async function renderClassSelector() {
@@ -2984,6 +3113,8 @@
             currentClass = null;
             selectedStudentId = null;
             renderClassSelector();
+            loadDevicesData();
+            switchHubSection('classes');
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
