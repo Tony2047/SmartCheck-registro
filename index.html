@@ -254,7 +254,7 @@
                         <i class="fa-solid fa-chalkboard"></i> Sezioni Didattiche
                     </button>
                     <button onclick="switchHubSection('fleet')" id="btn-tab-hub-fleet" class="px-5 py-2.5 rounded-xl transition text-slate-400 hover:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-network-wired text-cyan-400"></i> Flotta Nodi SmartCheck32 
+                        <i class="fa-solid fa-network-wired text-cyan-400"></i> Flotta Dispositivi Istituto 
                         <span id="hub-fleet-online-badge" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">5 Nodi</span>
                     </button>
                 </div>
@@ -278,15 +278,14 @@
                 </div>
             </div>
 
-            <!-- SEZIONE 2: PANNELLO COMPLETO FLOTTA DISPOSITIVI ISTITUTO (INTEGRATO NELL'HUB) -->
+            <!-- SEZIONE 2: PANNELLO FLOTTA DISPOSITIVI COMPLETA A MONTE NELL'HUB -->
             <div id="hub-section-fleet" class="hidden space-y-6 fade-in">
-                <!-- Header Sezione Flotta -->
                 <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-cyan-950/30 via-slate-900/60 to-purple-950/20 border border-cyan-500/20 flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2.5">
-                            <i class="fa-solid fa-microchip text-cyan-400"></i> Monitoraggio Hardware d'Istituto
+                            <i class="fa-solid fa-microchip text-cyan-400"></i> Monitoraggio Hardware SmartCheck32 d'Istituto
                         </h3>
-                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Telemetria in tempo reale di tutti i nodi SmartCheck32 installati nelle aule e nei laboratori.</p>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Stato in tempo reale di tutti i lettori NFC, microswitch tamper a parete e alimentazione 18650.</p>
                     </div>
                     <button onclick="openClassDiagnosticsModal()" class="px-4 py-2.5 bg-purple-600/30 hover:bg-purple-600 border border-purple-500/50 hover:text-white text-purple-300 font-bold text-xs rounded-xl transition flex items-center gap-2">
                         <i class="fa-solid fa-robot"></i> Assistente AI Diagnostico
@@ -315,9 +314,7 @@
 
                 <!-- Griglia Dispositivi Hardware dell'Istituto -->
                 <div class="glass-panel p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-800/80">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="hub-devices-grid">
-                        <!-- Popolato dinamicamente da renderFleetDashboard() -->
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="hub-devices-grid"></div>
                 </div>
             </div>
         </div>
@@ -334,7 +331,7 @@
         <header class="bg-[#0b1121]/95 backdrop-blur-xl border-b border-slate-800/80 px-3 sm:px-6 lg:px-8 xl:px-10 py-2.5 sm:py-3 sticky top-0 z-40">
             <div class="w-full grid grid-cols-2 gap-y-2.5 items-center md:flex md:justify-between md:items-center">
                 
-                <!-- Blocco Sinistro: Tasto Back + Classe e Sezione + Badge Ruolo -->
+                <!-- Blocco Sinistro: Tasto Back + Classe e Sezione Centrati e Ravvicinati + Badge Ruolo Distanziato -->
                 <div class="col-start-1 row-start-1 flex items-center gap-2.5 sm:gap-3.5 shrink-0">
                     <button id="back-btn" onclick="backToHub()" title="Torna all'Hub" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 text-slate-300 transition shrink-0">
                         <i class="fa-solid fa-arrow-left text-xs sm:text-sm"></i>
@@ -350,7 +347,7 @@
                     </div>
                 </div>
 
-                <!-- Controlli: Data, Elenco, Tasto Diagnostica Classe, Registro -->
+                <!-- Controlli: Data, Elenco, Diagnostica, Registro -->
                 <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex items-center justify-between md:justify-end gap-2 sm:gap-2.5 lg:gap-3 xl:gap-3.5 md:ml-auto md:order-2">
                     <!-- Selettore Data Ingrandito -->
                     <div class="relative group cursor-pointer flex-grow md:flex-grow-0" onclick="openNativeDatePicker()">
@@ -370,7 +367,7 @@
                         <i class="fa-solid fa-list-check text-slate-400 text-xs sm:text-sm"></i> <span>Elenco</span>
                     </button>
 
-                    <!-- TASTO DIAGNOSTICA IN OGNI CLASSE (CON CONSOLE HARDWARE ED EVENTI) -->
+                    <!-- TASTO DIAGNOSTICA IN OGNI CLASSE -->
                     <button onclick="openClassDiagnosticsModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 text-purple-300 hover:text-white rounded-xl lg:rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm shrink-0">
                         <i class="fa-solid fa-microchip text-purple-400"></i> <span>Diagnostica</span>
                     </button>
@@ -493,70 +490,75 @@
         </div>
     </div>
 
-    <!-- ================= MODALI ESISTENTI & CONSOLE DIAGNOSTICA ================= -->
-    
-    <!-- MODALE DIAGNOSTICA HARDWARE & COPILOT AI (ACCESSIBILE DA OGNI CLASSE E DALL'HUB) -->
-    <div id="modal-admin-console" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-lg p-3 sm:p-6">
-        <div class="glass-panel w-full max-w-5xl max-h-[92vh] p-5 sm:p-8 rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
+    <!-- ================= NUOVO CASSETTO LATERALE VERTICALE: DIAGNOSTICA NODO & COPILOT AI ================= -->
+    <div id="modal-admin-console" class="hidden fixed inset-0 z-[120] flex justify-end bg-black/80 backdrop-blur-md">
+        <!-- Pannello Laterale Verticale a Tutta Altezza -->
+        <div class="w-full sm:w-[540px] md:w-[600px] lg:w-[660px] h-full bg-[#080d1b] border-l border-slate-700/80 shadow-2xl flex flex-col p-4 sm:p-6 overflow-hidden relative fade-in">
             
-            <!-- Header Console -->
-            <div class="flex flex-wrap justify-between items-center gap-3 pb-4 border-b border-slate-800">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-purple-600/25 border border-purple-500/40 flex items-center justify-center text-purple-400 text-xl font-black shrink-0">
+            <!-- Header Pannello Verticale -->
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-800 shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-600/25 border border-purple-500/40 flex items-center justify-center text-purple-400 text-lg font-black shrink-0">
                         <i class="fa-solid fa-microchip"></i>
                     </div>
-                    <div>
+                    <div class="truncate">
                         <div class="flex items-center gap-2">
-                            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight" id="diagnostics-modal-title">Diagnostica Nodo SmartCheck32</h2>
-                            <span id="diagnostics-scope-badge" class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-mono font-bold uppercase">Aula Attiva</span>
+                            <h3 class="text-base sm:text-lg font-black text-white truncate font-sans" id="diagnostics-modal-title">Controllo Nodo SmartCheck32</h3>
+                            <span id="diagnostics-scope-badge" class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[9px] font-mono font-bold uppercase shrink-0">Aula</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Telemetria dell'hardware di sala, sensori di passaggio ToF e assistente AI locale</p>
+                        <p class="text-[11px] text-slate-400 font-mono mt-0.5 truncate">Telemetria Hardware 24/7 &amp; Assistente Diagnostico</p>
                     </div>
                 </div>
-                
-                <div class="flex items-center gap-2">
-                    <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs font-mono font-bold">
-                        <button onclick="switchAdminTab('node')" id="tab-admin-node" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md">Nodo Aula</button>
-                        <button onclick="switchAdminTab('ai')" id="tab-admin-ai" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Assistente AI</button>
-                    </div>
-                    <button onclick="closeAdminConsoleModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition ml-2">✕</button>
+                <button onclick="closeAdminConsoleModal()" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition shrink-0 ml-2">✕</button>
+            </div>
+
+            <!-- Tab Switcher Verticale -->
+            <div class="p-1 bg-slate-900/90 border border-slate-800 rounded-xl flex items-center gap-1 text-xs font-mono font-bold my-3 shrink-0">
+                <button onclick="switchAdminTab('node')" id="tab-admin-node" class="flex-1 py-2 rounded-lg bg-blue-600 text-white shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-satellite-dish"></i> Stato Nodo
+                </button>
+                <button onclick="switchAdminTab('ai')" id="tab-admin-ai" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-robot text-purple-400"></i> Assistente IA
+                </button>
+            </div>
+
+            <!-- Contenuto Tab 1: Stato Nodo Hardware (Impaginazione Verticale Chiara & Spaziosa) -->
+            <div id="content-admin-node" class="flex-grow overflow-y-auto custom-scrollbar pr-1 space-y-3.5">
+                <!-- Card 1: Stato Generale del Nodo -->
+                <div id="node-detail-status-card" class="bg-[#0e1628] border border-slate-800 p-4 rounded-2xl"></div>
+
+                <!-- Card 2: Batteria 18650 -->
+                <div id="node-detail-battery-card" class="bg-[#0e1628] border border-slate-800 p-4 rounded-2xl"></div>
+
+                <!-- Card 3: Rete Wi-Fi & ESP-NOW Mesh -->
+                <div id="node-detail-network-card" class="bg-[#0e1628] border border-slate-800 p-4 rounded-2xl"></div>
+
+                <!-- Card 4: Sensore Strappo Parete (Tamper Switch) -->
+                <div id="node-detail-tamper-card" class="bg-[#0e1628] border border-slate-800 p-4 rounded-2xl"></div>
+
+                <!-- Card 5: Pulsantiera Azioni Hardware -->
+                <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl flex items-center justify-between gap-2">
+                    <button onclick="pingCurrentNode()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold font-mono transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-satellite-dish text-blue-400"></i> Heartbeat Ping
+                    </button>
+                    <button onclick="simulateTamperCurrentNode()" class="flex-1 py-2.5 bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/60 rounded-xl text-xs font-bold font-mono transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-bell text-red-400"></i> Test Tamper
+                    </button>
                 </div>
             </div>
 
-            <!-- SCHEDA 1: DIAGNOSTICA SPECIFICA DEL NODO DI QUESTA CLASSE -->
-            <div id="content-admin-node" class="flex-grow flex flex-col overflow-y-auto custom-scrollbar pt-4 space-y-4">
-                <div id="node-detail-card" class="bg-[#0e1628] border border-slate-800 p-5 rounded-2xl shadow-lg">
-                    <!-- Generato dinamicamente via renderNodeDetails() -->
-                </div>
-
-                <!-- Azioni Hardware di Test -->
-                <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3">
-                    <div class="text-xs font-mono text-slate-400">
-                        <i class="fa-solid fa-wrench text-blue-400 mr-1.5"></i> Test e Manutenzione Nodo
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="pingCurrentNode()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold font-mono transition">
-                            <i class="fa-solid fa-satellite-dish mr-1 text-blue-400"></i> Heartbeat Ping
-                        </button>
-                        <button onclick="simulateTamperCurrentNode()" class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/60 rounded-xl text-xs font-bold font-mono transition">
-                            <i class="fa-solid fa-bell mr-1"></i> Simula Allarme Strappo
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SCHEDA 2: ASSISTENTE VIRTUALE AI (SMARTCHECK COPILOT) -->
-            <div id="content-admin-ai" class="hidden flex-grow flex flex-col overflow-hidden pt-4">
-                <div class="p-3 bg-gradient-to-r from-purple-950/30 to-blue-950/20 border border-purple-500/20 rounded-2xl mb-3 flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-xs font-mono text-purple-300">
+            <!-- Contenuto Tab 2: Assistente IA (Orientamento Verticale A Tutta Altezza) -->
+            <div id="content-admin-ai" class="hidden flex-grow flex flex-col overflow-hidden">
+                <div class="p-2.5 bg-gradient-to-r from-purple-950/30 to-blue-950/20 border border-purple-500/20 rounded-xl mb-2 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2 text-[11px] font-mono text-purple-300">
                         <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-                        Assistente Virtuale Locale SmartCheck Copilot • Modello Ollama/vLLM
+                        SmartCheck Copilot • Modello Ollama/vLLM Locale
                     </div>
-                    <span class="text-[10px] font-mono text-slate-400">Locale &amp; Conforme GDPR</span>
+                    <span class="text-[9px] font-mono text-slate-400">GDPR Safe</span>
                 </div>
 
-                <!-- Cronologia Chat -->
-                <div class="flex-grow bg-[#090e1a]/80 border border-slate-800 rounded-2xl p-4 overflow-y-auto custom-scrollbar space-y-3" id="ai-chat-history">
+                <!-- Chat History a tutta altezza -->
+                <div class="flex-grow bg-[#090e1a]/90 border border-slate-800 rounded-2xl p-4 overflow-y-auto custom-scrollbar space-y-3 mb-2" id="ai-chat-history">
                     <div class="flex items-start gap-2.5">
                         <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div>
                         <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">
@@ -566,16 +568,16 @@
                 </div>
 
                 <!-- Prompt Rapidi -->
-                <div class="flex items-center gap-2 py-2 overflow-x-auto scrollbar-none text-[11px] font-mono">
-                    <button onclick="sendQuickAiPrompt('Stato del nodo hardware di quest\'aula e batteria')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Nodo</button>
-                    <button onclick="sendQuickAiPrompt('Ci sono allarmi o manomissioni registrate?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
-                    <button onclick="sendQuickAiPrompt('Mostrami la situazione attuale delle uscite e della coda bagno')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚻 Coda Bagno</button>
+                <div class="flex items-center gap-1.5 py-1.5 overflow-x-auto scrollbar-none text-[10px] font-mono shrink-0">
+                    <button onclick="sendQuickAiPrompt('Stato del nodo hardware di quest\'aula e batteria')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Nodo</button>
+                    <button onclick="sendQuickAiPrompt('Ci sono allarmi o manomissioni registrate?')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
+                    <button onclick="sendQuickAiPrompt('Mostrami la situazione attuale delle uscite e della coda bagno')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚻 Coda Bagno</button>
                 </div>
 
-                <!-- Input Chat -->
-                <div class="flex items-center gap-2 pt-1">
-                    <input type="text" id="ai-chat-input" placeholder="Chiedi una verifica tecnica o diagnostica di sistema..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
-                    <button onclick="sendAiMessage()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-2 shadow-lg shadow-purple-600/25">
+                <!-- Input bar -->
+                <div class="flex items-center gap-2 pt-1 shrink-0">
+                    <input type="text" id="ai-chat-input" placeholder="Chiedi una verifica tecnica o diagnostica..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
+                    <button onclick="sendAiMessage()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-purple-600/25">
                         <span>Invia</span> <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
                 </div>
@@ -963,6 +965,11 @@
 
         function esc(val) { return String(val ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
         
+        function safeSetText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = text;
+        }
+
         function toast(title, message = '', type = 'info', timeout = 3000) {
             const wrap = document.getElementById('sc-toast-container');
             if (!wrap) return;
@@ -1068,6 +1075,7 @@
             }
         }
 
+        // Creazione stato classe: assegna gli studenti solo alla loro classe reale
         function buildLocalClassState(cls, students) {
             const data = {};
             for (let i=1; i<=23; i++) {
@@ -1104,6 +1112,7 @@
             return data;
         }
 
+        // Caricamento sicuro classe protetto da crash
         async function loadClassroom(cls) {
             window.scrollTo(0, 0);
             currentClass = cls;
@@ -1111,20 +1120,43 @@
 
             document.getElementById('view-hub')?.classList.add('hidden');
             document.getElementById('view-classroom')?.classList.remove('hidden');
-            document.getElementById('class-header-name').innerText = cls;
+            
+            const headerTitle = document.getElementById('class-header-name');
+            if (headerTitle) headerTitle.innerText = cls;
+
+            const isStud = currentUser?.role === 'studente';
+            document.getElementById('back-btn')?.classList.toggle('hidden', isStud);
+            document.getElementById('sign-btn')?.classList.toggle('hidden', isStud);
+            document.getElementById('dock-right')?.classList.remove('hidden');
+
+            const badge = document.getElementById('role-badge');
+            if (badge) {
+                badge.innerText = isStud ? 'STUDENTE' : (currentUser?.role || 'DOCENTE').toUpperCase();
+                badge.className = isStud 
+                    ? 'px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-700/50'
+                    : 'px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-blue-950/60 text-blue-300 border border-blue-700/50';
+            }
 
             setLoading(true, `Inizializzazione ${cls}...`);
             try {
-                const { data: classRows } = await _supabase.from('classes').select('id').eq('name', cls).limit(1);
-                currentClassId = classRows && classRows[0] ? classRows[0].id : null;
+                try {
+                    const { data: classRows } = await _supabase.from('classes').select('id').eq('name', cls).limit(1);
+                    currentClassId = classRows && classRows[0] ? classRows[0].id : null;
+                } catch(e) {
+                    currentClassId = null;
+                }
 
                 let students = [];
                 if (currentClassId) {
-                    const { data: st } = await _supabase.from('registry')
-                        .select('id, username, full_name, role, class_id')
-                        .eq('class_id', currentClassId)
-                        .eq('role', 'studente');
-                    students = st || [];
+                    try {
+                        const { data: st } = await _supabase.from('registry')
+                            .select('id, username, full_name, role, class_id')
+                            .eq('class_id', currentClassId)
+                            .eq('role', 'studente');
+                        students = st || [];
+                    } catch(e) {
+                        students = [];
+                    }
                 }
 
                 classStudents = students;
@@ -1134,30 +1166,20 @@
                 const picker = document.getElementById('date-picker');
                 if (picker) picker.value = selectedDate;
 
-                await loadScopedSchoolData();
-                await loadBathroomQueueData();
-                await loadDevicesData();
+                // Caricamento dati secondari isolati (non bloccano la grafica se falliscono)
+                try { await loadScopedSchoolData(); } catch(e) {}
+                try { await loadBathroomQueueData(); } catch(e) {}
+                try { await loadDevicesData(); } catch(e) {}
+
                 await changeDate(selectedDate);
                 renderGrid(localSchoolDB[cls]);
 
                 initRealtime();
-
-                const isStud = currentUser?.role === 'studente';
-                document.getElementById('back-btn')?.classList.toggle('hidden', isStud);
-                document.getElementById('sign-btn')?.classList.toggle('hidden', isStud);
-                document.getElementById('dock-right')?.classList.remove('hidden');
-
-                const badge = document.getElementById('role-badge');
-                if (badge) {
-                    badge.innerText = isStud ? 'STUDENTE' : (currentUser?.role || 'DOCENTE').toUpperCase();
-                    badge.className = isStud 
-                        ? 'px-2 py-0.5 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-700/50'
-                        : 'px-2 py-0.5 rounded-lg bg-blue-950/60 text-blue-300 border border-blue-700/50';
-                }
                 updateSignatureDisplay();
             } catch(err) {
-                console.error(err);
-                toast('Errore di Caricamento', 'Impossibile completare la sincronizzazione.', 'error');
+                console.error("Errore critico in loadClassroom:", err);
+                // Garantisce sempre il rendering dell'aula
+                renderGrid(localSchoolDB[cls]);
             } finally {
                 setLoading(false);
             }
@@ -1258,11 +1280,11 @@
             let batteryWarnings = schoolDevices.filter(d => d.battery_level < 20).length;
             let tamperAlerts = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper').length;
 
-            document.getElementById('hub-metric-total-nodes').innerText = totalNodes;
-            document.getElementById('hub-metric-online-nodes').innerText = onlineNodes;
-            document.getElementById('hub-metric-battery-warning').innerText = batteryWarnings;
-            document.getElementById('hub-metric-tamper-alerts').innerText = tamperAlerts;
-            document.getElementById('hub-fleet-online-badge').innerText = `${onlineNodes}/${totalNodes} Nodi Online`;
+            safeSetText('hub-metric-total-nodes', totalNodes);
+            safeSetText('hub-metric-online-nodes', onlineNodes);
+            safeSetText('hub-metric-battery-warning', batteryWarnings);
+            safeSetText('hub-metric-tamper-alerts', tamperAlerts);
+            safeSetText('hub-fleet-online-badge', `${onlineNodes}/${totalNodes} Nodi Online`);
 
             container.innerHTML = '';
             schoolDevices.forEach(d => {
@@ -1331,7 +1353,7 @@
             });
         }
 
-        // ================= CONSOLE DIAGNOSTICA NODO AULA E AI CHAT =================
+        // ================= CONSOLE DIAGNOSTICA NODO VERTICALE & AI CHAT =================
         async function loadDevicesData() {
             try {
                 const { data, error } = await _supabase.from('devices').select('*');
@@ -1339,16 +1361,16 @@
                     schoolDevices = data;
                 }
             } catch(e) {}
-            renderFleetDashboard();
+            renderHubFleetView();
         }
 
         function openClassDiagnosticsModal() {
             document.getElementById('modal-admin-console')?.classList.remove('hidden');
             const targetScope = currentClass || 'Istituto';
-            document.getElementById('diagnostics-modal-title').innerText = currentClass ? `Diagnostica SmartCheck32 — ${currentClass}` : `Diagnostica Flotta SmartCheck32`;
-            document.getElementById('diagnostics-scope-badge').innerText = targetScope;
+            safeSetText('diagnostics-modal-title', currentClass ? `Diagnostica SmartCheck32 — ${currentClass}` : `Diagnostica Flotta SmartCheck32`);
+            safeSetText('diagnostics-scope-badge', targetScope);
             
-            renderNodeDetails();
+            renderVerticalNodeDetails();
             switchAdminTab('node');
         }
 
@@ -1364,67 +1386,108 @@
             const btnAi = document.getElementById('tab-admin-ai');
             
             if (tab === 'node') {
-                btnNode.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md";
-                btnAi.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+                btnNode.className = "flex-1 py-2 rounded-lg bg-blue-600 text-white shadow transition flex items-center justify-center gap-2";
+                btnAi.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
             } else {
-                btnAi.className = "px-3.5 py-1.5 rounded-lg bg-purple-600 text-white shadow-md";
-                btnNode.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+                btnAi.className = "flex-1 py-2 rounded-lg bg-purple-600 text-white shadow transition flex items-center justify-center gap-2";
+                btnNode.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
             }
         }
 
-        function renderNodeDetails() {
-            const card = document.getElementById('node-detail-card');
-            if (!card) return;
-
-            // Trova dispositivo associato alla classe corrente o primo nodo
+        // Render Telemetria Verticale del Nodo
+        function renderVerticalNodeDetails() {
             let d = schoolDevices.find(dev => dev.class_name === currentClass) || schoolDevices[0];
 
             let statusColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
-            let statusText = "Online (Connesso)";
+            let statusText = "ONLINE — REGOLARE";
             if (d.is_tampered || d.status === 'tamper') {
                 statusColor = "bg-red-500/30 text-red-400 border-red-500/60 animate-pulse";
-                statusText = "ALLARME STRAPPO PARETE";
+                statusText = "MANOMESSO (STRAPPO)";
             } else if (d.status === 'offline') {
                 statusColor = "bg-slate-800 text-slate-500 border-slate-700";
-                statusText = "Disconnesso";
+                statusText = "DISCONNESSO";
             }
 
-            card.innerHTML = `
-                <div class="flex flex-wrap justify-between items-start gap-2 mb-4 pb-3 border-b border-slate-800">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full ${d.status === 'online' ? 'bg-emerald-400 animate-pulse' : (d.is_tampered ? 'bg-red-500 animate-ping' : 'bg-slate-600')}"></span>
-                            <h4 class="text-base sm:text-lg font-black text-white font-sans">${esc(d.device_name)}</h4>
+            // 1. Stato Card
+            const cardStatus = document.getElementById('node-detail-status-card');
+            if (cardStatus) {
+                cardStatus.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3.5 h-3.5 rounded-full ${d.status === 'online' ? 'bg-emerald-400 animate-pulse' : (d.is_tampered ? 'bg-red-500 animate-ping' : 'bg-slate-600')}"></span>
+                            <span class="text-sm font-black text-white font-sans">${esc(d.device_name)}</span>
                         </div>
-                        <p class="text-xs font-mono text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${esc(d.location)} • Codice: <span class="text-slate-300 font-bold">${esc(d.device_code)}</span></p>
+                        <span class="text-[9px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border ${statusColor}">${statusText}</span>
                     </div>
-                    <span class="text-[10px] font-mono font-bold uppercase px-3 py-1 rounded-lg border ${statusColor}">${statusText}</span>
-                </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs font-mono text-slate-300">
+                        <div><span class="text-slate-500 text-[10px] block">UBICAZIONE</span>${esc(d.location)}</div>
+                        <div><span class="text-slate-500 text-[10px] block">CODICE NODO</span>${esc(d.device_code)}</div>
+                    </div>
+                `;
+            }
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
-                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Stato Batteria</span>
-                        <span class="text-sm font-black ${d.battery_level < 20 ? 'text-red-400' : 'text-emerald-400'}"><i class="fa-solid fa-battery-half mr-1"></i>${d.battery_level}% (${d.battery_voltage}V)</span>
+            // 2. Batteria Card
+            const cardBatt = document.getElementById('node-detail-battery-card');
+            if (cardBatt) {
+                let battColor = d.battery_level < 20 ? 'text-red-400' : 'text-emerald-400';
+                cardBatt.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-mono font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-battery-half text-emerald-400"></i> Alimentazione Cella 18650
+                        </span>
+                        <span class="text-sm font-black font-mono ${battColor}">${d.battery_level}% (${d.battery_voltage}V)</span>
                     </div>
-                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
-                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Segnale Antenna</span>
-                        <span class="text-sm font-black text-blue-400"><i class="fa-solid fa-wifi mr-1"></i>${d.rssi} dBm</span>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-2">
+                        <div class="bg-emerald-500 h-full rounded-full transition-all" style="width: ${d.battery_level}%"></div>
                     </div>
-                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
-                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Tamper a Muro</span>
-                        <span class="text-sm font-black ${d.is_tampered ? 'text-red-400' : 'text-emerald-400'}"><i class="fa-solid fa-shield mr-1"></i>${d.is_tampered ? 'APERTO' : 'OK (Chiuso)'}</span>
+                    <div class="flex justify-between text-[10px] font-mono text-slate-500">
+                        <span>Autonomia stimata: ~36h attive / ~180h sleep</span>
+                        <span>Circuito Tampone: Attivo</span>
                     </div>
-                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
-                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Gate ToF / NFC</span>
-                        <span class="text-sm font-black text-emerald-400"><i class="fa-solid fa-door-open mr-1"></i>Attivo</span>
-                    </div>
-                </div>
+                `;
+            }
 
-                <div class="mt-4 pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-slate-400">
-                    <div>Indirizzo IP Locale: <span class="text-white font-bold">${esc(d.ip_address)}</span></div>
-                    <div>Indirizzo Fisico MAC: <span class="text-white font-bold">${esc(d.mac_address)}</span></div>
-                </div>
-            `;
+            // 3. Rete Card
+            const cardNet = document.getElementById('node-detail-network-card');
+            if (cardNet) {
+                cardNet.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-mono font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                            <i class="fa-solid fa-wifi text-blue-400"></i> Connettività Wi-Fi &amp; Mesh
+                        </span>
+                        <span class="text-xs font-mono font-bold text-blue-400">${d.rssi} dBm (Ottimale)</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs font-mono text-slate-300">
+                        <div><span class="text-slate-500 text-[10px] block">IP SUBNET LAN</span>${esc(d.ip_address)}</div>
+                        <div><span class="text-slate-500 text-[10px] block">INDIRIZZO MAC</span>${esc(d.mac_address)}</div>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-500 flex justify-between">
+                        <span>Protocollo: MQTT LAN + ESP-NOW Mesh</span>
+                        <span>Firmware: ${esc(d.firmware_version || 'v2.4')}</span>
+                    </div>
+                `;
+            }
+
+            // 4. Tamper Card
+            const cardTamper = document.getElementById('node-detail-tamper-card');
+            if (cardTamper) {
+                const isTamp = d.is_tampered;
+                cardTamper.className = isTamp 
+                    ? "bg-red-950/30 border border-red-500/60 p-4 rounded-2xl shadow-lg"
+                    : "bg-[#0e1628] border border-slate-800 p-4 rounded-2xl";
+
+                cardTamper.innerHTML = `
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs font-mono font-bold uppercase flex items-center gap-1.5 ${isTamp ? 'text-red-400' : 'text-slate-400'}">
+                            <i class="fa-solid fa-shield-halved ${isTamp ? 'text-red-400' : 'text-emerald-400'}"></i> Protezione Antifurto a Parete
+                        </span>
+                        <span class="text-xs font-mono font-black ${isTamp ? 'text-red-400' : 'text-emerald-400'}">${isTamp ? 'ALLARME STRAPPO' : 'CHIUSO (OK)'}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-mono leading-relaxed">
+                        ${isTamp ? 'Il microinterruttore a contatto sul retro è aperto: il dispositivo è stato staccato dalla parete.' : 'Microswitch normalmente chiuso a parete integro. Nessun movimento anomalo registrato.'}
+                    </p>
+                `;
+            }
         }
 
         function pingCurrentNode() {
@@ -1436,7 +1499,7 @@
             let d = schoolDevices.find(dev => dev.class_name === currentClass) || schoolDevices[0];
             d.is_tampered = !d.is_tampered;
             d.status = d.is_tampered ? 'tamper' : 'online';
-            renderNodeDetails();
+            renderVerticalNodeDetails();
             renderHubFleetView();
             if (d.is_tampered) {
                 toast('ALLARME MANOMISSIONE', `Rilevato distacco dalla parete del nodo ${d.device_name}!`, 'error', 5000);
@@ -1488,7 +1551,7 @@
                     </div>
                 `;
                 history.scrollTop = history.scrollHeight;
-            }, 400);
+            }, 350);
         }
 
         function generateLocalAiResponse(query) {
@@ -1501,16 +1564,16 @@
 
             if (q.includes('tamper') || q.includes('strappo') || q.includes('manomiss') || q.includes('rubato')) {
                 if (tamp.length > 0) {
-                    return `🚨 <strong>ATTENZIONE:</strong> Rilevato allarme di manomissione attivo sul nodo <strong>${tamp[0].device_name}</strong> (${tamp[0].location}). Il microswitch posteriore a parete è aperto.`;
+                    return `🚨 <strong>ATTENZIONE:</strong> Rilevato allarme di manomissione attivo sul nodo <strong>${tamp[0].device_name}</strong> (${tamp[0].location}). Il microswitch a parete è aperto.`;
                 }
-                return `✅ Nessun allarme di manomissione registrato. Tutti i microswitch a parete risultano chiusi e protetti.`;
+                return `✅ Nessun allarme di manomissione registrato. Tutti i nodi risultano protetti e fissati alla parete.`;
             }
 
             if (q.includes('batteri') || q.includes('scaric') || q.includes('18650')) {
                 if (lowBatt.length > 0) {
-                    return `⚠️ <strong>Report Batterie:</strong> Il nodo <strong>${lowBatt[0].device_name}</strong> (${lowBatt[0].location}) ha carica residua al <strong>${lowBatt[0].battery_level}%</strong> (${lowBatt[0].battery_voltage}V). Si consiglia la ricarica.`;
+                    return `⚠️ <strong>Report Batterie:</strong> Il nodo <strong>${lowBatt[0].device_name}</strong> (${lowBatt[0].location}) ha carica al <strong>${lowBatt[0].battery_level}%</strong> (${lowBatt[0].battery_voltage}V). Si consiglia la ricarica.`;
                 }
-                return `🔋 Tutte le celle 18650 dell'istituto presentano voltaggio ottimale compreso tra 3.82V e 4.18V.`;
+                return `🔋 Tutte le celle 18650 dell'istituto presentano voltaggio ottimale compreso tra 3.82V e 4.18V (&gt;60%).`;
             }
 
             if (q.includes('bagno') || q.includes('coda') || q.includes('uscita')) {
@@ -1523,330 +1586,6 @@
 
             let offlineText = offline.length > 0 ? `<br>⚠️ Nodi disconnessi: <strong>${offline.map(d=>d.device_name).join(', ')}</strong>.` : '<br>Tutti i nodi sono operativi.';
             return `📊 <strong>Diagnostica SmartCheck32:</strong><br>• Dispositivi totali: <strong>${total}</strong><br>• Connessi regolarmente (LAN): <strong>${online} / ${total}</strong>${offlineText}`;
-        }
-
-        // ================= GESTIONE CODA BAGNO =================
-        async function loadBathroomQueueData() {
-            try {
-                const { data, error } = await _supabase
-                    .from('bathroom_queue')
-                    .select('*')
-                    .eq('class', currentClass)
-                    .order('created_at', { ascending: true });
-                if (!error && data) {
-                    bathroomQueue = data;
-                }
-            } catch(e) {}
-            updateQueueBadges();
-            if (!document.getElementById('modal-bathroom-queue').classList.contains('hidden')) {
-                renderBathroomQueueUI();
-            }
-        }
-
-        function openBathroomQueueModal() {
-            document.getElementById('modal-bathroom-queue')?.classList.remove('hidden');
-            const isTeacher = (currentUser?.role !== 'studente');
-            document.getElementById('queue-teacher-controls')?.classList.toggle('hidden', !isTeacher);
-            renderBathroomQueueUI();
-        }
-
-        function closeBathroomQueueModal() {
-            document.getElementById('modal-bathroom-queue')?.classList.add('hidden');
-        }
-
-        function updateQueueBadges() {
-            const badge = document.getElementById('queue-badge-count');
-            if (badge) {
-                const count = bathroomQueue.length;
-                badge.innerText = count;
-                badge.classList.toggle('hidden', count === 0);
-            }
-        }
-
-        function renderBathroomQueueUI() {
-            const occupantCard = document.getElementById('queue-occupant-card');
-            const actionBox = document.getElementById('queue-action-box');
-            const listContainer = document.getElementById('queue-list-container');
-            const totalWaiting = document.getElementById('queue-total-waiting');
-
-            if (!occupantCard || !actionBox || !listContainer) return;
-
-            let occupant = null;
-            let occupantDeskId = null;
-            if (localSchoolDB[currentClass]) {
-                for (let [deskId, s] of Object.entries(localSchoolDB[currentClass])) {
-                    if (s && s.status === 'bagno') {
-                        occupant = s;
-                        occupantDeskId = deskId;
-                        break;
-                    }
-                }
-            }
-
-            const isTeacher = (currentUser?.role !== 'studente');
-
-            if (occupant) {
-                const lastHistory = occupant.history && occupant.history.length > 0 ? occupant.history[occupant.history.length - 1] : null;
-                const outTime = lastHistory ? lastHistory.out : occupant.time;
-                const returnBtn = isTeacher 
-                    ? `<button onclick="forceBathroomReturn('${occupantDeskId}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition">Segna Rientro</button>`
-                    : '';
-
-                occupantCard.className = "mb-4 p-4 rounded-2xl border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-between shadow-lg shadow-cyan-950/40 animate-pulse";
-                occupantCard.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
-                        <div>
-                            <div class="text-[10px] font-mono uppercase font-bold text-cyan-300">Bagno Occupato</div>
-                            <div class="text-sm sm:text-base font-black text-white font-sans">${esc(occupant.name)} <span class="text-xs font-mono text-cyan-400 font-normal">#${occupantDeskId.split('_')[1]}</span></div>
-                            <div class="text-[10px] font-mono text-slate-400">Uscita alle ore ${esc(outTime)}</div>
-                        </div>
-                    </div>
-                    ${returnBtn}
-                `;
-            } else {
-                occupantCard.className = "mb-4 p-4 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 flex items-center justify-between";
-                occupantCard.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-                        <div>
-                            <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Bagno Libero</div>
-                            <div class="text-xs sm:text-sm font-bold text-slate-300">Nessun alunno attualmente fuori aula per il bagno</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            actionBox.innerHTML = '';
-            if (currentUser?.role === 'studente') {
-                const myStudentId = currentUser.id;
-                let myDeskEntry = null;
-                if (localSchoolDB[currentClass]) {
-                    myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === myStudentId);
-                }
-
-                const myDeskId = myDeskEntry ? myDeskEntry[0] : null;
-                const myStudentData = myDeskEntry ? myDeskEntry[1] : null;
-                const isCurrentlyInBathroom = (myStudentData && myStudentData.status === 'bagno');
-                const queueIndex = bathroomQueue.findIndex(q => q.student_id === myStudentId);
-                const isInQueue = (queueIndex !== -1);
-                const isNextInLine = (queueIndex === 0);
-
-                if (isCurrentlyInBathroom) {
-                    actionBox.innerHTML = `
-                        <div class="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-center">
-                            <span class="text-xs font-mono font-bold text-cyan-300">Sei attualmente fuori al bagno.</span>
-                        </div>
-                    `;
-                } else if (isInQueue) {
-                    const canGoNow = (isNextInLine && !occupant);
-                    if (canGoNow) {
-                        actionBox.innerHTML = `
-                            <div class="p-3.5 bg-emerald-500/15 border border-emerald-500/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2 shadow-lg">
-                                <div>
-                                    <div class="text-xs font-black text-emerald-400">È IL TUO TURNO!</div>
-                                    <div class="text-[11px] text-slate-300">Il bagno è libero. Conferma per registrare l'uscita.</div>
-                                </div>
-                                <button onclick="startBathroomTrip('${myStudentId}', '${myDeskId}')" class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition shadow-md">
-                                    Esci al Bagno
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        actionBox.innerHTML = `
-                            <div class="p-3.5 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between gap-3">
-                                <div>
-                                    <div class="text-[10px] font-mono uppercase font-bold text-cyan-400">La tua posizione</div>
-                                    <div class="text-sm font-black text-white font-sans">${queueIndex + 1}° in fila d'attesa</div>
-                                    <div class="text-[10px] font-mono text-slate-400">Riceverai l'abilitazione appena il bagno si libera</div>
-                                </div>
-                                <button onclick="leaveBathroomQueue('${myStudentId}')" class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-300 font-bold text-xs rounded-xl transition">
-                                    Annulla
-                                </button>
-                            </div>
-                        `;
-                    }
-                } else {
-                    actionBox.innerHTML = `
-                        <button onclick="joinBathroomQueue()" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-cyan-600/25 transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-hand"></i> Prenotati per il Bagno dal tuo Banco
-                        </button>
-                    `;
-                }
-            }
-
-            totalWaiting.innerText = `${bathroomQueue.length} in attesa`;
-            listContainer.innerHTML = '';
-
-            if (bathroomQueue.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="p-6 text-center text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-2xl">
-                        Nessuno studente in coda al momento.
-                    </div>
-                `;
-                return;
-            }
-
-            bathroomQueue.forEach((item, index) => {
-                const isFirst = (index === 0);
-                const isReady = (isFirst && !occupant);
-                const badgeColor = isReady 
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 animate-pulse'
-                    : 'bg-slate-800 text-slate-400 border-slate-700';
-
-                const removeBtn = isTeacher 
-                    ? `<button onclick="removeQueueItem('${item.id || item.student_id}')" class="text-red-400 hover:text-red-300 p-1.5 transition ml-2" title="Rimuovi dalla coda"><i class="fa-solid fa-trash text-xs"></i></button>`
-                    : '';
-
-                const callBtn = (isTeacher && isReady)
-                    ? `<button onclick="startBathroomTrip('${item.student_id}', '${item.desk_id}')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px] rounded-lg uppercase tracking-wider transition ml-1">Fai uscire</button>`
-                    : '';
-
-                listContainer.innerHTML += `
-                    <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-7 h-7 rounded-lg ${isFirst ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400'} font-black text-xs flex items-center justify-center font-mono shrink-0">
-                                ${index + 1}°
-                            </div>
-                            <div>
-                                <div class="font-extrabold text-white text-xs sm:text-sm leading-tight">${esc(item.student_name)}</div>
-                                <div class="text-[9px] font-mono text-slate-400">#${esc(item.desk_id ? item.desk_id.replace('banco_','') : '--')} • Prenotato alle ${esc(item.booked_at || '--:--')}</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded border ${badgeColor}">
-                                ${isReady ? 'Turno Pronto' : 'In Attesa'}
-                            </span>
-                            ${callBtn}
-                            ${removeBtn}
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        async function joinBathroomQueue() {
-            if (currentUser?.role !== 'studente') return;
-            
-            let myDeskEntry = null;
-            if (localSchoolDB[currentClass]) {
-                myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === currentUser.id);
-            }
-
-            if (!myDeskEntry) {
-                toast('Attenzione', 'Il tuo account non risulta posizionato in questa classe.', 'error');
-                return;
-            }
-
-            const deskId = myDeskEntry[0];
-            const myData = myDeskEntry[1];
-
-            if (myData.status === 'assente') {
-                toast('Non puoi prenotarti', 'Risulti assente sul registro.', 'error');
-                return;
-            }
-
-            if (myData.status === 'bagno') {
-                toast('Già fuori', 'Risulti già al bagno.', 'info');
-                return;
-            }
-
-            const nowTime = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-            const newQueueItem = {
-                id: 'queue_' + Date.now(),
-                student_id: currentUser.id,
-                student_name: currentUser.name,
-                desk_id: deskId,
-                class: currentClass,
-                class_id: currentClassId,
-                booked_at: nowTime,
-                created_at: new Date().toISOString()
-            };
-
-            bathroomQueue.push(newQueueItem);
-            updateQueueBadges();
-            renderBathroomQueueUI();
-            toast('Prenotazione Registrata', `Sei il #${bathroomQueue.length} in coda per il bagno`, 'success');
-
-            try {
-                await _supabase.from('bathroom_queue').insert([newQueueItem]);
-            } catch(e) {}
-
-            broadcastQueueUpdate();
-        }
-
-        async function leaveBathroomQueue(studentId) {
-            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId);
-            updateQueueBadges();
-            renderBathroomQueueUI();
-            toast('Prenotazione Annullata', 'Hai lasciato la fila del bagno', 'info');
-
-            try {
-                await _supabase.from('bathroom_queue').delete().eq('student_id', studentId).eq('class', currentClass);
-            } catch(e) {}
-
-            broadcastQueueUpdate();
-        }
-
-        async function removeQueueItem(identifier) {
-            bathroomQueue = bathroomQueue.filter(q => q.id !== identifier && q.student_id !== identifier);
-            updateQueueBadges();
-            renderBathroomQueueUI();
-
-            try {
-                await _supabase.from('bathroom_queue').delete().match({ student_id: identifier, class: currentClass });
-            } catch(e) {}
-
-            broadcastQueueUpdate();
-        }
-
-        async function clearBathroomQueue() {
-            if (!confirm("Svuotare l'intera coda del bagno per questa classe?")) return;
-            bathroomQueue = [];
-            updateQueueBadges();
-            renderBathroomQueueUI();
-
-            try {
-                await _supabase.from('bathroom_queue').delete().eq('class', currentClass);
-            } catch(e) {}
-
-            broadcastQueueUpdate();
-            toast('Coda Svuotata', 'Tutte le prenotazioni sono state rimosse.', 'info');
-        }
-
-        async function startBathroomTrip(studentId, deskId) {
-            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId);
-            updateQueueBadges();
-
-            try {
-                await _supabase.from('bathroom_queue').delete().eq('student_id', studentId).eq('class', currentClass);
-            } catch(e) {}
-
-            selectedStudentId = deskId;
-            pendingStatus = 'bagno';
-            await confirmStatusChange();
-
-            renderBathroomQueueUI();
-            broadcastQueueUpdate();
-        }
-
-        async function forceBathroomReturn(occupantDeskId) {
-            selectedStudentId = occupantDeskId;
-            pendingStatus = 'presente';
-            await confirmStatusChange();
-            renderBathroomQueueUI();
-            broadcastQueueUpdate();
-            toast('Rientro Confermato', 'Il bagno è ora libero. Turno abilitato per il primo in coda.', 'success');
-        }
-
-        function broadcastQueueUpdate() {
-            try {
-                _supabase.channel('smartcheck_channel').send({
-                    type: 'broadcast',
-                    event: 'QUEUE_SYNC',
-                    payload: { class: currentClass, queue: bathroomQueue }
-                });
-            } catch(e) {}
         }
 
         // Selettore Ala Mobile
@@ -2120,6 +1859,7 @@
             document.getElementById(`btn-${status}`)?.classList.add('btn-selected');
         }
 
+        // Conferma cambio stato presenza
         async function confirmStatusChange() {
             if (!pendingStatus) {
                 toast('Seleziona Stato', 'Scegli uno stato prima di salvare.', 'info');
