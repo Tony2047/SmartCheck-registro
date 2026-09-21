@@ -31,7 +31,6 @@
             background-image: radial-gradient(rgba(59, 130, 246, 0.07) 1px, transparent 1px);
             background-size: 28px 28px;
             -webkit-tap-highlight-color: transparent; 
-            transition: box-shadow 0.3s ease;
         }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .glass-panel { 
@@ -43,29 +42,27 @@
         }
         .hidden { display: none !important; }
 
-        /* ALLARME MANOMISSIONE / TENTATO FURTO PERSISTENTE SULLO SCHERMO */
-        body.tamper-alarm-active {
-            box-shadow: inset 0 0 50px rgba(239, 68, 68, 0.65) !important;
-            animation: alarmScreenPulse 1.6s infinite;
-        }
-        @keyframes alarmScreenPulse {
-            0%, 100% { box-shadow: inset 0 0 35px rgba(239, 68, 68, 0.5); }
-            50% { box-shadow: inset 0 0 75px rgba(239, 68, 68, 0.9); }
-        }
-
+        /* GESTIONE VISIBILITÀ AULA RESPONSIVE */
         #classroom-grid { display: none; }
         #mobile-classroom-grid { display: flex; flex-direction: column; }
         .desk-switcher-mobile { display: block; }
+
+        /* SEPARATORE HEADER DEDICATO SENZA CONFLITTI !IMPORTANT */
         .header-divider { display: none; }
 
+        /* DISTANZIAMENTO GARANTITO CASELLE CLASSI HUB */
         .class-list-container {
             display: flex !important;
             flex-direction: column !important;
             gap: 12px !important;
         }
+
         @media (min-width: 640px) {
-            .class-list-container { gap: 15px !important; }
+            .class-list-container {
+                gap: 15px !important;
+            }
         }
+
         @media (min-width: 768px) {
             #classroom-grid { display: grid !important; }
             #mobile-classroom-grid { display: none !important; }
@@ -86,7 +83,7 @@
         .fade-in { animation: fadeIn 0.25s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* BADGE E STATI BANCHI */
+        /* STATUS BADGES & DESK STYLING */
         .status-bagno { border: 2px solid #06b6d4 !important; background: linear-gradient(145deg, rgba(8, 51, 68, 0.9), rgba(6, 182, 212, 0.2)) !important; color: #67e8f9 !important; animation: pulseCyan 2.2s infinite; }
         .status-presente { border: 2px solid #10b981 !important; background: linear-gradient(145deg, rgba(6, 78, 59, 0.85), rgba(16, 185, 129, 0.15)) !important; color: #6ee7b7 !important; }
         .status-assente { border: 2px solid rgba(239, 68, 68, 0.35) !important; background: rgba(15, 23, 42, 0.6) !important; color: #f87171 !important; opacity: 0.55; }
@@ -97,12 +94,14 @@
 
         @keyframes pulseCyan { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.5); } 70% { box-shadow: 0 0 0 14px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
 
+        /* DOCK TOOL BUTTONS */
         .dock-btn { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.08); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
         .dock-btn:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.25); background: rgba(30, 41, 59, 0.95); }
+
         .btn-selected { opacity: 1 !important; transform: scale(1.03) !important; border: 2px solid white !important; box-shadow: 0 0 18px rgba(255,255,255,0.25); z-index: 10; }
         .status-btn { opacity: 0.55; transition: all 0.18s; border-width: 1px; }
 
-        /* CALENDARIO & VOTI */
+        /* GRADES ENGINE STYLES */
         .cv-card { background: #0c1222; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; transition: all 0.2s; }
         .cv-card:hover { background: #131c33; border-color: rgba(255,255,255,0.15); }
         .grade-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; position: relative; }
@@ -116,6 +115,7 @@
         .bg-cv-orange { background: linear-gradient(135deg, #d97706, #f59e0b); }
         .bg-cv-red { background: linear-gradient(135deg, #dc2626, #ef4444); }
 
+        /* CALENDAR STRIP */
         .cv-calendar-strip { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 18px; }
         .cv-day { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 38px; cursor: pointer; transition: all 0.2s; opacity: 0.5; }
         .cv-day.active { opacity: 1; transform: scale(1.08); }
@@ -126,6 +126,7 @@
         .cv-day.today:not(.active) .cv-day-number { border: 1.5px solid #3b82f6; color: #60a5fa; }
         .cv-day.future { opacity: 0.2; pointer-events: none; }
 
+        /* TOAST & LOADER */
         .sc-toast-container { position: fixed; right: 16px; top: 16px; z-index: 300; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 32px)); pointer-events: none; }
         .sc-toast { pointer-events: auto; background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 20px 45px rgba(0,0,0,0.5); backdrop-filter: blur(16px); border-radius: 16px; padding: 12px 16px; display: flex; gap: 12px; align-items: flex-start; animation: toastSlide 0.25s ease-out; }
         .sc-toast.success { border-color: rgba(16,185,129,0.4); } .sc-toast.error { border-color: rgba(239,68,68,0.45); } .sc-toast.info { border-color: rgba(59,130,246,0.4); }
@@ -136,6 +137,7 @@
         .sc-loading-card { display: flex; align-items: center; gap: 14px; padding: 14px 24px; border-radius: 18px; background: #0f172a; border: 1px solid #334155; font-size: 13px; font-weight: 700; box-shadow: 0 25px 60px rgba(0,0,0,0.6); }
         .sc-spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
         .aisle-pill-active { background: #2563eb !important; color: white !important; border-color: #60a5fa !important; box-shadow: 0 4px 15px rgba(37,99,235,0.35); }
     </style>
 </head>
@@ -144,29 +146,6 @@
     <div id="sc-toast-container" class="sc-toast-container"></div>
     <div id="sc-loading" class="sc-loading hidden">
         <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Sincronizzazione in corso...</span></div>
-    </div>
-
-    <!-- BANNER PERMANENTE ALLARME MANOMISSIONE / TENTATO FURTO -->
-    <div id="global-tamper-banner" class="hidden fixed top-0 left-0 right-0 z-[250] bg-gradient-to-r from-red-950 via-red-800 to-red-950 border-b-2 border-red-500 text-white px-4 py-3 shadow-2xl flex flex-wrap items-center justify-between gap-3 animate-pulse">
-        <div class="flex items-center gap-3">
-            <span class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center text-white text-base font-black animate-ping">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </span>
-            <div class="text-xs sm:text-sm font-mono leading-tight" id="global-tamper-text">
-                <strong>ALLARME SICUREZZA:</strong> Rilevato distacco nodo a parete!
-            </div>
-        </div>
-        <div class="flex items-center gap-2">
-            <button onclick="toggleMuteSiren()" id="btn-mute-siren" class="px-3 py-1.5 bg-black/50 hover:bg-black/80 border border-white/20 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5">
-                <i class="fa-solid fa-volume-xmark text-red-400"></i> Tacita Sirena
-            </button>
-            <button onclick="openClassDiagnosticsModal()" class="px-3.5 py-1.5 bg-white text-red-950 font-black rounded-xl text-xs font-mono uppercase tracking-wider hover:bg-slate-200 transition shadow">
-                Verifica Nodo
-            </button>
-            <button onclick="resolveAllTamperAlarms()" class="px-3 py-1.5 bg-red-900 hover:bg-red-700 border border-red-400 rounded-xl text-xs font-mono font-bold transition">
-                Risolto
-            </button>
-        </div>
     </div>
 
     <!-- ================= 1. LOGIN SCREEN ================= -->
@@ -182,7 +161,7 @@
                         Smart<span class="text-blue-500">Check</span><span class="text-slate-500 text-2xl sm:text-3xl lg:text-4xl font-mono">.OS</span>
                     </h1>
                     <p class="text-slate-300 text-sm sm:text-base lg:text-lg leading-relaxed font-light">
-                        Piattaforma centralizzata per la gestione di presenze, registri di classe, uscite e monitoraggio didattico in tempo reale[cite: 1].
+                        Piattaforma centralizzata per la gestione di presenze, registri di classe, uscite e monitoraggio didattico in tempo reale.
                     </p>
                 </div>
                 
@@ -268,14 +247,14 @@
                 </div>
             </header>
 
-            <!-- TABS SWITCHER HUB -->
+            <!-- TABS SWITCHER: SEZIONI DIDATTICHE VS FLOTTA DISPOSITIVI ISTITUTO -->
             <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <div class="p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center gap-2 text-xs font-mono font-bold shadow-lg">
                     <button onclick="switchHubSection('classes')" id="btn-tab-hub-classes" class="px-5 py-2.5 rounded-xl transition bg-blue-600 text-white shadow-md flex items-center gap-2">
                         <i class="fa-solid fa-chalkboard"></i> Sezioni Didattiche
                     </button>
                     <button onclick="switchHubSection('fleet')" id="btn-tab-hub-fleet" class="px-5 py-2.5 rounded-xl transition text-slate-400 hover:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-network-wired text-cyan-400"></i> Flotta Dispositivi Istituto 
+                        <i class="fa-solid fa-network-wired text-cyan-400"></i> Flotta Nodi SmartCheck32 
                         <span id="hub-fleet-online-badge" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">5 Nodi</span>
                     </button>
                 </div>
@@ -285,12 +264,12 @@
                 </div>
             </div>
 
-            <!-- SEZIONE 1: SELETTORE DELLE CLASSI -->
+            <!-- SEZIONE 1: SELETTORE DELLE CLASSI E SEZIONI -->
             <div id="hub-section-classes">
                 <div class="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
                     <div>
                         <h3 class="text-lg sm:text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
-                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi e il monitoraggio presenze per l'indirizzo di competenza[cite: 1].</p>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi e il monitoraggio presenze per l'indirizzo di competenza.</p>
                     </div>
                 </div>
 
@@ -299,20 +278,22 @@
                 </div>
             </div>
 
-            <!-- SEZIONE 2: FLOTTA DISPOSITIVI COMPLETA A MONTE NELL'HUB -->
+            <!-- SEZIONE 2: PANNELLO COMPLETO FLOTTA DISPOSITIVI ISTITUTO (INTEGRATO NELL'HUB) -->
             <div id="hub-section-fleet" class="hidden space-y-6 fade-in">
+                <!-- Header Sezione Flotta -->
                 <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-cyan-950/30 via-slate-900/60 to-purple-950/20 border border-cyan-500/20 flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2.5">
-                            <i class="fa-solid fa-microchip text-cyan-400"></i> Monitoraggio Hardware SmartCheck32 d'Istituto
+                            <i class="fa-solid fa-microchip text-cyan-400"></i> Monitoraggio Hardware d'Istituto
                         </h3>
-                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Stato in tempo reale di tutti i lettori NFC, microswitch tamper a parete e alimentazione 18650[cite: 16, 17, 18].</p>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Telemetria in tempo reale di tutti i nodi SmartCheck32 installati nelle aule e nei laboratori.</p>
                     </div>
                     <button onclick="openClassDiagnosticsModal()" class="px-4 py-2.5 bg-purple-600/30 hover:bg-purple-600 border border-purple-500/50 hover:text-white text-purple-300 font-bold text-xs rounded-xl transition flex items-center gap-2">
                         <i class="fa-solid fa-robot"></i> Assistente AI Diagnostico
                     </button>
                 </div>
 
+                <!-- Cruscotto Metriche Generali -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                     <div class="glass-panel p-4 rounded-2xl border border-slate-800">
                         <div class="text-[10px] font-mono uppercase font-bold text-slate-400">Nodi Rilevati</div>
@@ -332,8 +313,11 @@
                     </div>
                 </div>
 
+                <!-- Griglia Dispositivi Hardware dell'Istituto -->
                 <div class="glass-panel p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-800/80">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="hub-devices-grid"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="hub-devices-grid">
+                        <!-- Popolato dinamicamente da renderFleetDashboard() -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -346,9 +330,11 @@
     <!-- ================= 3. CLASSROOM VIEW (PC WIDESCREEN & MOBILE) ================= -->
     <div id="view-classroom" class="hidden min-h-screen flex flex-col relative fade-in">
         
+        <!-- Header HUD -->
         <header class="bg-[#0b1121]/95 backdrop-blur-xl border-b border-slate-800/80 px-3 sm:px-6 lg:px-8 xl:px-10 py-2.5 sm:py-3 sticky top-0 z-40">
             <div class="w-full grid grid-cols-2 gap-y-2.5 items-center md:flex md:justify-between md:items-center">
                 
+                <!-- Blocco Sinistro: Tasto Back + Classe e Sezione + Badge Ruolo -->
                 <div class="col-start-1 row-start-1 flex items-center gap-2.5 sm:gap-3.5 shrink-0">
                     <button id="back-btn" onclick="backToHub()" title="Torna all'Hub" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 text-slate-300 transition shrink-0">
                         <i class="fa-solid fa-arrow-left text-xs sm:text-sm"></i>
@@ -364,7 +350,9 @@
                     </div>
                 </div>
 
+                <!-- Controlli: Data, Elenco, Tasto Diagnostica Classe, Registro -->
                 <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex items-center justify-between md:justify-end gap-2 sm:gap-2.5 lg:gap-3 xl:gap-3.5 md:ml-auto md:order-2">
+                    <!-- Selettore Data Ingrandito -->
                     <div class="relative group cursor-pointer flex-grow md:flex-grow-0" onclick="openNativeDatePicker()">
                         <div class="glass-panel px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl lg:rounded-2xl flex items-center gap-2.5 border border-slate-700/70 hover:border-blue-500/60 transition relative">
                             <i class="fa-regular fa-calendar text-sm lg:text-base text-blue-400 shrink-0"></i>
@@ -377,21 +365,26 @@
                         </div>
                     </div>
 
+                    <!-- Tasto Elenco -->
                     <button onclick="openListModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl lg:rounded-2xl text-xs sm:text-sm font-bold text-slate-200 transition flex items-center gap-2 shadow-sm shrink-0">
                         <i class="fa-solid fa-list-check text-slate-400 text-xs sm:text-sm"></i> <span>Elenco</span>
                     </button>
 
+                    <!-- TASTO DIAGNOSTICA IN OGNI CLASSE (CON CONSOLE HARDWARE ED EVENTI) -->
                     <button onclick="openClassDiagnosticsModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 text-purple-300 hover:text-white rounded-xl lg:rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm shrink-0">
                         <i class="fa-solid fa-microchip text-purple-400"></i> <span>Diagnostica</span>
                     </button>
 
+                    <!-- Tasto Registro Ingrandito -->
                     <button id="sign-btn" onclick="openSignModal()" class="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl lg:rounded-2xl text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-2 shrink-0">
                         <i class="fa-solid fa-pen-nib text-xs sm:text-sm"></i> <span>Registro</span>
                     </button>
                 </div>
 
+                <!-- Separatore Visivo Desktop Equidistante -->
                 <div class="header-divider shrink-0 h-8 w-[1.5px] bg-slate-700/80 mx-2.5 sm:mx-3 lg:mx-4 xl:mx-5 md:order-3"></div>
 
+                <!-- Blocco Orologio & Logout -->
                 <div class="col-start-2 row-start-1 justify-self-end flex items-center gap-2.5 sm:gap-3 lg:gap-4 xl:gap-5 md:order-4 shrink-0">
                     <div class="text-right flex flex-col justify-center">
                         <div id="clock" class="mono text-sm sm:text-xl lg:text-2xl font-black text-white tracking-wider leading-none">00:00:00</div>
@@ -405,6 +398,7 @@
             </div>
         </header>
 
+        <!-- Area Aula Ottimizzata PC & Mobile -->
         <main class="flex-grow flex flex-col items-center justify-between w-full px-4 lg:px-10 xl:px-16 pt-2 pb-24 max-w-[1850px] mx-auto min-h-[calc(100vh-65px)]">
             
             <div id="history-warning" class="hidden w-full max-w-md bg-amber-950/30 border border-amber-500/40 rounded-full py-1 px-4 mb-1.5 flex items-center justify-center gap-2 text-amber-300 backdrop-blur-md animate-pulse text-center">
@@ -415,7 +409,7 @@
             <!-- Telemetria Bagno Interattiva -->
             <div id="bathroom-bar" onclick="openBathroomQueueModal()" class="w-full max-w-xl mb-1 flex justify-center px-1 cursor-pointer hover:scale-[1.01] transition-transform" title="Clicca per aprire la gestione della Coda Bagno"></div>
 
-            <!-- Selettore Mobile -->
+            <!-- SELETTORE ALI PER SMARTPHONE -->
             <div class="desk-switcher-mobile w-full max-w-md mb-3">
                 <div class="p-1 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center gap-1 text-xs font-mono font-bold">
                     <button onclick="switchMobileAisle('left')" id="tab-aisle-left" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">
@@ -433,10 +427,13 @@
                 </div>
             </div>
 
+            <!-- GRIGLIA MOBILE -->
             <div id="mobile-classroom-grid" class="w-full space-y-3"></div>
+
+            <!-- GRIGLIA DESKTOP WIDESCREEN BILANCIATA E CENTRATA -->
             <div class="grid-cols-3 gap-6 lg:gap-10 xl:gap-16 2xl:gap-20 w-full my-auto flex-grow items-center" id="classroom-grid"></div>
 
-            <!-- Cattedra Docente -->
+            <!-- Cattedra Docente Potenziata & Centrata -->
             <div id="teacher-desk" onclick="openSignModal()" class="mt-4 lg:mt-6 mb-2 w-full max-w-md md:max-w-lg lg:max-w-xl min-h-[64px] lg:min-h-[76px] px-6 py-3.5 bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-blue-950/80 glass-panel border-2 border-blue-500/50 border-b-4 border-b-blue-500 rounded-2xl sm:rounded-3xl flex items-center justify-between cursor-pointer hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/30 hover:scale-[1.02] transition-all group shadow-xl relative overflow-hidden">
                 <div class="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 <div class="flex items-center gap-4 min-w-0">
@@ -496,61 +493,70 @@
         </div>
     </div>
 
-    <!-- ================= CASSETTO LATERALE VERTICALE: DIAGNOSTICA NODO & COPILOT AI ================= -->
-    <div id="modal-admin-console" class="hidden fixed inset-0 z-[120] flex justify-end bg-black/80 backdrop-blur-md">
-        <div class="w-full sm:w-[540px] md:w-[600px] lg:w-[660px] h-full bg-[#080d1b] border-l border-slate-700/80 shadow-2xl flex flex-col p-4 sm:p-6 overflow-hidden relative fade-in">
+    <!-- ================= MODALI ESISTENTI & CONSOLE DIAGNOSTICA ================= -->
+    
+    <!-- MODALE DIAGNOSTICA HARDWARE & COPILOT AI (ACCESSIBILE DA OGNI CLASSE E DALL'HUB) -->
+    <div id="modal-admin-console" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-lg p-3 sm:p-6">
+        <div class="glass-panel w-full max-w-5xl max-h-[92vh] p-5 sm:p-8 rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
             
-            <div class="flex items-center justify-between pb-3.5 border-b border-slate-800 shrink-0">
-                <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 rounded-2xl bg-purple-600/25 border border-purple-500/40 flex items-center justify-center text-purple-400 text-lg font-black shrink-0">
+            <!-- Header Console -->
+            <div class="flex flex-wrap justify-between items-center gap-3 pb-4 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-purple-600/25 border border-purple-500/40 flex items-center justify-center text-purple-400 text-xl font-black shrink-0">
                         <i class="fa-solid fa-microchip"></i>
                     </div>
-                    <div class="truncate">
+                    <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="text-base sm:text-lg font-black text-white truncate font-sans" id="diagnostics-modal-title">Controllo Nodo SmartCheck32</h3>
-                            <span id="diagnostics-scope-badge" class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[9px] font-mono font-bold uppercase shrink-0">Aula</span>
+                            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight" id="diagnostics-modal-title">Diagnostica Nodo SmartCheck32</h2>
+                            <span id="diagnostics-scope-badge" class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-mono font-bold uppercase">Aula Attiva</span>
                         </div>
-                        <p class="text-[11px] text-slate-400 font-mono mt-0.5 truncate">Telemetria Hardware 24/7 &amp; Assistente Diagnostico</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Telemetria dell'hardware di sala, sensori di passaggio ToF e assistente AI locale</p>
                     </div>
                 </div>
-                <button onclick="closeAdminConsoleModal()" class="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition shrink-0 ml-2">✕</button>
-            </div>
-
-            <div class="p-1 bg-slate-900/90 border border-slate-800 rounded-xl flex items-center gap-1 text-xs font-mono font-bold my-3 shrink-0">
-                <button onclick="switchAdminTab('node')" id="tab-admin-node" class="flex-1 py-2 rounded-lg bg-blue-600 text-white shadow transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-satellite-dish"></i> Stato Nodo
-                </button>
-                <button onclick="switchAdminTab('ai')" id="tab-admin-ai" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-robot text-purple-400"></i> Assistente IA
-                </button>
-            </div>
-
-            <div id="content-admin-node" class="flex-grow overflow-y-auto custom-scrollbar pr-1 space-y-3.5">
-                <div id="node-detail-status-card" class="bg-[#0e1628] border border-slate-800 p-4 rounded-2xl"></div>
-                <div id="node-detail-battery-card" class="bg-[#0e1628] border border-slate-800 p-4 rounded-2xl"></div>
-                <div id="node-detail-network-card" class="bg-[#0e1628] border border-slate-800 p-4 rounded-2xl"></div>
-                <div id="node-detail-tamper-card" class="bg-[#0e1628] border border-slate-800 p-4 rounded-2xl"></div>
-
-                <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl flex items-center justify-between gap-2">
-                    <button onclick="pingCurrentNode()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold font-mono transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-satellite-dish text-blue-400"></i> Heartbeat Ping
-                    </button>
-                    <button onclick="simulateTamperCurrentNode()" class="flex-1 py-2.5 bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/60 rounded-xl text-xs font-bold font-mono transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-bell text-red-400"></i> Test Tamper
-                    </button>
+                
+                <div class="flex items-center gap-2">
+                    <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs font-mono font-bold">
+                        <button onclick="switchAdminTab('node')" id="tab-admin-node" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md">Nodo Aula</button>
+                        <button onclick="switchAdminTab('ai')" id="tab-admin-ai" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Assistente AI</button>
+                    </div>
+                    <button onclick="closeAdminConsoleModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition ml-2">✕</button>
                 </div>
             </div>
 
-            <div id="content-admin-ai" class="hidden flex-grow flex flex-col overflow-hidden">
-                <div class="p-2.5 bg-gradient-to-r from-purple-950/30 to-blue-950/20 border border-purple-500/20 rounded-xl mb-2 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-2 text-[11px] font-mono text-purple-300">
+            <!-- SCHEDA 1: DIAGNOSTICA SPECIFICA DEL NODO DI QUESTA CLASSE -->
+            <div id="content-admin-node" class="flex-grow flex flex-col overflow-y-auto custom-scrollbar pt-4 space-y-4">
+                <div id="node-detail-card" class="bg-[#0e1628] border border-slate-800 p-5 rounded-2xl shadow-lg">
+                    <!-- Generato dinamicamente via renderNodeDetails() -->
+                </div>
+
+                <!-- Azioni Hardware di Test -->
+                <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+                    <div class="text-xs font-mono text-slate-400">
+                        <i class="fa-solid fa-wrench text-blue-400 mr-1.5"></i> Test e Manutenzione Nodo
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="pingCurrentNode()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold font-mono transition">
+                            <i class="fa-solid fa-satellite-dish mr-1 text-blue-400"></i> Heartbeat Ping
+                        </button>
+                        <button onclick="simulateTamperCurrentNode()" class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/60 rounded-xl text-xs font-bold font-mono transition">
+                            <i class="fa-solid fa-bell mr-1"></i> Simula Allarme Strappo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCHEDA 2: ASSISTENTE VIRTUALE AI (SMARTCHECK COPILOT) -->
+            <div id="content-admin-ai" class="hidden flex-grow flex flex-col overflow-hidden pt-4">
+                <div class="p-3 bg-gradient-to-r from-purple-950/30 to-blue-950/20 border border-purple-500/20 rounded-2xl mb-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-xs font-mono text-purple-300">
                         <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-                        SmartCheck Copilot • Modello Ollama/vLLM Locale
+                        Assistente Virtuale Locale SmartCheck Copilot • Modello Ollama/vLLM
                     </div>
-                    <span class="text-[9px] font-mono text-slate-400">GDPR Safe</span>
+                    <span class="text-[10px] font-mono text-slate-400">Locale &amp; Conforme GDPR</span>
                 </div>
 
-                <div class="flex-grow bg-[#090e1a]/90 border border-slate-800 rounded-2xl p-4 overflow-y-auto custom-scrollbar space-y-3 mb-2" id="ai-chat-history">
+                <!-- Cronologia Chat -->
+                <div class="flex-grow bg-[#090e1a]/80 border border-slate-800 rounded-2xl p-4 overflow-y-auto custom-scrollbar space-y-3" id="ai-chat-history">
                     <div class="flex items-start gap-2.5">
                         <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div>
                         <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">
@@ -559,15 +565,17 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-1.5 py-1.5 overflow-x-auto scrollbar-none text-[10px] font-mono shrink-0">
-                    <button onclick="sendQuickAiPrompt('Stato del nodo hardware di quest\'aula e batteria')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Nodo</button>
-                    <button onclick="sendQuickAiPrompt('Ci sono allarmi o manomissioni registrate?')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
-                    <button onclick="sendQuickAiPrompt('Mostrami la situazione attuale delle uscite e della coda bagno')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚻 Coda Bagno</button>
+                <!-- Prompt Rapidi -->
+                <div class="flex items-center gap-2 py-2 overflow-x-auto scrollbar-none text-[11px] font-mono">
+                    <button onclick="sendQuickAiPrompt('Stato del nodo hardware di quest\'aula e batteria')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Nodo</button>
+                    <button onclick="sendQuickAiPrompt('Ci sono allarmi o manomissioni registrate?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
+                    <button onclick="sendQuickAiPrompt('Mostrami la situazione attuale delle uscite e della coda bagno')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚻 Coda Bagno</button>
                 </div>
 
-                <div class="flex items-center gap-2 pt-1 shrink-0">
-                    <input type="text" id="ai-chat-input" placeholder="Chiedi una verifica tecnica o diagnostica..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
-                    <button onclick="sendAiMessage()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-purple-600/25">
+                <!-- Input Chat -->
+                <div class="flex items-center gap-2 pt-1">
+                    <input type="text" id="ai-chat-input" placeholder="Chiedi una verifica tecnica o diagnostica di sistema..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
+                    <button onclick="sendAiMessage()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-2 shadow-lg shadow-purple-600/25">
                         <span>Invia</span> <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
                 </div>
@@ -575,7 +583,43 @@
         </div>
     </div>
 
-    <!-- MODALI DI SISTEMA -->
+    <!-- MODALE CODA BAGNO -->
+    <div id="modal-bathroom-queue" class="hidden fixed inset-0 z-[95] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4">
+        <div class="glass-panel w-full max-w-xl max-h-[90vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-lg shrink-0">
+                        <i class="fa-solid fa-restroom"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-black text-white tracking-tight">Gestione Coda Bagno</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Prenota il turno dal tuo posto o gestisci le uscite</p>
+                    </div>
+                </div>
+                <button onclick="closeBathroomQueueModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">✕</button>
+            </div>
+
+            <div id="queue-occupant-card" class="mb-4 p-4 rounded-2xl border bg-slate-900/80 transition-all flex items-center justify-between"></div>
+            <div id="queue-action-box" class="mb-4"></div>
+
+            <div class="flex-grow flex flex-col min-h-[140px] overflow-hidden">
+                <div class="flex items-center justify-between mb-2 text-xs font-mono uppercase font-bold text-slate-400">
+                    <span>Fila d'Attesa</span>
+                    <span id="queue-total-waiting" class="text-cyan-400">0 in coda</span>
+                </div>
+                <div id="queue-list-container" class="overflow-y-auto custom-scrollbar flex-grow space-y-2 pr-1"></div>
+            </div>
+
+            <div id="queue-teacher-controls" class="hidden pt-3 mt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                <span class="text-[10px] font-mono uppercase font-bold text-slate-500">Pannello Docente</span>
+                <button onclick="clearBathroomQueue()" class="px-3 py-1.5 bg-red-950/40 border border-red-800/50 hover:bg-red-900/50 text-red-300 rounded-xl text-xs font-bold transition">
+                    Svuota Coda
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE AGENDA -->
     <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
@@ -598,6 +642,7 @@
         </div>
     </div>
 
+    <!-- MODALE AGGIUNGI AGENDA -->
     <div id="modal-add-agenda" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl relative border border-slate-700">
             <button onclick="document.getElementById('modal-add-agenda').classList.add('hidden')" class="absolute top-5 right-5 text-slate-400 hover:text-white">✕</button>
@@ -624,6 +669,7 @@
         </div>
     </div>
 
+    <!-- MODALE BACHECA -->
     <div id="modal-notices" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
@@ -637,6 +683,7 @@
         </div>
     </div>
 
+    <!-- MODALE REGISTRO FIRME -->
     <div id="modal-sign" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-xl p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl max-h-[90vh] flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-4">
@@ -683,6 +730,7 @@
         </div>
     </div>
 
+    <!-- MODALE VALUTAZIONI (VOTI) -->
     <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
         <div class="bg-[#0b1220] w-full max-w-md max-h-[88vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col">
             <div id="grades-header-bg" class="cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-slate-800">
@@ -707,6 +755,7 @@
         </div>
     </div>
 
+    <!-- MODALE SCHEDA STUDENTE -->
     <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-700/80 shadow-2xl relative">
             <div class="flex justify-between items-start mb-5 sm:mb-6">
@@ -812,6 +861,7 @@
         </div>
     </div>
 
+    <!-- MODALE ELENCO ALUNNI -->
     <div id="modal-class-list" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
@@ -858,7 +908,7 @@
             "Lorenzo Esposito",       // banco_06
             "Kristian Methasa",       // banco_07
             "Stefano Spaczil",        // banco_08
-            "Federico Pasqualone",    // banco_09
+            "Federico Pasqualone",    // banco_09 (Frontale centrale)
             "Leonardo Pacchione",     // banco_10
             "Oleksandr Tsikhanskyi",  // banco_11
             "Alessio Tofano",         // banco_12
@@ -899,23 +949,20 @@
         let localNotesDB = {};
         let localUsersDB = {};
 
-        // CODA BAGNO & DISPOSITIVI
+        // SISTEMA CODA BAGNO IN TEMPO REALE
         let bathroomQueue = [];
+
+        // FLOTTA DISPOSITIVI SMARTCHECK32
         let schoolDevices = [
-            { id: '1', device_code: 'SC32-5AEE', device_name: 'SmartCheck32 Aula 5AEE', class_name: '5AEE', location: 'Piano 1 - Aula 104', ip_address: '192.168.30.15', mac_address: '24:6F:28:B4:A1:0C', status: 'online', battery_voltage: 4.15, battery_level: 98, rssi: -58, is_tampered: false, last_ping: '10s fa', firmware_version: 'v2.4.1-mesh' },
-            { id: '2', device_code: 'SC32-4AEE', device_name: 'SmartCheck32 Aula 4AEE', class_name: '4AEE', location: 'Piano 1 - Aula 102', ip_address: '192.168.30.16', mac_address: '24:6F:28:C2:59:1E', status: 'online', battery_voltage: 3.82, battery_level: 64, rssi: -72, is_tampered: false, last_ping: '14s fa', firmware_version: 'v2.4.1-mesh' },
-            { id: '3', device_code: 'SC32-5AMM', device_name: 'SmartCheck32 Aula 5AMM', class_name: '5AMM', location: 'Piano Terra - Aula 008', ip_address: '192.168.30.22', mac_address: '24:6F:28:D1:88:4A', status: 'warning', battery_voltage: 3.48, battery_level: 18, rssi: -81, is_tampered: false, last_ping: '22s fa', firmware_version: 'v2.4.1-mesh' },
-            { id: '4', device_code: 'SC32-LAB-EL', device_name: 'SmartCheck32 Lab. Elettronica', class_name: 'Laboratorio', location: 'Ala Lab - Lab 3', ip_address: '192.168.30.50', mac_address: '24:6F:28:A0:12:F3', status: 'online', battery_voltage: 4.18, battery_level: 100, rssi: -52, is_tampered: false, last_ping: '5s fa', firmware_version: 'v2.4.1-mesh' },
-            { id: '5', device_code: 'SC32-PALESTRA', device_name: 'SmartCheck32 Motoria Mobile', class_name: 'Palestra', location: 'Palestra Principale', ip_address: '192.168.30.80', mac_address: '24:6F:28:EE:94:3B', status: 'offline', battery_voltage: 3.20, battery_level: 4, rssi: -88, is_tampered: false, last_ping: '48m fa', firmware_version: 'v2.4.1-mesh' }
+            { id: '1', device_code: 'SC32-5AEE', device_name: 'SmartCheck32 Aula 5AEE', class_name: '5AEE', location: 'Piano 1 - Aula 104', ip_address: '192.168.30.15', mac_address: '24:6F:28:B4:A1:0C', status: 'online', battery_voltage: 4.15, battery_level: 98, rssi: -58, is_tampered: false, last_ping: '10s fa' },
+            { id: '2', device_code: 'SC32-4AEE', device_name: 'SmartCheck32 Aula 4AEE', class_name: '4AEE', location: 'Piano 1 - Aula 102', ip_address: '192.168.30.16', mac_address: '24:6F:28:C2:59:1E', status: 'online', battery_voltage: 3.82, battery_level: 64, rssi: -72, is_tampered: false, last_ping: '14s fa' },
+            { id: '3', device_code: 'SC32-5AMM', device_name: 'SmartCheck32 Aula 5AMM', class_name: '5AMM', location: 'Piano Terra - Aula 008', ip_address: '192.168.30.22', mac_address: '24:6F:28:D1:88:4A', status: 'warning', battery_voltage: 3.48, battery_level: 18, rssi: -81, is_tampered: false, last_ping: '22s fa' },
+            { id: '4', device_code: 'SC32-LAB-EL', device_name: 'SmartCheck32 Lab. Elettronica', class_name: 'Laboratorio', location: 'Ala Lab - Lab 3', ip_address: '192.168.30.50', mac_address: '24:6F:28:A0:12:F3', status: 'online', battery_voltage: 4.18, battery_level: 100, rssi: -52, is_tampered: false, last_ping: '5s fa' },
+            { id: '5', device_code: 'SC32-PALESTRA', device_name: 'SmartCheck32 Motoria Mobile', class_name: 'Palestra', location: 'Palestra Principale', ip_address: '192.168.30.80', mac_address: '24:6F:28:EE:94:3B', status: 'offline', battery_voltage: 3.20, battery_level: 4, rssi: -88, is_tampered: false, last_ping: '48m fa' }
         ];
 
-        let sirenAudioCtx = null;
-        let sirenInterval = null;
-        let isSirenMuted = false;
-
         function esc(val) { return String(val ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
-        function safeSetText(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
-
+        
         function toast(title, message = '', type = 'info', timeout = 3000) {
             const wrap = document.getElementById('sc-toast-container');
             if (!wrap) return;
@@ -1064,41 +1111,20 @@
 
             document.getElementById('view-hub')?.classList.add('hidden');
             document.getElementById('view-classroom')?.classList.remove('hidden');
-            safeSetText('class-header-name', cls);
-
-            const isStud = currentUser?.role === 'studente';
-            document.getElementById('back-btn')?.classList.toggle('hidden', isStud);
-            document.getElementById('sign-btn')?.classList.toggle('hidden', isStud);
-            document.getElementById('dock-right')?.classList.remove('hidden');
-
-            const badge = document.getElementById('role-badge');
-            if (badge) {
-                badge.innerText = isStud ? 'STUDENTE' : (currentUser?.role || 'DOCENTE').toUpperCase();
-                badge.className = isStud 
-                    ? 'px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-700/50'
-                    : 'px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-blue-950/60 text-blue-300 border border-blue-700/50';
-            }
+            document.getElementById('class-header-name').innerText = cls;
 
             setLoading(true, `Inizializzazione ${cls}...`);
             try {
-                try {
-                    const { data: classRows } = await _supabase.from('classes').select('id').eq('name', cls).limit(1);
-                    currentClassId = classRows && classRows[0] ? classRows[0].id : null;
-                } catch(e) {
-                    currentClassId = null;
-                }
+                const { data: classRows } = await _supabase.from('classes').select('id').eq('name', cls).limit(1);
+                currentClassId = classRows && classRows[0] ? classRows[0].id : null;
 
                 let students = [];
                 if (currentClassId) {
-                    try {
-                        const { data: st } = await _supabase.from('registry')
-                            .select('id, username, full_name, role, class_id')
-                            .eq('class_id', currentClassId)
-                            .eq('role', 'studente');
-                        students = st || [];
-                    } catch(e) {
-                        students = [];
-                    }
+                    const { data: st } = await _supabase.from('registry')
+                        .select('id, username, full_name, role, class_id')
+                        .eq('class_id', currentClassId)
+                        .eq('role', 'studente');
+                    students = st || [];
                 }
 
                 classStudents = students;
@@ -1108,109 +1134,102 @@
                 const picker = document.getElementById('date-picker');
                 if (picker) picker.value = selectedDate;
 
-                try { await loadScopedSchoolData(); } catch(e) {}
-                try { await loadBathroomQueueData(); } catch(e) {}
-                try { await loadDevicesData(); } catch(e) {}
-
+                await loadScopedSchoolData();
+                await loadBathroomQueueData();
+                await loadDevicesData();
                 await changeDate(selectedDate);
                 renderGrid(localSchoolDB[cls]);
 
                 initRealtime();
+
+                const isStud = currentUser?.role === 'studente';
+                document.getElementById('back-btn')?.classList.toggle('hidden', isStud);
+                document.getElementById('sign-btn')?.classList.toggle('hidden', isStud);
+                document.getElementById('dock-right')?.classList.remove('hidden');
+
+                const badge = document.getElementById('role-badge');
+                if (badge) {
+                    badge.innerText = isStud ? 'STUDENTE' : (currentUser?.role || 'DOCENTE').toUpperCase();
+                    badge.className = isStud 
+                        ? 'px-2 py-0.5 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-700/50'
+                        : 'px-2 py-0.5 rounded-lg bg-blue-950/60 text-blue-300 border border-blue-700/50';
+                }
                 updateSignatureDisplay();
-                checkGlobalTamperAlarms();
             } catch(err) {
-                console.error("Errore gestito in loadClassroom:", err);
-                if (localSchoolDB[cls]) renderGrid(localSchoolDB[cls]);
+                console.error(err);
+                toast('Errore di Caricamento', 'Impossibile completare la sincronizzazione.', 'error');
             } finally {
                 setLoading(false);
             }
         }
 
-        // SIRENA ALLARME
-        function playSirenTone() {
-            if (isSirenMuted) return;
-            try {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContextClass) return;
-                if (!sirenAudioCtx) sirenAudioCtx = new AudioContextClass();
-                if (sirenAudioCtx.state === 'suspended') {
-                    sirenAudioCtx.resume();
-                }
-                const osc = sirenAudioCtx.createOscillator();
-                const gain = sirenAudioCtx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(750, sirenAudioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(950, sirenAudioCtx.currentTime + 0.25);
-                osc.frequency.exponentialRampToValueAtTime(650, sirenAudioCtx.currentTime + 0.5);
-                gain.gain.setValueAtTime(0.12, sirenAudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, sirenAudioCtx.currentTime + 0.5);
-                osc.connect(gain);
-                gain.connect(sirenAudioCtx.destination);
-                osc.start();
-                osc.stop(sirenAudioCtx.currentTime + 0.5);
-            } catch(e) {}
-        }
-
-        function startPersistentSiren() {
-            if (sirenInterval) clearInterval(sirenInterval);
-            playSirenTone();
-            sirenInterval = setInterval(playSirenTone, 2200);
-        }
-
-        function stopPersistentSiren() {
-            if (sirenInterval) {
-                clearInterval(sirenInterval);
-                sirenInterval = null;
-            }
-        }
-
-        function toggleMuteSiren() {
-            isSirenMuted = !isSirenMuted;
-            const btn = document.getElementById('btn-mute-siren');
-            if (btn) {
-                btn.innerHTML = isSirenMuted 
-                    ? `<i class="fa-solid fa-volume-high text-emerald-400"></i> Riattiva Sirena`
-                    : `<i class="fa-solid fa-volume-xmark text-red-400"></i> Tacita Sirena`;
-            }
-            if (isSirenMuted) stopPersistentSiren(); else startPersistentSiren();
-        }
-
-        function resolveAllTamperAlarms() {
-            schoolDevices.forEach(d => {
-                d.is_tampered = false;
-                if (d.status === 'tamper') d.status = 'online';
+        async function loadDayData(dateStr) {
+            if (!currentClass || !localSchoolDB[currentClass]) return;
+            Object.values(localSchoolDB[currentClass]).forEach(s => { 
+                if (!s || s.name === 'Libero') return; 
+                s.status = 'assente'; s.time = '--:--'; s.history = []; 
             });
-            checkGlobalTamperAlarms();
-            renderHubFleetView();
-            if (!document.getElementById('modal-admin-console')?.classList.contains('hidden')) {
-                renderVerticalNodeDetails();
-            }
-            toast('Allarme Risolto', 'Tutti i microswitch a parete sono stati verificati e ripristinati.', 'success');
-        }
 
-        function checkGlobalTamperAlarms() {
-            const tampered = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper');
-            const banner = document.getElementById('global-tamper-banner');
-            const textEl = document.getElementById('global-tamper-text');
-
-            if (tampered.length > 0) {
-                const first = tampered[0];
-                if (banner) {
-                    banner.classList.remove('hidden');
-                    if (textEl) {
-                        textEl.innerHTML = `<strong>ALLARME SICUREZZA:</strong> Distacco a parete attivo su <strong>${esc(first.device_name)}</strong> (${esc(first.location)}) - Possibile furto in corso!`;
+            try {
+                if (currentClassId) {
+                    const { data: att } = await _supabase.from('attendance').select('*').eq('date', dateStr).eq('class_id', currentClassId);
+                    if (att) {
+                        for (const row of att) { 
+                            const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id); 
+                            if (seat) { seat.status = row.status || 'assente'; seat.time = row.time || '--:--'; } 
+                        }
                     }
                 }
-                document.body.classList.add('tamper-alarm-active');
-                startPersistentSiren();
-            } else {
-                if (banner) banner.classList.add('hidden');
-                document.body.classList.remove('tamper-alarm-active');
-                stopPersistentSiren();
+
+                const { data: bath } = await _supabase.from('bathroom_history').select('*').eq('date', dateStr);
+                if (bath) {
+                    for (const row of bath) { 
+                        const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id); 
+                        if (seat) seat.history.push({ out: row.out_time, in: row.in_time }); 
+                    }
+                }
+
+                const { data: sig } = await _supabase.from('signatures').select('*').eq('date', dateStr).eq('class', currentClass); 
+                onlineSignatures = sig || []; 
+            } catch (e) {
+                console.error("Errore recupero storico:", e);
             }
         }
 
-        // SWITCHER HUB
+        async function loadScopedSchoolData() {
+            try {
+                const { data: allUsers } = await _supabase.from('registry').select('id, full_name, role');
+                localUsersDB = {};
+                if (allUsers) {
+                    allUsers.forEach(u => { localUsersDB[u.id] = u.full_name; });
+                }
+                localUsersDB['00000000-0000-0000-0000-000000000001'] = 'Amministratore';
+                if (currentUser?.id) localUsersDB[currentUser.id] = currentUser.name;
+
+                const { data: g } = await _supabase.from('grades').select('*');
+                onlineGrades = g || [];
+                localGradesDB = {};
+                onlineGrades.forEach(grade => {
+                    if (!localGradesDB[grade.student_id]) localGradesDB[grade.student_id] = [];
+                    localGradesDB[grade.student_id].push(grade);
+                });
+
+                const { data: n } = await _supabase.from('notes').select('*');
+                onlineNotes = n || [];
+                localNotesDB = {};
+                onlineNotes.forEach(note => {
+                    if (!localNotesDB[note.student_id]) localNotesDB[note.student_id] = [];
+                    localNotesDB[note.student_id].push(note);
+                });
+
+                const { data: ag } = await _supabase.from('agenda').select('*').eq('class', currentClass); 
+                onlineAgenda = ag || []; 
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        // ================= SWITCHER SEZIONI NELL'HUB =================
         function switchHubSection(section) {
             const isClasses = (section === 'classes');
             document.getElementById('hub-section-classes')?.classList.toggle('hidden', !isClasses);
@@ -1229,6 +1248,7 @@
             }
         }
 
+        // Render Flotta Nodi a Monte nell'Hub
         function renderHubFleetView() {
             const container = document.getElementById('hub-devices-grid');
             if (!container) return;
@@ -1238,11 +1258,11 @@
             let batteryWarnings = schoolDevices.filter(d => d.battery_level < 20).length;
             let tamperAlerts = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper').length;
 
-            safeSetText('hub-metric-total-nodes', totalNodes);
-            safeSetText('hub-metric-online-nodes', onlineNodes);
-            safeSetText('hub-metric-battery-warning', batteryWarnings);
-            safeSetText('hub-metric-tamper-alerts', tamperAlerts);
-            safeSetText('hub-fleet-online-badge', `${onlineNodes}/${totalNodes} Nodi Online`);
+            document.getElementById('hub-metric-total-nodes').innerText = totalNodes;
+            document.getElementById('hub-metric-online-nodes').innerText = onlineNodes;
+            document.getElementById('hub-metric-battery-warning').innerText = batteryWarnings;
+            document.getElementById('hub-metric-tamper-alerts').innerText = tamperAlerts;
+            document.getElementById('hub-fleet-online-badge').innerText = `${onlineNodes}/${totalNodes} Nodi Online`;
 
             container.innerHTML = '';
             schoolDevices.forEach(d => {
@@ -1311,7 +1331,7 @@
             });
         }
 
-        // DIAGNOSTICA NODO VERTICALE
+        // ================= CONSOLE DIAGNOSTICA NODO AULA E AI CHAT =================
         async function loadDevicesData() {
             try {
                 const { data, error } = await _supabase.from('devices').select('*');
@@ -1319,17 +1339,16 @@
                     schoolDevices = data;
                 }
             } catch(e) {}
-            renderHubFleetView();
-            checkGlobalTamperAlarms();
+            renderFleetDashboard();
         }
 
         function openClassDiagnosticsModal() {
             document.getElementById('modal-admin-console')?.classList.remove('hidden');
             const targetScope = currentClass || 'Istituto';
-            safeSetText('diagnostics-modal-title', currentClass ? `Diagnostica SmartCheck32 — ${currentClass}` : `Diagnostica Flotta SmartCheck32`);
-            safeSetText('diagnostics-scope-badge', targetScope);
+            document.getElementById('diagnostics-modal-title').innerText = currentClass ? `Diagnostica SmartCheck32 — ${currentClass}` : `Diagnostica Flotta SmartCheck32`;
+            document.getElementById('diagnostics-scope-badge').innerText = targetScope;
             
-            renderVerticalNodeDetails();
+            renderNodeDetails();
             switchAdminTab('node');
         }
 
@@ -1345,103 +1364,67 @@
             const btnAi = document.getElementById('tab-admin-ai');
             
             if (tab === 'node') {
-                if (btnNode) btnNode.className = "flex-1 py-2 rounded-lg bg-blue-600 text-white shadow transition flex items-center justify-center gap-2";
-                if (btnAi) btnAi.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
+                btnNode.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md";
+                btnAi.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
             } else {
-                if (btnAi) btnAi.className = "flex-1 py-2 rounded-lg bg-purple-600 text-white shadow transition flex items-center justify-center gap-2";
-                if (btnNode) btnNode.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
+                btnAi.className = "px-3.5 py-1.5 rounded-lg bg-purple-600 text-white shadow-md";
+                btnNode.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
             }
         }
 
-        function renderVerticalNodeDetails() {
+        function renderNodeDetails() {
+            const card = document.getElementById('node-detail-card');
+            if (!card) return;
+
+            // Trova dispositivo associato alla classe corrente o primo nodo
             let d = schoolDevices.find(dev => dev.class_name === currentClass) || schoolDevices[0];
 
             let statusColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
-            let statusText = "ONLINE — REGOLARE";
+            let statusText = "Online (Connesso)";
             if (d.is_tampered || d.status === 'tamper') {
                 statusColor = "bg-red-500/30 text-red-400 border-red-500/60 animate-pulse";
-                statusText = "MANOMESSO (STRAPPO)";
+                statusText = "ALLARME STRAPPO PARETE";
             } else if (d.status === 'offline') {
                 statusColor = "bg-slate-800 text-slate-500 border-slate-700";
-                statusText = "DISCONNESSO";
+                statusText = "Disconnesso";
             }
 
-            const cardStatus = document.getElementById('node-detail-status-card');
-            if (cardStatus) {
-                cardStatus.innerHTML = `
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-3.5 h-3.5 rounded-full ${d.status === 'online' ? 'bg-emerald-400 animate-pulse' : (d.is_tampered ? 'bg-red-500 animate-ping' : 'bg-slate-600')}"></span>
-                            <span class="text-sm font-black text-white font-sans">${esc(d.device_name)}</span>
+            card.innerHTML = `
+                <div class="flex flex-wrap justify-between items-start gap-2 mb-4 pb-3 border-b border-slate-800">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full ${d.status === 'online' ? 'bg-emerald-400 animate-pulse' : (d.is_tampered ? 'bg-red-500 animate-ping' : 'bg-slate-600')}"></span>
+                            <h4 class="text-base sm:text-lg font-black text-white font-sans">${esc(d.device_name)}</h4>
                         </div>
-                        <span class="text-[9px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border ${statusColor}">${statusText}</span>
+                        <p class="text-xs font-mono text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${esc(d.location)} • Codice: <span class="text-slate-300 font-bold">${esc(d.device_code)}</span></p>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs font-mono text-slate-300">
-                        <div><span class="text-slate-500 text-[10px] block">UBICAZIONE</span>${esc(d.location)}</div>
-                        <div><span class="text-slate-500 text-[10px] block">CODICE NODO</span>${esc(d.device_code)}</div>
-                    </div>
-                `;
-            }
+                    <span class="text-[10px] font-mono font-bold uppercase px-3 py-1 rounded-lg border ${statusColor}">${statusText}</span>
+                </div>
 
-            const cardBatt = document.getElementById('node-detail-battery-card');
-            if (cardBatt) {
-                let battColor = d.battery_level < 20 ? 'text-red-400' : 'text-emerald-400';
-                cardBatt.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-mono font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                            <i class="fa-solid fa-battery-half text-emerald-400"></i> Alimentazione Cella 18650
-                        </span>
-                        <span class="text-sm font-black font-mono ${battColor}">${d.battery_level}% (${d.battery_voltage}V)</span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Stato Batteria</span>
+                        <span class="text-sm font-black ${d.battery_level < 20 ? 'text-red-400' : 'text-emerald-400'}"><i class="fa-solid fa-battery-half mr-1"></i>${d.battery_level}% (${d.battery_voltage}V)</span>
                     </div>
-                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-2">
-                        <div class="bg-emerald-500 h-full rounded-full transition-all" style="width: ${d.battery_level}%"></div>
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Segnale Antenna</span>
+                        <span class="text-sm font-black text-blue-400"><i class="fa-solid fa-wifi mr-1"></i>${d.rssi} dBm</span>
                     </div>
-                    <div class="flex justify-between text-[10px] font-mono text-slate-500">
-                        <span>Autonomia: ~36h attive / ~180h deep sleep</span>
-                        <span>Circuito Tampone: Attivo</span>
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Tamper a Muro</span>
+                        <span class="text-sm font-black ${d.is_tampered ? 'text-red-400' : 'text-emerald-400'}"><i class="fa-solid fa-shield mr-1"></i>${d.is_tampered ? 'APERTO' : 'OK (Chiuso)'}</span>
                     </div>
-                `;
-            }
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Gate ToF / NFC</span>
+                        <span class="text-sm font-black text-emerald-400"><i class="fa-solid fa-door-open mr-1"></i>Attivo</span>
+                    </div>
+                </div>
 
-            const cardNet = document.getElementById('node-detail-network-card');
-            if (cardNet) {
-                cardNet.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-mono font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                            <i class="fa-solid fa-wifi text-blue-400"></i> Connettività Wi-Fi &amp; Mesh
-                        </span>
-                        <span class="text-xs font-mono font-bold text-blue-400">${d.rssi} dBm</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs font-mono text-slate-300">
-                        <div><span class="text-slate-500 text-[10px] block">IP SUBNET LAN</span>${esc(d.ip_address)}</div>
-                        <div><span class="text-slate-500 text-[10px] block">INDIRIZZO MAC</span>${esc(d.mac_address)}</div>
-                    </div>
-                    <div class="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-500 flex justify-between">
-                        <span>Protocollo: MQTT LAN + ESP-NOW</span>
-                        <span>Firmware: ${esc(d.firmware_version || 'v2.4.1')}</span>
-                    </div>
-                `;
-            }
-
-            const cardTamper = document.getElementById('node-detail-tamper-card');
-            if (cardTamper) {
-                const isTamp = d.is_tampered;
-                cardTamper.className = isTamp 
-                    ? "bg-red-950/30 border border-red-500/60 p-4 rounded-2xl shadow-lg"
-                    : "bg-[#0e1628] border border-slate-800 p-4 rounded-2xl";
-
-                cardTamper.innerHTML = `
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-xs font-mono font-bold uppercase flex items-center gap-1.5 ${isTamp ? 'text-red-400' : 'text-slate-400'}">
-                            <i class="fa-solid fa-shield-halved ${isTamp ? 'text-red-400' : 'text-emerald-400'}"></i> Protezione Antifurto a Parete
-                        </span>
-                        <span class="text-xs font-mono font-black ${isTamp ? 'text-red-400' : 'text-emerald-400'}">${isTamp ? 'ALLARME STRAPPO' : 'CHIUSO (OK)'}</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400 font-mono leading-relaxed">
-                        ${isTamp ? 'Microswitch posteriore aperto: rilevato distacco del dispositivo dalla parete.' : 'Microswitch normalmente chiuso a parete integro. Nessun movimento anomalo registrato.'}
-                    </p>
-                `;
-            }
+                <div class="mt-4 pt-3 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-slate-400">
+                    <div>Indirizzo IP Locale: <span class="text-white font-bold">${esc(d.ip_address)}</span></div>
+                    <div>Indirizzo Fisico MAC: <span class="text-white font-bold">${esc(d.mac_address)}</span></div>
+                </div>
+            `;
         }
 
         function pingCurrentNode() {
@@ -1453,11 +1436,10 @@
             let d = schoolDevices.find(dev => dev.class_name === currentClass) || schoolDevices[0];
             d.is_tampered = !d.is_tampered;
             d.status = d.is_tampered ? 'tamper' : 'online';
-            renderVerticalNodeDetails();
+            renderNodeDetails();
             renderHubFleetView();
-            checkGlobalTamperAlarms();
             if (d.is_tampered) {
-                toast('ALLARME STRAPPO', `Simulazione manomissione attiva su ${d.device_name}!`, 'error', 5000);
+                toast('ALLARME MANOMISSIONE', `Rilevato distacco dalla parete del nodo ${d.device_name}!`, 'error', 5000);
             } else {
                 toast('Ripristino Tamper', `Interruttore a parete riallineato correttamente.`, 'success');
             }
@@ -1467,7 +1449,7 @@
             toast('Ping Inviato', `Pacchetto MQTT Heartbeat trasmesso al nodo ${code}`, 'info');
         }
 
-        // ASSISTENTE AI CHAT
+        // ================= ASSISTENTE AI =================
         function sendQuickAiPrompt(text) {
             const input = document.getElementById('ai-chat-input');
             if (input) {
@@ -1506,7 +1488,7 @@
                     </div>
                 `;
                 history.scrollTop = history.scrollHeight;
-            }, 350);
+            }, 400);
         }
 
         function generateLocalAiResponse(query) {
@@ -1519,16 +1501,16 @@
 
             if (q.includes('tamper') || q.includes('strappo') || q.includes('manomiss') || q.includes('rubato')) {
                 if (tamp.length > 0) {
-                    return `🚨 <strong>ATTENZIONE:</strong> Rilevato allarme di manomissione attivo sul nodo <strong>${tamp[0].device_name}</strong> (${tamp[0].location}). Il microswitch a parete è aperto.`;
+                    return `🚨 <strong>ATTENZIONE:</strong> Rilevato allarme di manomissione attivo sul nodo <strong>${tamp[0].device_name}</strong> (${tamp[0].location}). Il microswitch posteriore a parete è aperto.`;
                 }
-                return `✅ Nessun allarme di manomissione registrato. Tutti i nodi risultano protetti e fissati alla parete.`;
+                return `✅ Nessun allarme di manomissione registrato. Tutti i microswitch a parete risultano chiusi e protetti.`;
             }
 
             if (q.includes('batteri') || q.includes('scaric') || q.includes('18650')) {
                 if (lowBatt.length > 0) {
-                    return `⚠️ <strong>Report Batterie:</strong> Il nodo <strong>${lowBatt[0].device_name}</strong> (${lowBatt[0].location}) ha carica al <strong>${lowBatt[0].battery_level}%</strong> (${lowBatt[0].battery_voltage}V). Si consiglia la ricarica.`;
+                    return `⚠️ <strong>Report Batterie:</strong> Il nodo <strong>${lowBatt[0].device_name}</strong> (${lowBatt[0].location}) ha carica residua al <strong>${lowBatt[0].battery_level}%</strong> (${lowBatt[0].battery_voltage}V). Si consiglia la ricarica.`;
                 }
-                return `🔋 Tutte le celle 18650 dell'istituto presentano voltaggio ottimale compreso tra 3.82V e 4.18V (&gt;60%).`;
+                return `🔋 Tutte le celle 18650 dell'istituto presentano voltaggio ottimale compreso tra 3.82V e 4.18V.`;
             }
 
             if (q.includes('bagno') || q.includes('coda') || q.includes('uscita')) {
@@ -1543,23 +1525,8 @@
             return `📊 <strong>Diagnostica SmartCheck32:</strong><br>• Dispositivi totali: <strong>${total}</strong><br>• Connessi regolarmente (LAN): <strong>${online} / ${total}</strong>${offlineText}`;
         }
 
-        // CODA BAGNO LOGICA
-        function saveQueueLocally() {
-            try {
-                if (currentClass) {
-                    localStorage.setItem(`SC_QUEUE_${currentClass}`, JSON.stringify(bathroomQueue));
-                }
-            } catch(e) {}
-        }
-
+        // ================= GESTIONE CODA BAGNO =================
         async function loadBathroomQueueData() {
-            try {
-                const localSaved = localStorage.getItem(`SC_QUEUE_${currentClass}`);
-                if (localSaved) {
-                    bathroomQueue = JSON.parse(localSaved);
-                }
-            } catch(e) {}
-            
             try {
                 const { data, error } = await _supabase
                     .from('bathroom_queue')
@@ -1568,12 +1535,10 @@
                     .order('created_at', { ascending: true });
                 if (!error && data) {
                     bathroomQueue = data;
-                    saveQueueLocally();
                 }
             } catch(e) {}
-
             updateQueueBadges();
-            if (!document.getElementById('modal-bathroom-queue')?.classList.contains('hidden')) {
+            if (!document.getElementById('modal-bathroom-queue').classList.contains('hidden')) {
                 renderBathroomQueueUI();
             }
         }
@@ -1653,28 +1618,24 @@
             }
 
             actionBox.innerHTML = '';
-            
             if (currentUser?.role === 'studente') {
                 const myStudentId = currentUser.id;
                 let myDeskEntry = null;
                 if (localSchoolDB[currentClass]) {
-                    myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => 
-                        (s.db_id && s.db_id === myStudentId) || 
-                        (s.name && currentUser?.name && s.name.toLowerCase() === currentUser.name.toLowerCase())
-                    );
+                    myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === myStudentId);
                 }
 
                 const myDeskId = myDeskEntry ? myDeskEntry[0] : null;
                 const myStudentData = myDeskEntry ? myDeskEntry[1] : null;
                 const isCurrentlyInBathroom = (myStudentData && myStudentData.status === 'bagno');
-                const queueIndex = bathroomQueue.findIndex(q => q.student_id === myStudentId || q.student_name === currentUser.name);
+                const queueIndex = bathroomQueue.findIndex(q => q.student_id === myStudentId);
                 const isInQueue = (queueIndex !== -1);
                 const isNextInLine = (queueIndex === 0);
 
                 if (isCurrentlyInBathroom) {
                     actionBox.innerHTML = `
                         <div class="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-center">
-                            <span class="text-xs font-mono font-bold text-cyan-300">Sei attualmente fuori aula per il bagno.</span>
+                            <span class="text-xs font-mono font-bold text-cyan-300">Sei attualmente fuori al bagno.</span>
                         </div>
                     `;
                 } else if (isInQueue) {
@@ -1712,28 +1673,9 @@
                         </button>
                     `;
                 }
-            } else {
-                const activeStudents = Object.entries(localSchoolDB[currentClass] || {})
-                    .filter(([, s]) => s && s.name !== 'Libero' && s.status !== 'assente' && s.status !== 'bagno' && !bathroomQueue.some(q => q.student_name === s.name));
-
-                actionBox.innerHTML = `
-                    <div class="p-3.5 bg-slate-900/80 border border-slate-800 rounded-2xl flex flex-wrap items-center justify-between gap-2.5">
-                        <div class="text-xs font-mono font-bold text-slate-300">
-                            <i class="fa-solid fa-user-plus text-cyan-400 mr-1"></i> Accoda Alunno:
-                        </div>
-                        <div class="flex items-center gap-2 flex-grow sm:flex-grow-0">
-                            <select id="select-queue-manual-student" class="bg-[#0b1220] border border-slate-700 text-white px-3 py-1.5 rounded-xl text-xs outline-none focus:border-cyan-500 max-w-[220px]">
-                                ${activeStudents.length > 0 ? activeStudents.map(([deskId, s]) => `<option value="${deskId}">${esc(s.name)} (#${deskId.split('_')[1]})</option>`).join('') : '<option disabled>Tutti già accodati/assenti</option>'}
-                            </select>
-                            <button onclick="manualTeacherQueueAdd()" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl transition">
-                                Aggiungi
-                            </button>
-                        </div>
-                    </div>
-                `;
             }
 
-            safeSetText('queue-total-waiting', `${bathroomQueue.length} in attesa`);
+            totalWaiting.innerText = `${bathroomQueue.length} in attesa`;
             listContainer.innerHTML = '';
 
             if (bathroomQueue.length === 0) {
@@ -1783,45 +1725,12 @@
             });
         }
 
-        async function manualTeacherQueueAdd() {
-            const selectEl = document.getElementById('select-queue-manual-student');
-            const deskId = selectEl ? selectEl.value : null;
-            if (!deskId || !localSchoolDB[currentClass]?.[deskId]) return;
-
-            const student = localSchoolDB[currentClass][deskId];
-            const nowTime = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-            const newQueueItem = {
-                id: 'queue_' + Date.now(),
-                student_id: student.db_id || 'manual_' + Date.now(),
-                student_name: student.name,
-                desk_id: deskId,
-                class: currentClass,
-                class_id: currentClassId,
-                booked_at: nowTime,
-                created_at: new Date().toISOString()
-            };
-
-            bathroomQueue.push(newQueueItem);
-            saveQueueLocally();
-            updateQueueBadges();
-            renderBathroomQueueUI();
-            toast('Alunno Accodato', `${student.name} inserito in coda (#${bathroomQueue.length})`, 'success');
-
-            try {
-                await _supabase.from('bathroom_queue').insert([newQueueItem]);
-            } catch(e) {}
-            broadcastQueueUpdate();
-        }
-
         async function joinBathroomQueue() {
             if (currentUser?.role !== 'studente') return;
             
             let myDeskEntry = null;
             if (localSchoolDB[currentClass]) {
-                myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => 
-                    (s.db_id && s.db_id === currentUser.id) || 
-                    (s.name && currentUser?.name && s.name.toLowerCase() === currentUser.name.toLowerCase())
-                );
+                myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === currentUser.id);
             }
 
             if (!myDeskEntry) {
@@ -1855,7 +1764,6 @@
             };
 
             bathroomQueue.push(newQueueItem);
-            saveQueueLocally();
             updateQueueBadges();
             renderBathroomQueueUI();
             toast('Prenotazione Registrata', `Sei il #${bathroomQueue.length} in coda per il bagno`, 'success');
@@ -1868,8 +1776,7 @@
         }
 
         async function leaveBathroomQueue(studentId) {
-            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId && q.id !== studentId);
-            saveQueueLocally();
+            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId);
             updateQueueBadges();
             renderBathroomQueueUI();
             toast('Prenotazione Annullata', 'Hai lasciato la fila del bagno', 'info');
@@ -1883,7 +1790,6 @@
 
         async function removeQueueItem(identifier) {
             bathroomQueue = bathroomQueue.filter(q => q.id !== identifier && q.student_id !== identifier);
-            saveQueueLocally();
             updateQueueBadges();
             renderBathroomQueueUI();
 
@@ -1897,7 +1803,6 @@
         async function clearBathroomQueue() {
             if (!confirm("Svuotare l'intera coda del bagno per questa classe?")) return;
             bathroomQueue = [];
-            saveQueueLocally();
             updateQueueBadges();
             renderBathroomQueueUI();
 
@@ -1906,67 +1811,345 @@
             } catch(e) {}
 
             broadcastQueueUpdate();
-            toast('Coda Svuotata', 'Tutte le prenotazioni rimosse.', 'info');
+            toast('Coda Svuotata', 'Tutte le prenotazioni sono state rimosse.', 'info');
         }
 
         async function startBathroomTrip(studentId, deskId) {
-            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId && q.id !== studentId);
-            saveQueueLocally();
+            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId);
             updateQueueBadges();
 
-            let targetDeskId = deskId;
-            if (!targetDeskId && localSchoolDB[currentClass]) {
-                const entry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === studentId);
-                if (entry) targetDeskId = entry[0];
-            }
-
-            if (targetDeskId && localSchoolDB[currentClass]?.[targetDeskId]) {
-                const student = localSchoolDB[currentClass][targetDeskId];
-                const nowObj = new Date();
-                const now = nowObj.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-                student.status = 'bagno';
-                student.time = now;
-                student.history.push({ out: now, in: null });
-
-                renderGrid(localSchoolDB[currentClass]);
-
-                if (student.db_id && currentClassId) {
-                    try {
-                        await _supabase.from('attendance').upsert({
-                            student_id: student.db_id,
-                            class_id: currentClassId,
-                            date: selectedDate,
-                            status: 'bagno',
-                            time: now
-                        }, { onConflict: 'student_id, date' });
-                    } catch(e) {}
-                }
-                toast('Uscita Bagno', `${student.name} è uscito/a al bagno.`, 'info');
-            }
-
             try {
-                await _supabase.from('bathroom_queue').delete().match({ student_id: studentId, class: currentClass });
+                await _supabase.from('bathroom_queue').delete().eq('student_id', studentId).eq('class', currentClass);
             } catch(e) {}
+
+            selectedStudentId = deskId;
+            pendingStatus = 'bagno';
+            await confirmStatusChange();
 
             renderBathroomQueueUI();
             broadcastQueueUpdate();
         }
 
         async function forceBathroomReturn(occupantDeskId) {
-            if (!occupantDeskId || !localSchoolDB[currentClass]?.[occupantDeskId]) return;
-            const student = localSchoolDB[currentClass][occupantDeskId];
+            selectedStudentId = occupantDeskId;
+            pendingStatus = 'presente';
+            await confirmStatusChange();
+            renderBathroomQueueUI();
+            broadcastQueueUpdate();
+            toast('Rientro Confermato', 'Il bagno è ora libero. Turno abilitato per il primo in coda.', 'success');
+        }
+
+        function broadcastQueueUpdate() {
+            try {
+                _supabase.channel('smartcheck_channel').send({
+                    type: 'broadcast',
+                    event: 'QUEUE_SYNC',
+                    payload: { class: currentClass, queue: bathroomQueue }
+                });
+            } catch(e) {}
+        }
+
+        // Selettore Ala Mobile
+        function switchMobileAisle(aisle) {
+            currentMobileAisle = aisle;
+            ['left', 'center', 'right', 'all'].forEach(k => {
+                const b = document.getElementById(`tab-aisle-${k}`);
+                if (b) {
+                    if (k === aisle) {
+                        b.className = "flex-1 py-2 rounded-xl text-center transition border aisle-pill-active font-black";
+                    } else {
+                        b.className = "flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400 hover:text-white";
+                    }
+                }
+            });
+            renderMobileClassroom(localSchoolDB[currentClass]);
+        }
+
+        // Generatore Scheda Banco Mobile
+        function createMobileDeskCard(id, data) {
+            const d = data[id] || { name: 'Libero', status: 'assente', time: '--:--' };
+            const isLibero = (d.name === 'Libero');
+            const statusClass = String(d.status || 'assente').replace(/_/g,'-');
+            
+            const studentNotes = (d.db_id && localNotesDB[d.db_id]) ? localNotesDB[d.db_id] : [];
+            const hasWarning = studentNotes.some(n => n.type === 'warning');
+            const hasNotes = studentNotes.length > 0;
+            const noteFlag = hasWarning 
+                ? `<span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" title="Richiamo Disciplinare"></span>` 
+                : (hasNotes ? `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping" title="Annotazione"></span>` : '');
+
+            const card = document.createElement('div');
+            card.className = `p-3 rounded-2xl status-${statusClass} ${isLibero ? 'opacity-30 cursor-default' : 'cursor-pointer active:scale-[0.98]'} transition-all shadow-md flex flex-col justify-between min-h-[105px]`;
+
+            card.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-[9px] font-mono font-bold opacity-60">#${id.split('_')[1]}</span>
+                    <div class="flex items-center gap-1.5">
+                        ${noteFlag}
+                        <span class="text-[8px] font-mono font-black uppercase tracking-wider py-0.5 px-2 rounded-md bg-black/40">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
+                    </div>
+                </div>
+                <div class="my-1">
+                    <div class="font-extrabold text-sm text-white leading-tight break-words">${esc(d.name)}</div>
+                </div>
+                <div class="flex justify-between items-center text-[9px] font-mono opacity-80 pt-1 border-t border-white/10">
+                    <span>${isLibero ? '--' : 'Ultimo orario:'}</span>
+                    <span class="font-bold">${esc(d.time || '--:--')}</span>
+                </div>
+            `;
+
+            if (!isLibero) {
+                card.onclick = () => openStudentDetail(id);
+            }
+            return card;
+        }
+
+        // Render Aula Mobile
+        function renderMobileClassroom(data) {
+            const container = document.getElementById('mobile-classroom-grid');
+            if (!container || !data) return;
+            container.innerHTML = '';
+
+            const left = []; for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
+            const center = [`banco_09`]; for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
+            const right = []; for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
+
+            const renderSection = (title, deskIds, icon) => {
+                const sec = document.createElement('div');
+                sec.className = "bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800 space-y-3";
+                sec.innerHTML = `
+                    <div class="flex items-center justify-between px-1">
+                        <div class="flex items-center gap-2 text-xs font-mono font-black text-slate-300 uppercase tracking-wider">
+                            <i class="fa-solid ${icon} text-blue-400"></i> ${title}
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-500">${deskIds.length} Banchi</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5"></div>
+                `;
+                const g = sec.querySelector('div:last-child');
+                deskIds.forEach(id => g.appendChild(createMobileDeskCard(id, data)));
+                container.appendChild(sec);
+            };
+
+            if (currentMobileAisle === 'left' || currentMobileAisle === 'all') {
+                renderSection("Ala Sinistra", left, "fa-arrow-left");
+            }
+            if (currentMobileAisle === 'center' || currentMobileAisle === 'all') {
+                renderSection("Fila Centrale", center, "fa-arrows-to-dot");
+            }
+            if (currentMobileAisle === 'right' || currentMobileAisle === 'all') {
+                renderSection("Ala Destra", right, "fa-arrow-right");
+            }
+        }
+
+        // Generatore Scheda Banco Desktop PC
+        function createDeskCard(id, data, isSingle=false) {
+            const d = data[id] || {name:'Libero',status:'assente',time:'--:--'};
+            const wrap = document.createElement('div'); 
+            wrap.className = isSingle ? 'w-full max-w-[340px] lg:max-w-[420px] xl:max-w-[480px] mx-auto' : 'w-full';
+
+            const btn = document.createElement('button'); 
+            btn.type = 'button'; 
+            btn.className = 'w-full block outline-none h-full';
+            btn.disabled = (d.name === 'Libero');
+
+            const studentNotes = (d.db_id && localNotesDB[d.db_id]) ? localNotesDB[d.db_id] : [];
+            const hasWarning = studentNotes.some(n => n.type === 'warning');
+            const hasNotes = studentNotes.length > 0;
+            const noteFlag = hasWarning 
+                ? `<i class="fa-solid fa-circle-exclamation text-red-500 animate-pulse absolute top-3 right-3 text-sm lg:text-base z-20 drop-shadow" title="Richiamo Disciplinare"></i>`
+                : (hasNotes ? `<i class="fa-solid fa-circle-info text-amber-400 absolute top-3 right-3 text-sm lg:text-base z-20 drop-shadow" title="Annotazione"></i>` : '');
+            
+            const statusClass = String(d.status || 'assente').replace(/_/g,'-');
+            
+            btn.innerHTML = `<div class="relative h-28 md:h-32 lg:h-36 xl:h-44 2xl:h-48 w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between shadow-xl status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100'} transition-all ${d.name==='Libero'?'cursor-default':'cursor-pointer hover:scale-[1.03]'}">
+                ${noteFlag}
+                <div class="flex justify-between items-start">
+                    <span class="text-[10px] lg:text-xs xl:text-sm font-bold opacity-75 font-mono">#${id.split('_')[1]}</span>
+                    <span class="text-[9px] lg:text-[10px] xl:text-xs font-mono font-black uppercase tracking-wider opacity-95 py-1 px-2.5 lg:px-3 rounded-lg bg-black/40 border border-white/5">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
+                </div>
+                <div class="text-center flex-grow flex items-center justify-center px-1 lg:px-2 my-1">
+                    <h3 class="font-extrabold text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl leading-tight uppercase w-full break-words text-white tracking-wide">${esc(d.name)}</h3>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] lg:text-xs xl:text-sm font-mono font-semibold opacity-85 bg-black/40 px-3 py-1 rounded-lg border border-white/5 text-slate-300">${esc(d.time || '--:--')}</span>
+                </div>
+            </div>`;
+
+            if (d.name !== 'Libero') { 
+                btn.onclick = () => openStudentDetail(id);
+            }
+            wrap.appendChild(btn); 
+            return wrap;
+        }
+
+        // Render Griglia Aula Desktop
+        function renderGrid(data) {
+            if (!data) return;
+            renderMobileClassroom(data);
+
+            const grid = document.getElementById('classroom-grid'); 
+            if (!grid) return; 
+            grid.innerHTML = '';
+
+            const makeColumn = (label, deskIds) => {
+                const col = document.createElement('div');
+                col.className = 'flex flex-col-reverse gap-3 lg:gap-4 xl:gap-5 flex-1'; 
+                const labelEl = document.createElement('div');
+                labelEl.className = 'text-center text-xs lg:text-sm font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last';
+                labelEl.textContent = label;
+                col.appendChild(labelEl);
+                for (let i = 0; i < deskIds.length; i += 2) {
+                    const pair = deskIds.slice(i, i+2);
+                    const row = document.createElement('div'); 
+                    row.className = 'grid grid-cols-2 gap-3 lg:gap-4 xl:gap-5';
+                    pair.forEach(id => row.appendChild(createDeskCard(id, data)));
+                    col.appendChild(row);
+                }
+                return col;
+            };
+
+            const left = []; for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
+            const center = [`banco_09`]; for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
+            const right = []; for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
+
+            const leftCol = makeColumn('ALA SINISTRA', left);
+            const centerCol = document.createElement('div'); 
+            centerCol.className = 'flex flex-col-reverse gap-3 lg:gap-4 xl:gap-5 flex-1';
+            const centerLabel = document.createElement('div'); 
+            centerLabel.className = 'text-center text-xs lg:text-sm font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last'; 
+            centerLabel.textContent = 'FILA CENTRALE'; 
+            centerCol.appendChild(centerLabel);
+            
+            const single = document.createElement('div'); 
+            single.className = 'flex justify-center w-full'; 
+            single.appendChild(createDeskCard('banco_09', data, true)); 
+            centerCol.appendChild(single);
+            
+            const centerPairs = center.slice(1);
+            for (let i=0;i<centerPairs.length;i+=2) {
+                const row = document.createElement('div'); 
+                row.className = 'grid grid-cols-2 gap-3 lg:gap-4 xl:gap-5';
+                row.appendChild(createDeskCard(centerPairs[i], data));
+                if (centerPairs[i+1]) row.appendChild(createDeskCard(centerPairs[i+1], data));
+                centerCol.appendChild(row);
+            }
+
+            const rightCol = makeColumn('ALA DESTRA', right);
+            grid.appendChild(leftCol); grid.appendChild(centerCol); grid.appendChild(rightCol);
+
+            let out = null; 
+            Object.values(data).forEach(v => { if (v.status === 'bagno') out = v.name; });
+            const bath = document.getElementById('bathroom-bar');
+            if (bath && !bath.classList.contains('hidden')) {
+                const queueInfo = bathroomQueue.length > 0 ? `<span class="ml-1.5 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/40 text-[10px] font-bold text-cyan-300">Coda: ${bathroomQueue.length}</span>` : '';
+                bath.innerHTML = out 
+                    ? `<div class="px-4 py-1.5 rounded-full border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-center gap-2 animate-pulse shadow-lg shadow-cyan-950/50 backdrop-blur-md">
+                         <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0"></span>
+                         <span class="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider truncate">BAGNO: <span class="text-white font-sans font-extrabold">${esc(out)}</span></span>
+                         ${queueInfo}
+                       </div>` 
+                    : `<div class="px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/20 flex items-center justify-center gap-2 shadow-md backdrop-blur-md">
+                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
+                         <span class="text-xs font-mono font-bold text-emerald-300 uppercase tracking-wider">BAGNO LIBERO</span>
+                         ${queueInfo}
+                       </div>`;
+            }
+        }
+
+        // Modale Dettaglio Studente
+        function openStudentDetail(id) {
+            const student = localSchoolDB[currentClass]?.[selectedStudentId = id];
+            if (!student || student.name === 'Libero') return;
+            pendingStatus = student.status;
+
+            document.getElementById('modal-detail-name').innerText = student.name;
+            const statusEl = document.getElementById('modal-detail-status');
+            statusEl.innerText = student.status.toUpperCase().replace('_', ' ');
+
+            const colorMap = {
+                presente: "text-emerald-400",
+                bagno: "text-cyan-400 animate-pulse",
+                ritardo: "text-amber-400",
+                assente: "text-red-400",
+                uscita_anticipata: "text-yellow-400",
+                fuori_aula: "text-indigo-400"
+            };
+            statusEl.className = `text-xl sm:text-2xl font-black ${colorMap[student.status] || 'text-white'}`;
+            document.getElementById('modal-detail-count').innerText = student.history.length;
+
+            const tbody = document.getElementById('modal-history-body');
+            tbody.innerHTML = "";
+            student.history.slice().reverse().forEach(h => {
+                let durataStringa = h.in ? `<span class="text-[10px] text-amber-300 font-mono font-bold ml-2 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-500/30">⏱ ${calcolaDurata(h.out, h.in)}</span>` : '';
+                tbody.innerHTML += `<tr class="hover:bg-slate-800/25 transition"><td class="px-4 sm:px-5 py-3 font-bold text-cyan-400 font-mono">${h.out}</td><td class="px-4 sm:px-5 py-3 font-bold text-emerald-400 font-mono">${h.in || '--:--'} ${durataStringa}</td><td class="px-4 sm:px-5 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
+            });
+
+            document.getElementById('status-view-mode').classList.remove('hidden');
+            document.getElementById('status-edit-mode').classList.add('hidden');
+
+            const isTeacher = (currentUser?.role !== 'studente');
+            document.getElementById('status-edit-hint')?.classList.toggle('hidden', !isTeacher);
+            document.getElementById('teacher-note-input')?.classList.toggle('hidden', !isTeacher);
+            document.getElementById('grade-input-area')?.classList.toggle('hidden', !isTeacher);
+
+            switchTab('presence');
+            document.getElementById('student-modal-tabs')?.classList.remove('hidden');
+
+            document.getElementById('modal-student-detail').classList.remove('hidden');
+        }
+
+        function toggleStatusEdit() {
+            if (currentUser?.role === 'studente') return;
+            const viewMode = document.getElementById('status-view-mode');
+            const editMode = document.getElementById('status-edit-mode');
+            const isEditing = !editMode.classList.contains('hidden');
+            
+            viewMode.classList.toggle('hidden', !isEditing);
+            editMode.classList.toggle('hidden', isEditing);
+            
+            if (!isEditing) {
+                const current = localSchoolDB[currentClass]?.[selectedStudentId]?.status;
+                selectStatusPreview(current);
+            }
+        }
+
+        function selectStatusPreview(status) {
+            pendingStatus = status;
+            document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('btn-selected'));
+            document.getElementById(`btn-${status}`)?.classList.add('btn-selected');
+        }
+
+        async function confirmStatusChange() {
+            if (!pendingStatus) {
+                toast('Seleziona Stato', 'Scegli uno stato prima di salvare.', 'info');
+                return;
+            }
+            const student = localSchoolDB[currentClass]?.[selectedStudentId];
+            if (!student) return;
+
+            const oldStatus = student.status;
             const nowObj = new Date();
             const now = nowObj.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-            student.status = 'presente';
-            student.time = '08:00';
-            for (let i = student.history.length - 1; i >= 0; i--) {
-                if (student.history[i].in === null) {
-                    student.history[i].in = now;
-                    break;
+            const totalM = nowObj.getHours() * 60 + nowObj.getMinutes();
+            const isOrarioScolastico = (totalM >= 480 && totalM < 810);
+
+            student.status = pendingStatus;
+            student.time = (pendingStatus === 'presente') ? (isOrarioScolastico ? '08:00' : now) : (pendingStatus === 'assente' ? '--:--' : now);
+
+            if (pendingStatus === 'bagno' && oldStatus !== 'bagno') {
+                student.history.push({ out: now, in: null });
+            } else if (oldStatus === 'bagno' && pendingStatus !== 'bagno') {
+                for (let i = student.history.length - 1; i >= 0; i--) {
+                    if (student.history[i].in === null) {
+                        student.history[i].in = now;
+                        break;
+                    }
                 }
             }
 
             renderGrid(localSchoolDB[currentClass]);
+            openStudentDetail(selectedStudentId);
 
             if (student.db_id && currentClassId) {
                 try {
@@ -1974,18 +2157,250 @@
                         student_id: student.db_id,
                         class_id: currentClassId,
                         date: selectedDate,
-                        status: 'presente',
+                        status: pendingStatus,
                         time: student.time
                     }, { onConflict: 'student_id, date' });
-                } catch(e) {}
+                    toast('Presenza Salvata', `${student.name} → ${pendingStatus.toUpperCase().replace('_', ' ')} (${student.time})`, 'success');
+                } catch(err) {
+                    console.error("Errore salvataggio presenza:", err);
+                    toast('Errore Sincronizzazione', 'Salvataggio non riuscito su DB.', 'error');
+                }
             }
-
-            renderBathroomQueueUI();
-            broadcastQueueUpdate();
-            toast('Rientro Registrato', `${student.name} è rientrato/a dal bagno. Bagno libero!`, 'success');
         }
 
-        // VOTI E NOTE
+        // Registro e Firme
+        function openSignModal() {
+            const m = document.getElementById('modal-sign');
+            if (!m) return;
+            m.classList.remove('hidden');
+            
+            const isStud = (currentUser?.role === 'studente');
+            document.getElementById('reg-header-student')?.classList.toggle('hidden', !isStud);
+            document.getElementById('reg-header-teacher')?.classList.toggle('hidden', isStud);
+            document.getElementById('new-signature-form')?.classList.toggle('hidden', isStud);
+            
+            if (!isStud) updateTeacherForm();
+            renderCalendarStrip();
+            renderSignaturesList();
+        }
+
+        function updateTeacherForm() {
+            const isToday = (selectedDate === getTodayStr());
+            const form = document.getElementById('new-signature-form');
+            if (form) form.classList.toggle('hidden', !isToday);
+        }
+
+        function renderCalendarStrip() {
+            const container = document.getElementById('cv-calendar-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const labels = ['D','L','M','M','G','V','S'];
+            const selected = new Date(`${selectedDate}T12:00:00`);
+            for (let i=-3; i<=3; i++) {
+                const d = new Date(selected);
+                d.setDate(selected.getDate() + i);
+                const iso = d.toISOString().slice(0,10);
+                const isFuture = iso > getTodayStr();
+                const day = document.createElement('button');
+                day.type = 'button';
+                day.className = `cv-day ${iso===selectedDate?'active':''} ${iso===getTodayStr()?'today':''} ${isFuture?'future':''}`;
+                day.disabled = isFuture;
+                day.innerHTML = `<span class="cv-day-letter">${labels[d.getDay()]}</span><div class="cv-day-number">${d.getDate()}</div>`;
+                if (!isFuture) day.onclick = () => changeDate(iso);
+                container.appendChild(day);
+            }
+        }
+
+        function selectSignHour(h) {
+            selectedSignHour = h;
+            for (let i=1; i<=5; i++) {
+                const btn = document.getElementById(`hour-btn-${i}`);
+                if (btn) {
+                    btn.className = (i === h)
+                        ? 'flex-1 py-1.5 rounded-lg bg-blue-600 border border-blue-400 text-xs font-mono font-bold text-white shadow-lg'
+                        : 'flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold hover:bg-slate-700 text-slate-300 transition';
+                }
+            }
+        }
+
+        function renderSignaturesList() {
+            const container = document.getElementById('signatures-list');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            if (!onlineSignatures || onlineSignatures.length === 0) {
+                document.getElementById('no-signatures')?.classList.remove('hidden');
+                return;
+            }
+            document.getElementById('no-signatures')?.classList.add('hidden');
+            
+            onlineSignatures.forEach(sig => {
+                const canDelete = currentUser && (currentUser.role === 'admin' || currentUser.name === sig.teacher);
+                const deleteBtn = canDelete ? `<button onclick="deleteSignature('${sig.id}')" class="text-red-500 hover:text-red-300 p-1.5 ml-auto"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+                container.innerHTML += `<div class="bg-slate-900/80 border border-slate-800 p-3 rounded-xl flex flex-col gap-1.5 relative group"><div class="flex justify-between items-start"><span class="text-[10px] font-mono font-bold bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded uppercase tracking-wider">${sig.hour}° ORA • ${esc(sig.subject)}</span>${deleteBtn}</div><p class="text-xs font-medium text-slate-200 leading-snug">${esc(sig.topic)}</p><div class="text-[10px] text-slate-500 flex items-center gap-1"><i class="fa-solid fa-user-tie text-[9px]"></i> ${esc(sig.teacher)}</div></div>`;
+            });
+        }
+
+        async function saveSignature() {
+            if (!selectedSignHour) { toast('Ora Mancante', 'Seleziona l\'ora di lezione.', 'error'); return; }
+            const subj = document.getElementById('subject-search').value.trim();
+            const topic = document.getElementById('sign-argomento').value.trim();
+            if (!subj || !topic) { toast('Dati Incompleti', 'Specifica materia e argomento svolto.', 'error'); return; }
+            
+            setLoading(true, "Registrazione firma...");
+            try {
+                await _supabase.from('signatures').insert([{
+                    date: selectedDate,
+                    hour: selectedSignHour,
+                    teacher: currentUser?.name || 'Docente',
+                    subject: subj,
+                    topic: topic,
+                    class: currentClass
+                }]);
+                
+                toast('Firma Apposta', `${selectedSignHour}° ora registrata con successo.`, 'success');
+                document.getElementById('modal-sign').classList.add('hidden');
+                document.getElementById('sign-argomento').value = '';
+                selectSignHour(null);
+                
+                await loadDayData(selectedDate);
+                renderSignaturesList();
+                updateSignatureDisplay();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function deleteSignature(id) {
+            if (!confirm("Eliminare questa firma dal registro?")) return;
+            setLoading(true, "Eliminazione...");
+            try {
+                await _supabase.from('signatures').delete().eq('id', id);
+                await loadDayData(selectedDate);
+                renderSignaturesList();
+                updateSignatureDisplay();
+                toast('Firma Cancellata', '', 'success');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function updateSignatureDisplay() {
+            const last = onlineSignatures && onlineSignatures.length > 0 ? onlineSignatures[onlineSignatures.length - 1] : null;
+            const disp = document.getElementById('signature-display');
+            if (disp) {
+                disp.innerText = last ? `${last.hour}° Ora • ${last.subject}: ${last.topic}` : "Clicca per aprire il Registro di Classe";
+            }
+        }
+
+        function filterSubjects() {
+            const input = document.getElementById('subject-search').value.toLowerCase();
+            const drop = document.getElementById('subject-dropdown');
+            drop.innerHTML = "";
+            ALL_SUBJECTS.forEach(s => {
+                if (s.toLowerCase().includes(input)) {
+                    const div = document.createElement('div');
+                    div.innerText = s;
+                    div.className = "p-2 hover:bg-blue-600/50 cursor-pointer text-xs";
+                    div.onclick = () => {
+                        document.getElementById('subject-search').value = s;
+                        drop.classList.add('hidden');
+                    };
+                    drop.appendChild(div);
+                }
+            });
+            drop.classList.remove('hidden');
+        }
+
+        // Agenda
+        function openAgendaModal() {
+            document.getElementById('modal-agenda').classList.remove('hidden');
+            document.getElementById('btn-add-agenda')?.classList.toggle('hidden', currentUser?.role === 'studente');
+            renderAgendaList();
+        }
+
+        function openAddAgendaModal() {
+            document.getElementById('modal-add-agenda').classList.remove('hidden');
+            const sel = document.getElementById('agenda-subject');
+            sel.innerHTML = "";
+            ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`);
+        }
+
+        function selectAgendaType(t) {
+            pendingAgendaType = t;
+            document.getElementById('btn-type-compito').className = (t === 'compito') ? 'btn-selected py-2.5 bg-emerald-950/40 text-emerald-400 font-bold rounded-xl text-xs uppercase' : 'py-2.5 bg-slate-800 text-slate-400 font-bold rounded-xl text-xs uppercase';
+            document.getElementById('btn-type-verifica').className = (t === 'verifica') ? 'btn-selected py-2.5 bg-red-950/40 text-red-400 font-bold rounded-xl text-xs uppercase' : 'py-2.5 bg-slate-800 text-slate-400 font-bold rounded-xl text-xs uppercase';
+        }
+
+        function renderAgendaList() {
+            const list = document.getElementById('agenda-list');
+            if (!list) return;
+            const items = (onlineAgenda || []).filter(item => !currentClass || item.class === currentClass);
+            list.innerHTML = '';
+            if (items.length === 0) {
+                list.innerHTML = '<div class="p-8 text-center text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-2xl">Nessun impegno in agenda per questa classe.</div>';
+                return;
+            }
+            items.forEach(item => {
+                const el = document.createElement('div');
+                const isTask = item.type === 'compito';
+                el.className = `p-4 rounded-xl mb-2 flex justify-between items-start border-l-4 ${isTask ? 'border-emerald-500 bg-emerald-950/10' : 'border-red-500 bg-red-950/10'} border-slate-800/60`;
+                const canDelete = (currentUser?.role !== 'studente');
+                el.innerHTML = `<div><span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-black/40 text-slate-300 inline-block mb-1">${esc(item.date||'--')} • ${esc(item.subject||'')}</span><p class="text-xs text-slate-200 mt-1">${esc(item.description||'')}</p></div>`;
+                if (canDelete && item.id) {
+                    const b = document.createElement('button');
+                    b.className = 'bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white p-2 rounded-lg transition ml-4 flex-shrink-0';
+                    b.innerHTML = '<i class="fa-solid fa-trash text-xs"></i>';
+                    b.onclick = () => deleteAgendaItem(item.id);
+                    el.appendChild(b);
+                }
+                list.appendChild(el);
+            });
+        }
+
+        async function saveAgendaEntry() {
+            if (!pendingAgendaType) { toast('Tipo Richiesto', 'Seleziona se si tratta di Compito o Verifica.', 'error'); return; }
+            const dateInput = document.getElementById('agenda-date').value;
+            if (!dateInput) { toast('Data Mancante', 'Inserisci una data valida.', 'error'); return; }
+            const d = new Date(dateInput);
+            const formatted = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+            setLoading(true, "Registrazione...");
+            try {
+                const { data, error } = await _supabase.from('agenda').insert([{
+                    date: formatted,
+                    subject: document.getElementById('agenda-subject').value,
+                    type: pendingAgendaType,
+                    description: document.getElementById('agenda-desc').value,
+                    class: currentClass
+                }]).select();
+                if (error) throw error;
+                if (data && data.length > 0) onlineAgenda.push(data[0]);
+                document.getElementById('modal-add-agenda').classList.add('hidden');
+                renderAgendaList();
+                toast('Agenda Aggiornata', 'Attività registrata con successo!', 'success');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function deleteAgendaItem(id) {
+            if (!confirm("Eliminare questa annotazione dall'agenda?")) return;
+            setLoading(true, "Eliminazione...");
+            try {
+                await _supabase.from('agenda').delete().eq('id', id);
+                onlineAgenda = onlineAgenda.filter(a => a.id !== id);
+                renderAgendaList();
+                toast('Impegno Rimosso', '', 'success');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function toggleNoticeModal() {
+            document.getElementById('modal-notices')?.classList.toggle('hidden');
+        }
+
+        // Valutazioni e Medie
         function backToGradePicker() {
             selectedStudentId = null;
             renderClassGradePicker();
@@ -2295,6 +2710,7 @@
             }
         }
 
+        // Visualizzazione note: mostra Badge Tipo, Data, Ora e Autore Docente
         function loadNotes() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
@@ -2332,6 +2748,7 @@
             });
         }
 
+        // Salvataggio nota con attribuzione profilo docente e orario reale
         async function addNote() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student?.db_id) return;
@@ -2490,7 +2907,6 @@
             .on('broadcast', { event: 'QUEUE_SYNC' }, payload => {
                 if (payload.payload && payload.payload.class === currentClass) {
                     bathroomQueue = payload.payload.queue || [];
-                    saveQueueLocally();
                     updateQueueBadges();
                     renderBathroomQueueUI();
                     renderGrid(localSchoolDB[currentClass]);
