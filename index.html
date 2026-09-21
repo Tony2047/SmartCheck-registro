@@ -342,8 +342,8 @@
                 <span class="text-[10px] font-mono font-bold uppercase tracking-wider">Archivio Storico</span>
             </div>
 
-            <!-- Telemetria Bagno -->
-            <div id="bathroom-bar" class="w-full max-w-xl mb-1 flex justify-center px-1"></div>
+            <!-- Telemetria Bagno Interattiva (Cliccabile per aprire la Coda Bagno) -->
+            <div id="bathroom-bar" onclick="openBathroomQueueModal()" class="w-full max-w-xl mb-1 flex justify-center px-1 cursor-pointer hover:scale-[1.01] transition-transform" title="Clicca per aprire la gestione della Coda Bagno"></div>
 
             <!-- SELETTORE ALI PER SMARTPHONE -->
             <div class="desk-switcher-mobile w-full max-w-md mb-3">
@@ -393,9 +393,9 @@
             </div>
         </main>
 
-        <!-- Dock Barra Inferiore -->
+        <!-- Dock Barra Inferiore (Con Tasto Diretto Coda Bagno) -->
         <div class="fixed bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-auto max-w-5xl glass-panel px-3 sm:px-6 py-1.5 sm:py-2 rounded-2xl flex items-center justify-between sm:justify-center gap-3 sm:gap-6 shadow-2xl z-50 border border-slate-700/60 backdrop-blur-2xl">
-            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+            <div class="flex items-center gap-2 sm:gap-3.5 shrink-0">
                 <button onclick="openAgendaModal()" class="dock-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-pink-400 hover:text-pink-300 group" title="Agenda Impegni">
                     <i class="fa-solid fa-calendar-check text-sm sm:text-base"></i>
                     <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Agenda</span>
@@ -407,6 +407,12 @@
                 <button id="dock-right" onclick="openGradesModal()" class="dock-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-emerald-400 hover:text-emerald-300 group" title="Valutazioni e Medie">
                     <i class="fa-solid fa-chart-pie text-sm sm:text-base"></i>
                     <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Voti</span>
+                </button>
+                <!-- Tasto Coda Bagno con contatore in tempo reale -->
+                <button onclick="openBathroomQueueModal()" class="dock-btn relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-cyan-400 hover:text-cyan-300 group" title="Coda Bagno">
+                    <i class="fa-solid fa-restroom text-sm sm:text-base"></i>
+                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Coda</span>
+                    <span id="queue-badge-count" class="hidden absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-cyan-500 text-[9px] font-black text-black flex items-center justify-center font-mono shadow-md animate-pulse">0</span>
                 </button>
             </div>
             
@@ -426,6 +432,55 @@
 
     <!-- ================= MODALI ================= -->
     
+    <!-- MODALE CODA BAGNO (PRENOTAZIONI INDIVIDUALI DAL BANCO) -->
+    <div id="modal-bathroom-queue" class="hidden fixed inset-0 z-[95] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4">
+        <div class="glass-panel w-full max-w-xl max-h-[90vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-lg shrink-0">
+                        <i class="fa-solid fa-restroom"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-black text-white tracking-tight">Gestione Coda Bagno</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Prenota il turno dal tuo posto o gestisci le uscite</p>
+                    </div>
+                </div>
+                <button onclick="closeBathroomQueueModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">✕</button>
+            </div>
+
+            <!-- Scheda Occupante Attuale -->
+            <div id="queue-occupant-card" class="mb-4 p-4 rounded-2xl border bg-slate-900/80 transition-all flex items-center justify-between">
+                <!-- Generato dinamicamente via JS -->
+            </div>
+
+            <!-- Sezione Azione Utente Corrente (Prenotati / Annulla / Esci) -->
+            <div id="queue-action-box" class="mb-4">
+                <!-- Generato dinamicamente in base al ruolo e stato dell'utente -->
+            </div>
+
+            <!-- Elenco Studenti in Fila -->
+            <div class="flex-grow flex flex-col min-h-[140px] overflow-hidden">
+                <div class="flex items-center justify-between mb-2 text-xs font-mono uppercase font-bold text-slate-400">
+                    <span>Fila d'Attesa</span>
+                    <span id="queue-total-waiting" class="text-cyan-400">0 in coda</span>
+                </div>
+                <div id="queue-list-container" class="overflow-y-auto custom-scrollbar flex-grow space-y-2 pr-1">
+                    <!-- Elementi della coda generati dinamicamente -->
+                </div>
+            </div>
+
+            <!-- Controlli Docente (Solo Professori / Admin) -->
+            <div id="queue-teacher-controls" class="hidden pt-3 mt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                <span class="text-[10px] font-mono uppercase font-bold text-slate-500">Pannello Docente</span>
+                <div class="flex gap-2">
+                    <button onclick="clearBathroomQueue()" class="px-3 py-1.5 bg-red-950/40 border border-red-800/50 hover:bg-red-900/50 text-red-300 rounded-xl text-xs font-bold transition">
+                        Svuota Coda
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODALE AGENDA -->
     <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
@@ -757,6 +812,9 @@
         let localNotesDB = {};
         let localUsersDB = {};
 
+        // SISTEMA CODA BAGNO IN TEMPO REALE
+        let bathroomQueue = [];
+
         function esc(val) { return String(val ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
         
         function toast(title, message = '', type = 'info', timeout = 3000) {
@@ -933,6 +991,7 @@
 
                 // Carica prima tutte le note e i dati di registro per garantire la presenza dei richiami/note
                 await loadScopedSchoolData();
+                await loadBathroomQueueData();
                 await changeDate(selectedDate);
                 renderGrid(localSchoolDB[cls]);
 
@@ -1023,6 +1082,352 @@
             } catch (e) {
                 console.warn(e);
             }
+        }
+
+        // ================= GESTIONE CODA BAGNO (DATABASE + REALTIME BROADCAST) =================
+        async function loadBathroomQueueData() {
+            try {
+                const { data, error } = await _supabase
+                    .from('bathroom_queue')
+                    .select('*')
+                    .eq('class', currentClass)
+                    .order('created_at', { ascending: true });
+                if (!error && data) {
+                    bathroomQueue = data;
+                }
+            } catch(e) {
+                // Fallback in-memory se la tabella custom sul DB non è ancora creata
+            }
+            updateQueueBadges();
+            if (!document.getElementById('modal-bathroom-queue').classList.contains('hidden')) {
+                renderBathroomQueueUI();
+            }
+        }
+
+        function openBathroomQueueModal() {
+            document.getElementById('modal-bathroom-queue')?.classList.remove('hidden');
+            const isTeacher = (currentUser?.role !== 'studente');
+            document.getElementById('queue-teacher-controls')?.classList.toggle('hidden', !isTeacher);
+            renderBathroomQueueUI();
+        }
+
+        function closeBathroomQueueModal() {
+            document.getElementById('modal-bathroom-queue')?.classList.add('hidden');
+        }
+
+        function updateQueueBadges() {
+            const badge = document.getElementById('queue-badge-count');
+            if (badge) {
+                const count = bathroomQueue.length;
+                badge.innerText = count;
+                badge.classList.toggle('hidden', count === 0);
+            }
+        }
+
+        function renderBathroomQueueUI() {
+            const occupantCard = document.getElementById('queue-occupant-card');
+            const actionBox = document.getElementById('queue-action-box');
+            const listContainer = document.getElementById('queue-list-container');
+            const totalWaiting = document.getElementById('queue-total-waiting');
+
+            if (!occupantCard || !actionBox || !listContainer) return;
+
+            // 1. Individuazione occupante attuale del bagno
+            let occupant = null;
+            let occupantDeskId = null;
+            if (localSchoolDB[currentClass]) {
+                for (let [deskId, s] of Object.entries(localSchoolDB[currentClass])) {
+                    if (s && s.status === 'bagno') {
+                        occupant = s;
+                        occupantDeskId = deskId;
+                        break;
+                    }
+                }
+            }
+
+            const isTeacher = (currentUser?.role !== 'studente');
+
+            // Render Scheda Occupante
+            if (occupant) {
+                const lastHistory = occupant.history && occupant.history.length > 0 ? occupant.history[occupant.history.length - 1] : null;
+                const outTime = lastHistory ? lastHistory.out : occupant.time;
+                const returnBtn = isTeacher 
+                    ? `<button onclick="forceBathroomReturn('${occupantDeskId}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition">Segna Rientro</button>`
+                    : '';
+
+                occupantCard.className = "mb-4 p-4 rounded-2xl border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-between shadow-lg shadow-cyan-950/40 animate-pulse";
+                occupantCard.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+                        <div>
+                            <div class="text-[10px] font-mono uppercase font-bold text-cyan-300">Bagno Occupato</div>
+                            <div class="text-sm sm:text-base font-black text-white font-sans">${esc(occupant.name)} <span class="text-xs font-mono text-cyan-400 font-normal">#${occupantDeskId.split('_')[1]}</span></div>
+                            <div class="text-[10px] font-mono text-slate-400">Uscita alle ore ${esc(outTime)}</div>
+                        </div>
+                    </div>
+                    ${returnBtn}
+                `;
+            } else {
+                occupantCard.className = "mb-4 p-4 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 flex items-center justify-between";
+                occupantCard.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                        <div>
+                            <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Bagno Libero</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-300">Nessun alunno attualmente fuori aula per il bagno</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. Action Box (Pulsante per lo studente dal proprio banco)
+            actionBox.innerHTML = '';
+            if (currentUser?.role === 'studente') {
+                const myStudentId = currentUser.id;
+                // Trova il banco dello studente loggato
+                let myDeskEntry = null;
+                if (localSchoolDB[currentClass]) {
+                    myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === myStudentId);
+                }
+
+                const myDeskId = myDeskEntry ? myDeskEntry[0] : null;
+                const myStudentData = myDeskEntry ? myDeskEntry[1] : null;
+                const isCurrentlyInBathroom = (myStudentData && myStudentData.status === 'bagno');
+                const queueIndex = bathroomQueue.findIndex(q => q.student_id === myStudentId);
+                const isInQueue = (queueIndex !== -1);
+                const isNextInLine = (queueIndex === 0);
+
+                if (isCurrentlyInBathroom) {
+                    actionBox.innerHTML = `
+                        <div class="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-center">
+                            <span class="text-xs font-mono font-bold text-cyan-300">Sei attualmente fuori al bagno.</span>
+                        </div>
+                    `;
+                } else if (isInQueue) {
+                    const queueItem = bathroomQueue[queueIndex];
+                    const canGoNow = (isNextInLine && !occupant);
+
+                    if (canGoNow) {
+                        actionBox.innerHTML = `
+                            <div class="p-3.5 bg-emerald-500/15 border border-emerald-500/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2 shadow-lg">
+                                <div>
+                                    <div class="text-xs font-black text-emerald-400">È IL TUO TURNO!</div>
+                                    <div class="text-[11px] text-slate-300">Il bagno è libero. Conferma per registrare l'uscita.</div>
+                                </div>
+                                <button onclick="startBathroomTrip('${myStudentId}', '${myDeskId}')" class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition shadow-md">
+                                    Esci al Bagno
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        actionBox.innerHTML = `
+                            <div class="p-3.5 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between gap-3">
+                                <div>
+                                    <div class="text-[10px] font-mono uppercase font-bold text-cyan-400">La tua posizione</div>
+                                    <div class="text-sm font-black text-white font-sans">${queueIndex + 1}° in fila d'attesa</div>
+                                    <div class="text-[10px] font-mono text-slate-400">Riceverai l'abilitazione appena il bagno si libera</div>
+                                </div>
+                                <button onclick="leaveBathroomQueue('${myStudentId}')" class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-300 font-bold text-xs rounded-xl transition">
+                                    Annulla
+                                </button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    actionBox.innerHTML = `
+                        <button onclick="joinBathroomQueue()" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-cyan-600/25 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-hand"></i> Prenotati per il Bagno dal tuo Banco
+                        </button>
+                    `;
+                }
+            }
+
+            // 3. Lista d'attesa
+            totalWaiting.innerText = `${bathroomQueue.length} in attesa`;
+            listContainer.innerHTML = '';
+
+            if (bathroomQueue.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="p-6 text-center text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-2xl">
+                        Nessuno studente in coda al momento.
+                    </div>
+                `;
+                return;
+            }
+
+            bathroomQueue.forEach((item, index) => {
+                const isFirst = (index === 0);
+                const isReady = (isFirst && !occupant);
+                const badgeColor = isReady 
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 animate-pulse'
+                    : 'bg-slate-800 text-slate-400 border-slate-700';
+
+                const removeBtn = isTeacher 
+                    ? `<button onclick="removeQueueItem('${item.id || item.student_id}')" class="text-red-400 hover:text-red-300 p-1.5 transition ml-2" title="Rimuovi dalla coda"><i class="fa-solid fa-trash text-xs"></i></button>`
+                    : '';
+
+                const callBtn = (isTeacher && isReady)
+                    ? `<button onclick="startBathroomTrip('${item.student_id}', '${item.desk_id}')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px] rounded-lg uppercase tracking-wider transition ml-1">Fai uscire</button>`
+                    : '';
+
+                listContainer.innerHTML += `
+                    <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-lg ${isFirst ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400'} font-black text-xs flex items-center justify-center font-mono shrink-0">
+                                ${index + 1}°
+                            </div>
+                            <div>
+                                <div class="font-extrabold text-white text-xs sm:text-sm leading-tight">${esc(item.student_name)}</div>
+                                <div class="text-[9px] font-mono text-slate-400">#${esc(item.desk_id ? item.desk_id.replace('banco_','') : '--')} • Prenotato alle ${esc(item.booked_at || '--:--')}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded border ${badgeColor}">
+                                ${isReady ? 'Turno Pronto' : 'In Attesa'}
+                            </span>
+                            ${callBtn}
+                            ${removeBtn}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Unisciti alla coda (Studente dal proprio posto)
+        async function joinBathroomQueue() {
+            if (currentUser?.role !== 'studente') return;
+            
+            // Trova il proprio banco nella classe corrente
+            let myDeskEntry = null;
+            if (localSchoolDB[currentClass]) {
+                myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === currentUser.id);
+            }
+
+            if (!myDeskEntry) {
+                toast('Attenzione', 'Il tuo account non risulta posizionato in questa classe.', 'error');
+                return;
+            }
+
+            const deskId = myDeskEntry[0];
+            const myData = myDeskEntry[1];
+
+            if (myData.status === 'assente') {
+                toast('Non puoi prenotarti', 'Risulti assente sul registro.', 'error');
+                return;
+            }
+
+            if (myData.status === 'bagno') {
+                toast('Già fuori', 'Risulti già al bagno.', 'info');
+                return;
+            }
+
+            const nowTime = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+            const newQueueItem = {
+                id: 'queue_' + Date.now(),
+                student_id: currentUser.id,
+                student_name: currentUser.name,
+                desk_id: deskId,
+                class: currentClass,
+                class_id: currentClassId,
+                booked_at: nowTime,
+                created_at: new Date().toISOString()
+            };
+
+            // Aggiorna stato locale immediato
+            bathroomQueue.push(newQueueItem);
+            updateQueueBadges();
+            renderBathroomQueueUI();
+            toast('Prenotazione Registrata', `Sei il #${bathroomQueue.length} in coda per il bagno`, 'success');
+
+            // Persistenza Supabase se disponibile
+            try {
+                await _supabase.from('bathroom_queue').insert([newQueueItem]);
+            } catch(e) {}
+
+            // Broadcast Realtime a tutti i terminali
+            broadcastQueueUpdate();
+        }
+
+        // Annulla prenotazione
+        async function leaveBathroomQueue(studentId) {
+            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId);
+            updateQueueBadges();
+            renderBathroomQueueUI();
+            toast('Prenotazione Annullata', 'Hai lasciato la fila del bagno', 'info');
+
+            try {
+                await _supabase.from('bathroom_queue').delete().eq('student_id', studentId).eq('class', currentClass);
+            } catch(e) {}
+
+            broadcastQueueUpdate();
+        }
+
+        // Rimuovi singolo elemento (Docente)
+        async function removeQueueItem(identifier) {
+            bathroomQueue = bathroomQueue.filter(q => q.id !== identifier && q.student_id !== identifier);
+            updateQueueBadges();
+            renderBathroomQueueUI();
+
+            try {
+                await _supabase.from('bathroom_queue').delete().match({ student_id: identifier, class: currentClass });
+            } catch(e) {}
+
+            broadcastQueueUpdate();
+        }
+
+        // Svuota intera coda
+        async function clearBathroomQueue() {
+            if (!confirm("Svuotare l'intera coda del bagno per questa classe?")) return;
+            bathroomQueue = [];
+            updateQueueBadges();
+            renderBathroomQueueUI();
+
+            try {
+                await _supabase.from('bathroom_queue').delete().eq('class', currentClass);
+            } catch(e) {}
+
+            broadcastQueueUpdate();
+            toast('Coda Svuotata', 'Tutte le prenotazioni sono state rimosse.', 'info');
+        }
+
+        // Lo studente (o il docente per lui) conferma l'uscita al bagno
+        async function startBathroomTrip(studentId, deskId) {
+            // Rimuovi dalla coda
+            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId);
+            updateQueueBadges();
+
+            try {
+                await _supabase.from('bathroom_queue').delete().eq('student_id', studentId).eq('class', currentClass);
+            } catch(e) {}
+
+            // Seleziona il banco e applica lo stato "bagno"
+            selectedStudentId = deskId;
+            pendingStatus = 'bagno';
+            await confirmStatusChange();
+
+            renderBathroomQueueUI();
+            broadcastQueueUpdate();
+        }
+
+        // Docente forza il rientro dell'occupante attuale
+        async function forceBathroomReturn(occupantDeskId) {
+            selectedStudentId = occupantDeskId;
+            pendingStatus = 'presente';
+            await confirmStatusChange();
+            renderBathroomQueueUI();
+            broadcastQueueUpdate();
+            toast('Rientro Confermato', 'Il bagno è ora libero. Turno abilitato per il primo in coda.', 'success');
+        }
+
+        // Canale Broadcast Realtime per sincronizzare la coda istantaneamente
+        function broadcastQueueUpdate() {
+            try {
+                _supabase.channel('smartcheck_channel').send({
+                    type: 'broadcast',
+                    event: 'QUEUE_SYNC',
+                    payload: { class: currentClass, queue: bathroomQueue }
+                });
+            } catch(e) {}
         }
 
         // Selettore Ala Mobile
@@ -1218,14 +1623,17 @@
             Object.values(data).forEach(v => { if (v.status === 'bagno') out = v.name; });
             const bath = document.getElementById('bathroom-bar');
             if (bath && !bath.classList.contains('hidden')) {
+                const queueInfo = bathroomQueue.length > 0 ? `<span class="ml-1.5 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/40 text-[10px] font-bold text-cyan-300">Coda: ${bathroomQueue.length}</span>` : '';
                 bath.innerHTML = out 
                     ? `<div class="px-4 py-1.5 rounded-full border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-center gap-2 animate-pulse shadow-lg shadow-cyan-950/50 backdrop-blur-md">
                          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0"></span>
                          <span class="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider truncate">BAGNO: <span class="text-white font-sans font-extrabold">${esc(out)}</span></span>
+                         ${queueInfo}
                        </div>` 
                     : `<div class="px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/20 flex items-center justify-center gap-2 shadow-md backdrop-blur-md">
                          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
                          <span class="text-xs font-mono font-bold text-emerald-300 uppercase tracking-wider">BAGNO LIBERO</span>
+                         ${queueInfo}
                        </div>`;
             }
         }
@@ -2052,6 +2460,7 @@
                          }
                      }
                      renderGrid(localSchoolDB[currentClass]);
+                     renderBathroomQueueUI();
                  }
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'signatures' }, () => {
@@ -2070,6 +2479,18 @@
                 renderGrid(localSchoolDB[currentClass]);
                 if (selectedStudentId && !document.getElementById('modal-student-detail').classList.contains('hidden')) {
                     loadNotes();
+                }
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'bathroom_queue' }, async () => {
+                await loadBathroomQueueData();
+            })
+            // Canale Broadcast rapido per la coda tra browser e dispositivi
+            .on('broadcast', { event: 'QUEUE_SYNC' }, payload => {
+                if (payload.payload && payload.payload.class === currentClass) {
+                    bathroomQueue = payload.payload.queue || [];
+                    updateQueueBadges();
+                    renderBathroomQueueUI();
+                    renderGrid(localSchoolDB[currentClass]);
                 }
             })
             .subscribe();
