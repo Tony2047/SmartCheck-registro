@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SmartCheck OS — Piattaforma Registro & Presenze</title>
+    <title>SmartCheck OS — Piattaforma Registro, Presenze & Laboratorio</title>
     <meta name="theme-color" content="#060913">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Socket.io servito direttamente dal tuo server.js locale -->
+    <script src="/socket.io/socket.io.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,13 +19,7 @@
             --panel-bg: rgba(13, 20, 36, 0.75);
             --panel-border: rgba(255, 255, 255, 0.08);
         }
-        html, body {
-            width: 100%;
-            min-height: 100%;
-            margin: 0;
-            padding: 0;
-            -webkit-text-size-adjust: 100%;
-        }
+        html, body { width: 100%; min-height: 100%; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-deep); 
@@ -42,27 +37,13 @@
         }
         .hidden { display: none !important; }
 
-        /* GESTIONE VISIBILITÀ AULA RESPONSIVE */
         #classroom-grid { display: none; }
         #mobile-classroom-grid { display: flex; flex-direction: column; }
         .desk-switcher-mobile { display: block; }
-
-        /* SEPARATORE HEADER DEDICATO SENZA CONFLITTI !IMPORTANT */
         .header-divider { display: none; }
 
-        /* DISTANZIAMENTO GARANTITO CASELLE CLASSI HUB */
-        .class-list-container {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 12px !important;
-        }
-
-        @media (min-width: 640px) {
-            .class-list-container {
-                gap: 15px !important;
-            }
-        }
-
+        .class-list-container { display: flex !important; flex-direction: column !important; gap: 12px !important; }
+        @media (min-width: 640px) { .class-list-container { gap: 15px !important; } }
         @media (min-width: 768px) {
             #classroom-grid { display: grid !important; }
             #mobile-classroom-grid { display: none !important; }
@@ -76,7 +57,6 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #0b1120; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -93,8 +73,8 @@
         .status-fuori-aula { border: 2px solid #6366f1 !important; background: linear-gradient(145deg, rgba(49, 46, 129, 0.9), rgba(99, 102, 241, 0.2)) !important; color: #a5b4fc !important; }
 
         @keyframes pulseCyan { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.5); } 70% { box-shadow: 0 0 0 14px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
+        .bench-highlight { border: 2px solid #f59e0b !important; box-shadow: 0 0 25px rgba(245, 158, 11, 0.45) !important; transform: scale(1.02); }
 
-        /* DOCK TOOL BUTTONS */
         .dock-btn { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.08); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
         .dock-btn:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.25); background: rgba(30, 41, 59, 0.95); }
 
@@ -145,7 +125,7 @@
 
     <div id="sc-toast-container" class="sc-toast-container"></div>
     <div id="sc-loading" class="sc-loading hidden">
-        <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Sincronizzazione in corso...</span></div>
+        <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Sincronizzazione locale...</span></div>
     </div>
 
     <!-- ================= 1. LOGIN SCREEN ================= -->
@@ -154,20 +134,20 @@
             
             <div class="lg:col-span-6 bg-gradient-to-br from-blue-950/40 via-slate-900/60 to-purple-950/30 p-6 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800/80">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-mono font-bold text-blue-400 mb-4 sm:mb-6 lg:mb-8 uppercase tracking-wider">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span> Sistema Scolastico Digitale
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono font-bold text-emerald-400 mb-4 sm:mb-6 lg:mb-8 uppercase tracking-wider">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span> Server Locale Intranet Attivo
                     </div>
                     <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-none mb-3 sm:mb-5">
                         Smart<span class="text-blue-500">Check</span><span class="text-slate-500 text-2xl sm:text-3xl lg:text-4xl font-mono">.OS</span>
                     </h1>
                     <p class="text-slate-300 text-sm sm:text-base lg:text-lg leading-relaxed font-light">
-                        Piattaforma centralizzata per la gestione di presenze, registri di classe, uscite e monitoraggio didattico in tempo reale.
+                        Piattaforma locale ad alta sicurezza per registro presenze, coda bagno, tracciamento banchi di laboratorio e armadio componenti.
                     </p>
                 </div>
                 
                 <div class="mt-6 sm:mt-8 lg:mt-12 pt-4 sm:pt-6 border-t border-slate-800/60 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-400">
                     <div>ANNO SCOL. <span class="text-white font-bold">2026/2027</span></div>
-                    <div class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 font-bold text-xs">v140.0</div>
+                    <div class="px-2.5 py-1 rounded-md bg-slate-800 text-emerald-400 font-bold text-xs">LOCAL v2026.3</div>
                 </div>
             </div>
 
@@ -175,7 +155,7 @@
                 <div class="w-full max-w-md mx-auto space-y-5 sm:space-y-7">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Autenticazione</h2>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-1">Accedi al terminale con le tue credenziali d'istituto</p>
+                        <p class="text-slate-400 text-xs sm:text-sm mt-1">Accedi al nodo locale con le tue credenziali d'istituto</p>
                     </div>
                     
                     <div id="login-form-container" class="space-y-4 sm:space-y-5">
@@ -223,7 +203,7 @@
         </div>
     </div>
 
-    <!-- ================= 2. ENLARGED & WIDESCREEN CLASS HUB ================= -->
+    <!-- ================= 2. CLASS HUB ================= -->
     <div id="view-hub" class="hidden min-h-screen p-4 sm:p-6 md:p-10 fade-in w-full max-w-[1850px] mx-auto flex flex-col justify-between">
         <div>
             <header class="flex flex-wrap justify-between items-center gap-4 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-slate-800/80">
@@ -236,12 +216,11 @@
                             <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Hub Istituto</h2>
                             <span id="hub-role-badge" class="text-[10px] sm:text-xs font-mono font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg border border-slate-700 uppercase bg-slate-800/70 text-slate-300">--</span>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Sessione attiva: <span id="hub-user-name" class="text-white font-bold">--</span></p>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Sessione protetta JWT: <span id="hub-user-name" class="text-white font-bold">--</span></p>
                     </div>
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <!-- Tasto Accesso Console Flotta & AI (Solo Admin) -->
                     <button id="btn-open-admin-console" onclick="openAdminConsoleModal()" class="hidden px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600/20 border border-blue-500/40 rounded-xl text-blue-400 hover:bg-blue-600 hover:text-white transition text-xs font-bold flex items-center gap-2 shadow-lg">
                         <i class="fa-solid fa-microchip"></i> Console Flotta & AI
                     </button>
@@ -254,10 +233,10 @@
             <div class="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
                 <div>
                     <h3 class="text-lg sm:text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi e il monitoraggio presenze per l'indirizzo di competenza.</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi d'aula o la postazione di Laboratorio & Armadio Componenti.</p>
                 </div>
-                <div class="hidden md:flex items-center gap-2 text-xs font-mono text-slate-400 bg-black/30 px-3.5 py-2 rounded-xl border border-slate-800 shrink-0 ml-4">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Connesso
+                <div class="hidden md:flex items-center gap-2 text-xs font-mono text-emerald-400 bg-black/30 px-3.5 py-2 rounded-xl border border-emerald-800/50 shrink-0 ml-4">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> DB Locale SQLite + Socket.io
                 </div>
             </div>
 
@@ -267,18 +246,17 @@
         </div>
 
         <footer class="mt-8 sm:mt-12 text-center text-xs font-mono text-slate-600">
-            SmartCheck School OS • Architettura Scolastica Indipendente 2026/2027
+            SmartCheck School OS • Ecosistema Locale Indipendente (Zero-Cloud GDPR Safe) 2026/2027
         </footer>
     </div>
 
-    <!-- ================= 3. CLASSROOM VIEW (PC WIDESCREEN & MOBILE) ================= -->
+    <!-- ================= 3. CLASSROOM & LABORATORY VIEW ================= -->
     <div id="view-classroom" class="hidden min-h-screen flex flex-col relative fade-in">
         
         <!-- Header HUD -->
         <header class="bg-[#0b1121]/95 backdrop-blur-xl border-b border-slate-800/80 px-3 sm:px-6 lg:px-8 xl:px-10 py-2.5 sm:py-3 sticky top-0 z-40">
             <div class="w-full grid grid-cols-2 gap-y-2.5 items-center md:flex md:justify-between md:items-center">
                 
-                <!-- Blocco Sinistro: Tasto Back + Classe e Sezione + Badge Ruolo -->
                 <div class="col-start-1 row-start-1 flex items-center gap-2.5 sm:gap-3.5 shrink-0">
                     <button id="back-btn" onclick="backToHub()" title="Torna all'Hub" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-slate-800/80 border border-slate-700/60 rounded-xl hover:bg-slate-700 text-slate-300 transition shrink-0">
                         <i class="fa-solid fa-arrow-left text-xs sm:text-sm"></i>
@@ -296,7 +274,6 @@
 
                 <!-- Controlli: Data, Elenco, Registro -->
                 <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex items-center justify-between md:justify-end gap-2.5 sm:gap-3.5 lg:gap-4 xl:gap-5 md:ml-auto md:order-2">
-                    <!-- Selettore Data Ingrandito -->
                     <div class="relative group cursor-pointer flex-grow md:flex-grow-0" onclick="openNativeDatePicker()">
                         <div class="glass-panel px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl lg:rounded-2xl flex items-center gap-2.5 border border-slate-700/70 hover:border-blue-500/60 transition relative">
                             <i class="fa-regular fa-calendar text-sm lg:text-base text-blue-400 shrink-0"></i>
@@ -309,21 +286,17 @@
                         </div>
                     </div>
 
-                    <!-- Tasto Elenco -->
                     <button onclick="openListModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl lg:rounded-2xl text-xs sm:text-sm font-bold text-slate-200 transition flex items-center gap-2 shadow-sm shrink-0">
                         <i class="fa-solid fa-list-check text-slate-400 text-xs sm:text-sm"></i> <span>Elenco</span>
                     </button>
 
-                    <!-- Tasto Registro Ingrandito -->
                     <button id="sign-btn" onclick="openSignModal()" class="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl lg:rounded-2xl text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-2 shrink-0">
                         <i class="fa-solid fa-pen-nib text-xs sm:text-sm"></i> <span>Registro</span>
                     </button>
                 </div>
 
-                <!-- Separatore Visivo Desktop Equidistante -->
                 <div class="header-divider shrink-0 h-8 w-[1.5px] bg-slate-700/80 mx-2.5 sm:mx-3 lg:mx-4 xl:mx-5 md:order-3"></div>
 
-                <!-- Blocco Orologio & Logout -->
                 <div class="col-start-2 row-start-1 justify-self-end flex items-center gap-2.5 sm:gap-3 lg:gap-4 xl:gap-5 md:order-4 shrink-0">
                     <div class="text-right flex flex-col justify-center">
                         <div id="clock" class="mono text-sm sm:text-xl lg:text-2xl font-black text-white tracking-wider leading-none">00:00:00</div>
@@ -333,12 +306,31 @@
                         <i class="fa-solid fa-power-off"></i>
                     </button>
                 </div>
+            </div>
 
+            <!-- BARRA SWITCH MODALITÀ: AULA | LABORATORIO | PANNELLO ARMADIO -->
+            <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800 w-full sm:w-auto">
+                    <button onclick="switchWorkspaceMode('aula')" id="btn-mode-aula" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-2 bg-blue-600 text-white shadow-md">
+                        <i class="fa-solid fa-chair"></i> <span>Mappa Aula</span>
+                    </button>
+                    <button onclick="switchWorkspaceMode('lab')" id="btn-mode-lab" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-microchip"></i> <span>Banchi Laboratorio</span>
+                    </button>
+                    <button onclick="switchWorkspaceMode('cabinet')" id="btn-mode-cabinet" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-2 text-slate-400 hover:text-white relative">
+                        <i class="fa-solid fa-boxes-stacked"></i> <span>Armadio Componenti</span>
+                        <span id="badge-missing-items" class="hidden ml-1 px-1.5 py-0.2 rounded-full bg-amber-500 text-black font-black text-[10px]">0</span>
+                    </button>
+                </div>
+
+                <div id="lab-status-pill" class="hidden sm:flex items-center gap-2 text-[11px] font-mono px-3 py-1 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-300">
+                    <i class="fa-solid fa-shield-check"></i> <span id="lab-status-pill-text">Armadio Completo (0 strumenti fuori)</span>
+                </div>
             </div>
         </header>
 
-        <!-- Area Aula Ottimizzata PC & Mobile -->
-        <main class="flex-grow flex flex-col items-center justify-between w-full px-4 lg:px-10 xl:px-16 pt-2 pb-24 max-w-[1850px] mx-auto min-h-[calc(100vh-65px)]">
+        <!-- ================= SEZIONE A: MAPPA AULA TRADIZIONALE ================= -->
+        <main id="workspace-aula" class="flex-grow flex flex-col items-center justify-between w-full px-4 lg:px-10 xl:px-16 pt-2 pb-24 max-w-[1850px] mx-auto min-h-[calc(100vh-115px)]">
             
             <div id="history-warning" class="hidden w-full max-w-md bg-amber-950/30 border border-amber-500/40 rounded-full py-1 px-4 mb-1.5 flex items-center justify-center gap-2 text-amber-300 backdrop-blur-md animate-pulse text-center">
                 <i class="fa-solid fa-clock-rotate-left text-xs"></i> 
@@ -369,10 +361,10 @@
             <!-- GRIGLIA MOBILE -->
             <div id="mobile-classroom-grid" class="w-full space-y-3"></div>
 
-            <!-- GRIGLIA DESKTOP WIDESCREEN BILANCIATA E CENTRATA -->
+            <!-- GRIGLIA DESKTOP WIDESCREEN -->
             <div class="grid-cols-3 gap-6 lg:gap-10 xl:gap-16 2xl:gap-20 w-full my-auto flex-grow items-center" id="classroom-grid"></div>
 
-            <!-- Cattedra Docente Potenziata & Centrata -->
+            <!-- Cattedra Docente -->
             <div id="teacher-desk" onclick="openSignModal()" class="mt-4 lg:mt-6 mb-2 w-full max-w-md md:max-w-lg lg:max-w-xl min-h-[64px] lg:min-h-[76px] px-6 py-3.5 bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-blue-950/80 glass-panel border-2 border-blue-500/50 border-b-4 border-b-blue-500 rounded-2xl sm:rounded-3xl flex items-center justify-between cursor-pointer hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/30 hover:scale-[1.02] transition-all group shadow-xl relative overflow-hidden">
                 <div class="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 <div class="flex items-center gap-4 min-w-0">
@@ -396,6 +388,112 @@
             </div>
         </main>
 
+        <!-- ================= SEZIONE B: VISTA BANCHI LABORATORIO & RICERCA COMPONENTI ================= -->
+        <section id="workspace-lab" class="hidden flex-grow flex flex-col w-full px-4 lg:px-10 xl:px-16 pt-4 pb-28 max-w-[1850px] mx-auto space-y-5 fade-in">
+            
+            <!-- Barra Ricerca Componente ("Chi ha il Multimetro?") + Azioni Rapide -->
+            <div class="glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-mono font-bold uppercase">Mappa Live Laboratorio</span>
+                        <h2 class="text-lg sm:text-xl font-black text-white">Postazioni di Lavoro & Tracciamento Strumenti</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Visualizza in tempo reale i gruppi assegnati ai banchi e individua subito dove si trovano multimetri, sonde e kit.</p>
+                </div>
+
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
+                    <div class="relative flex-grow sm:w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-400 text-xs"></i>
+                        <input type="text" id="lab-search-input" oninput="renderLabWorkbenches()" placeholder="Cerca componente (es. Multimetro, Sonda)..." class="w-full bg-slate-900/95 border border-slate-700 text-white pl-9 pr-3 py-2.5 rounded-xl text-xs outline-none focus:border-amber-400">
+                    </div>
+                    <button onclick="switchWorkspaceMode('cabinet')" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-2 shrink-0 shadow-lg shadow-amber-500/20">
+                        <i class="fa-solid fa-box-open"></i> <span>Apri Armadio</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtro Rapido Dotazione Armadio -->
+            <div id="lab-quick-inventory-bar" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none"></div>
+
+            <!-- Griglia 8 Banchi di Laboratorio -->
+            <div id="lab-workbenches-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5"></div>
+        </section>
+
+        <!-- ================= SEZIONE C: PANNELLO OPERATORE ARMADIO COMPONENTI ================= -->
+        <section id="workspace-cabinet" class="hidden flex-grow flex flex-col w-full px-4 lg:px-10 xl:px-16 pt-4 pb-28 max-w-[1850px] mx-auto space-y-5 fade-in">
+            
+            <!-- Intestazione Armadio & Alert Mancanze -->
+            <div id="cabinet-alert-banner" class="p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Colonna Sinistra (7 col): Pannello Touch Prelievo dall'Armadio -->
+                <div class="lg:col-span-7 glass-panel p-5 sm:p-6 rounded-3xl border border-slate-800 space-y-5">
+                    <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-black text-white">Terminale Armadio di Laboratorio</h3>
+                                <p class="text-xs text-slate-400">Seleziona il banco di destinazione e tocca il componente da prelevare</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[10px] font-mono font-bold text-cyan-400">
+                            <i class="fa-solid fa-wifi mr-1"></i> Nodo SC32-LAB-EL Attivo
+                        </span>
+                    </div>
+
+                    <!-- Selettore Operatore e Banco Destinazione -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/90 p-4 rounded-2xl border border-slate-800">
+                        <div>
+                            <label class="text-[10px] font-mono uppercase font-bold text-slate-400 block mb-1">1. Chi preleva (Badge NFC / Utente)</label>
+                            <select id="cabinet-student-select" onchange="syncCabinetBenchFromStudent()" class="w-full bg-slate-950 border border-slate-700 text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none focus:border-blue-500"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-mono uppercase font-bold text-slate-400 block mb-1">2. Banco di Lavoro Destinazione</label>
+                            <select id="cabinet-bench-select" class="w-full bg-slate-950 border border-slate-700 text-amber-300 px-3 py-2.5 rounded-xl text-xs font-mono font-bold outline-none focus:border-amber-500">
+                                <option value="lab_banco_01">Banco Lab #01</option>
+                                <option value="lab_banco_02">Banco Lab #02</option>
+                                <option value="lab_banco_03">Banco Lab #03</option>
+                                <option value="lab_banco_04">Banco Lab #04</option>
+                                <option value="lab_banco_05">Banco Lab #05</option>
+                                <option value="lab_banco_06">Banco Lab #06</option>
+                                <option value="lab_banco_07">Banco Lab #07</option>
+                                <option value="lab_banco_08">Banco Lab #08</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Griglia Scaffali e Componenti Armadio -->
+                    <div id="cabinet-inventory-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
+                </div>
+
+                <!-- Colonna Destra (5 col): Componenti Fuori dall'Armadio (Da Riconsegnare) + Storico Orari -->
+                <div class="lg:col-span-5 space-y-5">
+                    <div class="glass-panel p-5 sm:p-6 rounded-3xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-black text-white">Componenti Attualmente ai Banchi</h3>
+                                <p class="text-xs text-slate-400">Premi "Restituisci" quando il componente viene rimesso nell'armadio</p>
+                            </div>
+                            <span id="cabinet-out-counter" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-black">0 fuori</span>
+                        </div>
+                        <div id="cabinet-active-loans-list" class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar"></div>
+                    </div>
+
+                    <div class="glass-panel p-5 sm:p-6 rounded-3xl border border-slate-800">
+                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+                            <h3 class="text-xs font-mono uppercase font-bold text-slate-400">Registro Cronologico Movimenti Armadio (Oggi)</h3>
+                            <i class="fa-solid fa-clock-rotate-left text-slate-500 text-xs"></i>
+                        </div>
+                        <div id="cabinet-history-list" class="space-y-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar text-xs font-mono"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
         <!-- Dock Barra Inferiore -->
         <div class="fixed bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-auto max-w-5xl glass-panel px-3 sm:px-6 py-1.5 sm:py-2 rounded-2xl flex items-center justify-between sm:justify-center gap-3 sm:gap-6 shadow-2xl z-50 border border-slate-700/60 backdrop-blur-2xl">
             <div class="flex items-center gap-2 sm:gap-3.5 shrink-0">
@@ -416,6 +514,10 @@
                     <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Coda</span>
                     <span id="queue-badge-count" class="hidden absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-cyan-500 text-[9px] font-black text-black flex items-center justify-center font-mono shadow-md animate-pulse">0</span>
                 </button>
+                <button onclick="switchWorkspaceMode('lab')" class="dock-btn relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-blue-400 hover:text-blue-300 group" title="Mappa Laboratorio & Armadio">
+                    <i class="fa-solid fa-screwdriver-wrench text-sm sm:text-base"></i>
+                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Lab</span>
+                </button>
             </div>
             
             <div class="h-6 w-[1px] bg-slate-700 shrink-0"></div>
@@ -432,13 +534,11 @@
         </div>
     </div>
 
-    <!-- ================= MODALI ESISTENTI & NUOVI ================= -->
+    <!-- ================= MODALI ================= -->
     
     <!-- MODALE PANNELLO ADMIN: FLOTTA SMARTCHECK32 & ASSISTENTE AI -->
     <div id="modal-admin-console" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-lg p-3 sm:p-6">
         <div class="glass-panel w-full max-w-6xl max-h-[92vh] p-5 sm:p-8 rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
-            
-            <!-- Header Console -->
             <div class="flex flex-wrap justify-between items-center gap-3 pb-4 border-b border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="w-11 h-11 rounded-2xl bg-blue-600/25 border border-blue-500/40 flex items-center justify-center text-blue-400 text-xl font-black shrink-0">
@@ -449,7 +549,7 @@
                             <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Console Hardware & Diagnostica AI</h2>
                             <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold uppercase">Admin Root</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Telemetria nodi ESP32 d'istituto e assistente virtuale dedicato</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Telemetria nodi ESP32 d'istituto, controllo armadi laboratorio e assistente diagnostico</p>
                     </div>
                 </div>
                 
@@ -462,9 +562,7 @@
                 </div>
             </div>
 
-            <!-- SCHEDA 1: MONITORAGGIO FLOTTA HARDWARE ESP32 -->
             <div id="content-admin-fleet" class="flex-grow flex flex-col overflow-hidden pt-4">
-                <!-- Barra Metriche Rapide -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                     <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
                         <div class="text-[10px] font-mono uppercase font-bold text-slate-400">Nodi Rilevati</div>
@@ -484,45 +582,39 @@
                     </div>
                 </div>
 
-                <!-- Griglia Dispositivi ESP32 -->
                 <div class="flex-grow overflow-y-auto custom-scrollbar pr-1">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" id="devices-grid-container">
-                        <!-- Generato dinamicamente via JS -->
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" id="devices-grid-container"></div>
                 </div>
             </div>
 
-            <!-- SCHEDA 2: ASSISTENTE VIRTUALE AI (SMARTCHECK COPILOT) -->
             <div id="content-admin-ai" class="hidden flex-grow flex flex-col overflow-hidden pt-4">
                 <div class="p-3 bg-gradient-to-r from-purple-950/30 to-blue-950/20 border border-purple-500/20 rounded-2xl mb-3 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-xs font-mono text-purple-300">
                         <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-                        Modello Diagnostico Locale SmartCheck AI • Analisi Log & Hardware
+                        Motore Diagnostico Locale SmartCheck AI • Analisi Nodi, Bagni & Armadio Lab
                     </div>
-                    <span class="text-[10px] font-mono text-slate-400">Ollama / vLLM Endpoint Ready</span>
+                    <span class="text-[10px] font-mono text-emerald-400">Server SQLite Connesso</span>
                 </div>
 
-                <!-- Cronologia Chat -->
                 <div class="flex-grow bg-[#090e1a]/80 border border-slate-800 rounded-2xl p-4 overflow-y-auto custom-scrollbar space-y-3" id="ai-chat-history">
                     <div class="flex items-start gap-2.5">
                         <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div>
                         <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">
-                            Ciao Amministratore. Sono l'assistente virtuale di <strong>SmartCheck OS</strong>. Posso analizzare la flotta dei nodi ESP32, verificare disconnessioni, allarmi di manomissione a parete o controllare anomalie nelle uscite scolastiche. Come posso aiutarti?
+                            Ciao Amministratore. Sono l'assistente diagnostico di <strong>SmartCheck OS</strong> collegato al database locale. Posso controllare lo stato dei moduli ESP32, verificare gli allarmi Tamper, la coda del bagno e controllare <strong>quali componenti mancano nell'armadio di laboratorio</strong>.
                         </div>
                     </div>
                 </div>
 
-                <!-- Prompt Rapidi -->
                 <div class="flex items-center gap-2 py-2 overflow-x-auto scrollbar-none text-[11px] font-mono">
-                    <button onclick="sendQuickAiPrompt('Stato generale dei nodi ESP32 e anomalie')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔍 Stato Nodi</button>
+                    <button onclick="sendQuickAiPrompt('Quali componenti mancano nell\'armadio di laboratorio?')" class="px-3 py-1 bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 rounded-lg border border-amber-700/50 whitespace-nowrap transition">📦 Controllo Armadio Lab</button>
+                    <button onclick="sendQuickAiPrompt('Stato generale dei nodi ESP32 e anomalie')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔍 Stato Nodi ESP32</button>
                     <button onclick="sendQuickAiPrompt('Quali dispositivi hanno batteria bassa o segnale scarso?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Batterie</button>
-                    <button onclick="sendQuickAiPrompt('Ci sono allarmi di manomissione o nodi disconnessi?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
+                    <button onclick="sendQuickAiPrompt('Ci sono allarmi di manomissione Tamper?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
                     <button onclick="sendQuickAiPrompt('Mostrami la situazione attuale delle uscite e della coda bagno')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚻 Coda Bagno</button>
                 </div>
 
-                <!-- Input Chat -->
                 <div class="flex items-center gap-2 pt-1">
-                    <input type="text" id="ai-chat-input" placeholder="Chiedi un controllo o diagnostica di sistema..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
+                    <input type="text" id="ai-chat-input" placeholder="Chiedi un controllo su nodi ESP32, batterie, armadio laboratorio o coda bagno..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
                     <button onclick="sendAiMessage()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-2 shadow-lg shadow-purple-600/25">
                         <span>Invia</span> <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
@@ -541,7 +633,7 @@
                     </div>
                     <div>
                         <h2 class="text-lg sm:text-xl font-black text-white tracking-tight">Gestione Coda Bagno</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Prenota il turno dal tuo posto o gestisci le uscite</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Sincronizzazione istantanea locale (Socket.io)</p>
                     </div>
                 </div>
                 <button onclick="closeBathroomQueueModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">✕</button>
@@ -627,7 +719,13 @@
                 </div>
                 <button onclick="toggleNoticeModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
             </div>
-            <div class="overflow-y-auto flex-grow space-y-3 custom-scrollbar" id="modal-notices-list"></div>
+            <div class="overflow-y-auto flex-grow space-y-3 custom-scrollbar" id="modal-notices-list">
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <span class="text-[10px] font-mono font-bold text-blue-400 uppercase">Circolare Interna #42</span>
+                    <h4 class="text-sm font-bold text-white mt-1">Regolamento Prelievo Strumentazione di Laboratorio</h4>
+                    <p class="text-xs text-slate-300 mt-1">Ogni gruppo di lavoro è tenuto a registrare sul Pannello Armadio il prelievo di multimetri, sonde e kit microcontrollori, riconsegnandoli prima del suono della campanella.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -827,11 +925,9 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT ENGINE ================= -->
+    <!-- ================= JAVASCRIPT ENGINE (100% LOCAL & SECURE) ================= -->
     <script>
-        const SUPABASE_URL = 'https://axlfuzksfpfwdvjawlmf.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4bGZ1emtzZnBmd2R2amF3bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MzYyMzYsImV4cCI6MjA4NDUxMjIzNn0.Xga9UIWfS8rYxGYZs-Cz446GZkVhPCxeUvV8UUTlXEg';
-        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const socket = io();
 
         const ALL_SUBJECTS = ["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
         
@@ -847,34 +943,8 @@
             "CHIMICA": { icon: "fa-flask-vial", badge: "Biotecnologie & Materiali", color: "text-emerald-400", bgBadge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30", hoverBorder: "hover:border-emerald-500 hover:shadow-emerald-500/25 hover:from-emerald-950/60 hover:to-slate-900/90" }
         };
 
-        const OLD_SEAT_ORDER = [
-            "Antonio Navarroli",      // banco_01
-            "Emiliano Calò",          // banco_02
-            "Filippo Agnitti",        // banco_03
-            "Ivan Garofalo",          // banco_04
-            "Mattia Galli",           // banco_05
-            "Lorenzo Esposito",       // banco_06
-            "Kristian Methasa",       // banco_07
-            "Stefano Spaczil",        // banco_08
-            "Federico Pasqualone",    // banco_09 (Frontale centrale)
-            "Leonardo Pacchione",     // banco_10
-            "Oleksandr Tsikhanskyi",  // banco_11
-            "Alessio Tofano",         // banco_12
-            "Pierpaolo Carosa",       // banco_13
-            "Stefano Camassa",        // banco_14
-            "Lorenzo Pisone",         // banco_15
-            "Abdula Chackari",        // banco_16
-            "Ernest Cupi",            // banco_17
-            "Matteo Di Michele",      // banco_18
-            "Luca Iarossi",           // banco_19
-            "Biagio Recchione",       // banco_20
-            "Luigi Mirandola",        // banco_21
-            "Mattia Raulli",          // banco_22
-            "Giuseppe Palombizio"     // banco_23
-        ];
-
         let currentUser = null; 
-        let tempUser = null; 
+        let verifiedUsername = null;
         let currentClass = null; 
         let currentClassId = null; 
         let selectedStudentId = null; 
@@ -883,6 +953,7 @@
         let pendingAgendaType = null;
         let clockTimer = null;
         let currentMobileAisle = 'left';
+        let currentWorkspaceMode = 'aula';
         
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
@@ -896,21 +967,30 @@
         let localGradesDB = {}; 
         let localNotesDB = {};
         let localUsersDB = {};
-
-        // SISTEMA CODA BAGNO IN TEMPO REALE
         let bathroomQueue = [];
+        let schoolDevices = [];
 
-        // SISTEMA FLOTTA DISPOSITIVI SMARTCHECK32
-        let schoolDevices = [
-            { id: '1', device_code: 'SC32-5AEE', device_name: 'SmartCheck32 Aula 5AEE', class_name: '5AEE', location: 'Piano 1 - Aula 104', ip_address: '192.168.30.15', mac_address: '24:6F:28:B4:A1:0C', status: 'online', battery_voltage: 4.15, battery_level: 98, rssi: -58, is_tampered: false, last_ping: '10s fa' },
-            { id: '2', device_code: 'SC32-4AEE', device_name: 'SmartCheck32 Aula 4AEE', class_name: '4AEE', location: 'Piano 1 - Aula 102', ip_address: '192.168.30.16', mac_address: '24:6F:28:C2:59:1E', status: 'online', battery_voltage: 3.82, battery_level: 64, rssi: -72, is_tampered: false, last_ping: '14s fa' },
-            { id: '3', device_code: 'SC32-5AMM', device_name: 'SmartCheck32 Aula 5AMM', class_name: '5AMM', location: 'Piano Terra - Aula 008', ip_address: '192.168.30.22', mac_address: '24:6F:28:D1:88:4A', status: 'warning', battery_voltage: 3.48, battery_level: 18, rssi: -81, is_tampered: false, last_ping: '22s fa' },
-            { id: '4', device_code: 'SC32-LAB-EL', device_name: 'SmartCheck32 Lab. Elettronica', class_name: 'Laboratorio', location: 'Ala Lab - Lab 3', ip_address: '192.168.30.50', mac_address: '24:6F:28:A0:12:F3', status: 'online', battery_voltage: 4.18, battery_level: 100, rssi: -52, is_tampered: false, last_ping: '5s fa' },
-            { id: '5', device_code: 'SC32-PALESTRA', device_name: 'SmartCheck32 Motoria Mobile', class_name: 'Palestra', location: 'Palestra Principale', ip_address: '192.168.30.80', mac_address: '24:6F:28:EE:94:3B', status: 'offline', battery_voltage: 3.20, battery_level: 4, rssi: -88, is_tampered: false, last_ping: '48m fa' }
-        ];
+        // STATO LABORATORIO & ARMADIO COMPONENTI
+        let labState = {
+            workbenches: [],
+            students: [],
+            inventory: [],
+            activeLoans: [],
+            historyLoans: []
+        };
 
         function esc(val) { return String(val ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
         
+        async function apiFetch(url, options = {}) {
+            const res = await fetch(url, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || 'Errore comunicazione server');
+            return data;
+        }
+
         function toast(title, message = '', type = 'info', timeout = 3000) {
             const wrap = document.getElementById('sc-toast-container');
             if (!wrap) return;
@@ -1004,2025 +1084,58 @@
             document.getElementById('history-warning')?.classList.toggle('hidden', isToday);
             document.getElementById('bathroom-bar')?.classList.toggle('hidden', !isToday);
 
-            setLoading(true, "Aggiornamento registri...");
-            try {
-                await loadDayData(selectedDate);
-                renderGrid(localSchoolDB[currentClass]);
-                renderSignaturesList();
-                renderCalendarStrip();
-                if (currentUser?.role !== 'studente') updateTeacherForm();
-            } finally {
-                setLoading(false);
-            }
+            await syncClassBundle(false);
         }
 
-        function buildLocalClassState(cls, students) {
+        function buildLocalClassState(students) {
             const data = {};
             for (let i=1; i<=23; i++) {
                 const id = `banco_${String(i).padStart(2,'0')}`;
                 data[id] = { db_id: null, name: 'Libero', status: 'assente', time: '--:--', history: [] };
             }
-            
-            if (cls === '5AEE') {
-                students.forEach(stud => {
-                    let seatIndex = OLD_SEAT_ORDER.indexOf(stud.full_name);
-                    if (seatIndex !== -1) {
-                        let id = `banco_${String(seatIndex + 1).padStart(2, '0')}`;
-                        if (data[id]) {
-                            data[id].db_id = stud.id;
-                            data[id].name = stud.full_name;
-                        }
-                    } else {
-                        let emptySeat = Object.keys(data).find(k => data[k].name === 'Libero');
-                        if (emptySeat) {
-                            data[emptySeat].db_id = stud.id;
-                            data[emptySeat].name = stud.full_name;
-                        }
-                    }
-                });
-            } else {
-                students.forEach((stud, idx) => {
-                    if (idx < 23) {
-                        let id = `banco_${String(idx + 1).padStart(2, '0')}`;
-                        data[id].db_id = stud.id;
-                        data[id].name = stud.full_name;
-                    }
-                });
-            }
+            students.forEach((stud, idx) => {
+                const targetDesk = stud.desk_id && data[stud.desk_id] ? stud.desk_id : `banco_${String(idx + 1).padStart(2, '0')}`;
+                if (data[targetDesk]) {
+                    data[targetDesk].db_id = stud.id;
+                    data[targetDesk].name = stud.full_name;
+                }
+            });
             return data;
         }
 
-        async function loadClassroom(cls) {
-            window.scrollTo(0, 0);
-            currentClass = cls;
-            localStorage.setItem('SC_ACTIVE_CLASS', cls);
-
-            document.getElementById('view-hub')?.classList.add('hidden');
-            document.getElementById('view-classroom')?.classList.remove('hidden');
-            document.getElementById('class-header-name').innerText = cls;
-
-            setLoading(true, `Inizializzazione ${cls}...`);
+        // ================= SINCRONIZZAZIONE BUNDLE LOCALE =================
+        async function syncClassBundle(showSpinner = false) {
+            if (!currentClass) return;
+            if (showSpinner) setLoading(true, `Sincronizzazione ${currentClass}...`);
             try {
-                const { data: classRows } = await _supabase.from('classes').select('id').eq('name', cls).limit(1);
-                currentClassId = classRows && classRows[0] ? classRows[0].id : null;
+                const bundle = await apiFetch(`/api/class-bundle/${encodeURIComponent(currentClass)}?date=${encodeURIComponent(selectedDate)}`);
+                currentClassId = bundle.classId;
+                classStudents = bundle.students || [];
+                localSchoolDB[currentClass] = buildLocalClassState(classStudents);
 
-                let students = [];
-                if (currentClassId) {
-                    const { data: st } = await _supabase.from('registry')
-                        .select('id, username, full_name, role, class_id')
-                        .eq('class_id', currentClassId)
-                        .eq('role', 'studente');
-                    students = st || [];
-                }
-
-                classStudents = students;
-                localSchoolDB[cls] = buildLocalClassState(cls, classStudents);
-
-                selectedDate = getTodayStr();
-                const picker = document.getElementById('date-picker');
-                if (picker) picker.value = selectedDate;
-
-                await loadScopedSchoolData();
-                await loadBathroomQueueData();
-                await changeDate(selectedDate);
-                renderGrid(localSchoolDB[cls]);
-
-                initRealtime();
-
-                const isStud = currentUser?.role === 'studente';
-                document.getElementById('back-btn')?.classList.toggle('hidden', isStud);
-                document.getElementById('sign-btn')?.classList.toggle('hidden', isStud);
-                document.getElementById('dock-right')?.classList.remove('hidden');
-
-                const badge = document.getElementById('role-badge');
-                if (badge) {
-                    badge.innerText = isStud ? 'STUDENTE' : (currentUser?.role || 'DOCENTE').toUpperCase();
-                    badge.className = isStud 
-                        ? 'px-2 py-0.5 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-700/50'
-                        : 'px-2 py-0.5 rounded-lg bg-blue-950/60 text-blue-300 border border-blue-700/50';
-                }
-                updateSignatureDisplay();
-            } catch(err) {
-                console.error(err);
-                toast('Errore di Caricamento', 'Impossibile completare la sincronizzazione.', 'error');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        async function loadDayData(dateStr) {
-            if (!currentClass || !localSchoolDB[currentClass]) return;
-            Object.values(localSchoolDB[currentClass]).forEach(s => { 
-                if (!s || s.name === 'Libero') return; 
-                s.status = 'assente'; s.time = '--:--'; s.history = []; 
-            });
-
-            try {
-                if (currentClassId) {
-                    const { data: att } = await _supabase.from('attendance').select('*').eq('date', dateStr).eq('class_id', currentClassId);
-                    if (att) {
-                        for (const row of att) { 
-                            const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id); 
-                            if (seat) { seat.status = row.status || 'assente'; seat.time = row.time || '--:--'; } 
-                        }
-                    }
-                }
-
-                const { data: bath } = await _supabase.from('bathroom_history').select('*').eq('date', dateStr);
-                if (bath) {
-                    for (const row of bath) { 
-                        const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id); 
-                        if (seat) seat.history.push({ out: row.out_time, in: row.in_time }); 
-                    }
-                }
-
-                const { data: sig } = await _supabase.from('signatures').select('*').eq('date', dateStr).eq('class', currentClass); 
-                onlineSignatures = sig || []; 
-            } catch (e) {
-                console.error("Errore recupero storico:", e);
-            }
-        }
-
-        async function loadScopedSchoolData() {
-            try {
-                const { data: allUsers } = await _supabase.from('registry').select('id, full_name, role');
                 localUsersDB = {};
-                if (allUsers) {
-                    allUsers.forEach(u => { localUsersDB[u.id] = u.full_name; });
-                }
-                localUsersDB['00000000-0000-0000-0000-000000000001'] = 'Amministratore';
-                if (currentUser?.id) localUsersDB[currentUser.id] = currentUser.name;
+                (bundle.allUsers || []).forEach(u => { localUsersDB[u.id] = u.full_name; });
 
-                const { data: g } = await _supabase.from('grades').select('*');
-                onlineGrades = g || [];
+                (bundle.attendance || []).forEach(row => {
+                    const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id);
+                    if (seat) { seat.status = row.status || 'assente'; seat.time = row.time || '--:--'; }
+                });
+
+                (bundle.bathroomHistory || []).forEach(row => {
+                    const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id);
+                    if (seat) seat.history.push({ out: row.out_time, in: row.in_time });
+                });
+
+                bathroomQueue = bundle.bathroomQueue || [];
+                onlineSignatures = bundle.signatures || [];
+                onlineAgenda = bundle.agenda || [];
+                onlineGrades = bundle.grades || [];
+                onlineNotes = bundle.notes || [];
+
                 localGradesDB = {};
-                onlineGrades.forEach(grade => {
-                    if (!localGradesDB[grade.student_id]) localGradesDB[grade.student_id] = [];
-                    localGradesDB[grade.student_id].push(grade);
+                onlineGrades.forEach(g => {
+                    if (!localGradesDB[g.student_id]) localGradesDB[g.student_id] = [];
+                    localGradesDB[g.student_id].push(g);
                 });
 
-                const { data: n } = await _supabase.from('notes').select('*');
-                onlineNotes = n || [];
-                localNotesDB = {};
-                onlineNotes.forEach(note => {
-                    if (!localNotesDB[note.student_id]) localNotesDB[note.student_id] = [];
-                    localNotesDB[note.student_id].push(note);
-                });
-
-                const { data: ag } = await _supabase.from('agenda').select('*').eq('class', currentClass); 
-                onlineAgenda = ag || []; 
-            } catch (e) {
-                console.warn(e);
-            }
-        }
-
-        // ================= GESTIONE CODA BAGNO =================
-        async function loadBathroomQueueData() {
-            try {
-                const { data, error } = await _supabase
-                    .from('bathroom_queue')
-                    .select('*')
-                    .eq('class', currentClass)
-                    .order('created_at', { ascending: true });
-                if (!error && data) {
-                    bathroomQueue = data;
-                }
-            } catch(e) {}
-            updateQueueBadges();
-            if (!document.getElementById('modal-bathroom-queue').classList.contains('hidden')) {
-                renderBathroomQueueUI();
-            }
-        }
-
-        function openBathroomQueueModal() {
-            document.getElementById('modal-bathroom-queue')?.classList.remove('hidden');
-            const isTeacher = (currentUser?.role !== 'studente');
-            document.getElementById('queue-teacher-controls')?.classList.toggle('hidden', !isTeacher);
-            renderBathroomQueueUI();
-        }
-
-        function closeBathroomQueueModal() {
-            document.getElementById('modal-bathroom-queue')?.classList.add('hidden');
-        }
-
-        function updateQueueBadges() {
-            const badge = document.getElementById('queue-badge-count');
-            if (badge) {
-                const count = bathroomQueue.length;
-                badge.innerText = count;
-                badge.classList.toggle('hidden', count === 0);
-            }
-        }
-
-        function renderBathroomQueueUI() {
-            const occupantCard = document.getElementById('queue-occupant-card');
-            const actionBox = document.getElementById('queue-action-box');
-            const listContainer = document.getElementById('queue-list-container');
-            const totalWaiting = document.getElementById('queue-total-waiting');
-
-            if (!occupantCard || !actionBox || !listContainer) return;
-
-            let occupant = null;
-            let occupantDeskId = null;
-            if (localSchoolDB[currentClass]) {
-                for (let [deskId, s] of Object.entries(localSchoolDB[currentClass])) {
-                    if (s && s.status === 'bagno') {
-                        occupant = s;
-                        occupantDeskId = deskId;
-                        break;
-                    }
-                }
-            }
-
-            const isTeacher = (currentUser?.role !== 'studente');
-
-            if (occupant) {
-                const lastHistory = occupant.history && occupant.history.length > 0 ? occupant.history[occupant.history.length - 1] : null;
-                const outTime = lastHistory ? lastHistory.out : occupant.time;
-                const returnBtn = isTeacher 
-                    ? `<button onclick="forceBathroomReturn('${occupantDeskId}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition">Segna Rientro</button>`
-                    : '';
-
-                occupantCard.className = "mb-4 p-4 rounded-2xl border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-between shadow-lg shadow-cyan-950/40 animate-pulse";
-                occupantCard.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
-                        <div>
-                            <div class="text-[10px] font-mono uppercase font-bold text-cyan-300">Bagno Occupato</div>
-                            <div class="text-sm sm:text-base font-black text-white font-sans">${esc(occupant.name)} <span class="text-xs font-mono text-cyan-400 font-normal">#${occupantDeskId.split('_')[1]}</span></div>
-                            <div class="text-[10px] font-mono text-slate-400">Uscita alle ore ${esc(outTime)}</div>
-                        </div>
-                    </div>
-                    ${returnBtn}
-                `;
-            } else {
-                occupantCard.className = "mb-4 p-4 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 flex items-center justify-between";
-                occupantCard.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-                        <div>
-                            <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Bagno Libero</div>
-                            <div class="text-xs sm:text-sm font-bold text-slate-300">Nessun alunno attualmente fuori aula per il bagno</div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            actionBox.innerHTML = '';
-            if (currentUser?.role === 'studente') {
-                const myStudentId = currentUser.id;
-                let myDeskEntry = null;
-                if (localSchoolDB[currentClass]) {
-                    myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === myStudentId);
-                }
-
-                const myDeskId = myDeskEntry ? myDeskEntry[0] : null;
-                const myStudentData = myDeskEntry ? myDeskEntry[1] : null;
-                const isCurrentlyInBathroom = (myStudentData && myStudentData.status === 'bagno');
-                const queueIndex = bathroomQueue.findIndex(q => q.student_id === myStudentId);
-                const isInQueue = (queueIndex !== -1);
-                const isNextInLine = (queueIndex === 0);
-
-                if (isCurrentlyInBathroom) {
-                    actionBox.innerHTML = `
-                        <div class="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-center">
-                            <span class="text-xs font-mono font-bold text-cyan-300">Sei attualmente fuori al bagno.</span>
-                        </div>
-                    `;
-                } else if (isInQueue) {
-                    const canGoNow = (isNextInLine && !occupant);
-                    if (canGoNow) {
-                        actionBox.innerHTML = `
-                            <div class="p-3.5 bg-emerald-500/15 border border-emerald-500/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2 shadow-lg">
-                                <div>
-                                    <div class="text-xs font-black text-emerald-400">È IL TUO TURNO!</div>
-                                    <div class="text-[11px] text-slate-300">Il bagno è libero. Conferma per registrare l'uscita.</div>
-                                </div>
-                                <button onclick="startBathroomTrip('${myStudentId}', '${myDeskId}')" class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition shadow-md">
-                                    Esci al Bagno
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        actionBox.innerHTML = `
-                            <div class="p-3.5 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between gap-3">
-                                <div>
-                                    <div class="text-[10px] font-mono uppercase font-bold text-cyan-400">La tua posizione</div>
-                                    <div class="text-sm font-black text-white font-sans">${queueIndex + 1}° in fila d'attesa</div>
-                                    <div class="text-[10px] font-mono text-slate-400">Riceverai l'abilitazione appena il bagno si libera</div>
-                                </div>
-                                <button onclick="leaveBathroomQueue('${myStudentId}')" class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-300 font-bold text-xs rounded-xl transition">
-                                    Annulla
-                                </button>
-                            </div>
-                        `;
-                    }
-                } else {
-                    actionBox.innerHTML = `
-                        <button onclick="joinBathroomQueue()" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-cyan-600/25 transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-hand"></i> Prenotati per il Bagno dal tuo Banco
-                        </button>
-                    `;
-                }
-            }
-
-            totalWaiting.innerText = `${bathroomQueue.length} in attesa`;
-            listContainer.innerHTML = '';
-
-            if (bathroomQueue.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="p-6 text-center text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-2xl">
-                        Nessuno studente in coda al momento.
-                    </div>
-                `;
-                return;
-            }
-
-            bathroomQueue.forEach((item, index) => {
-                const isFirst = (index === 0);
-                const isReady = (isFirst && !occupant);
-                const badgeColor = isReady 
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 animate-pulse'
-                    : 'bg-slate-800 text-slate-400 border-slate-700';
-
-                const removeBtn = isTeacher 
-                    ? `<button onclick="removeQueueItem('${item.id || item.student_id}')" class="text-red-400 hover:text-red-300 p-1.5 transition ml-2" title="Rimuovi dalla coda"><i class="fa-solid fa-trash text-xs"></i></button>`
-                    : '';
-
-                const callBtn = (isTeacher && isReady)
-                    ? `<button onclick="startBathroomTrip('${item.student_id}', '${item.desk_id}')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px] rounded-lg uppercase tracking-wider transition ml-1">Fai uscire</button>`
-                    : '';
-
-                listContainer.innerHTML += `
-                    <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-7 h-7 rounded-lg ${isFirst ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400'} font-black text-xs flex items-center justify-center font-mono shrink-0">
-                                ${index + 1}°
-                            </div>
-                            <div>
-                                <div class="font-extrabold text-white text-xs sm:text-sm leading-tight">${esc(item.student_name)}</div>
-                                <div class="text-[9px] font-mono text-slate-400">#${esc(item.desk_id ? item.desk_id.replace('banco_','') : '--')} • Prenotato alle ${esc(item.booked_at || '--:--')}</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded border ${badgeColor}">
-                                ${isReady ? 'Turno Pronto' : 'In Attesa'}
-                            </span>
-                            ${callBtn}
-                            ${removeBtn}
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        async function joinBathroomQueue() {
-            if (currentUser?.role !== 'studente') return;
-            
-            let myDeskEntry = null;
-            if (localSchoolDB[currentClass]) {
-                myDeskEntry = Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === currentUser.id);
-            }
-
-            if (!myDeskEntry) {
-                toast('Attenzione', 'Il tuo account non risulta posizionato in questa classe.', 'error');
-                return;
-            }
-
-            const deskId = myDeskEntry[0];
-            const myData = myDeskEntry[1];
-
-            if (myData.status === 'assente') {
-                toast('Non puoi prenotarti', 'Risulti assente sul registro.', 'error');
-                return;
-            }
-
-            if (myData.status === 'bagno') {
-                toast('Già fuori', 'Risulti già al bagno.', 'info');
-                return;
-            }
-
-            const nowTime = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-            const newQueueItem = {
-                id: 'queue_' + Date.now(),
-                student_id: currentUser.id,
-                student_name: currentUser.name,
-                desk_id: deskId,
-                class: currentClass,
-                class_id: currentClassId,
-                booked_at: nowTime,
-                created_at: new Date().toISOString()
-            };
-
-            bathroomQueue.push(newQueueItem);
-            updateQueueBadges();
-            renderBathroomQueueUI();
-            toast('Prenotazione Registrata', `Sei il #${bathroomQueue.length} in coda per il bagno`, 'success');
-
-            try {
-                await _supabase.from('bathroom_queue').insert([newQueueItem]);
-            } catch(e) {}
-
-            broadcastQueueUpdate();
-        }
-
-        async function leaveBathroomQueue(studentId) {
-            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId);
-            updateQueueBadges();
-            renderBathroomQueueUI();
-            toast('Prenotazione Annullata', 'Hai lasciato la fila del bagno', 'info');
-
-            try {
-                await _supabase.from('bathroom_queue').delete().eq('student_id', studentId).eq('class', currentClass);
-            } catch(e) {}
-
-            broadcastQueueUpdate();
-        }
-
-        async function removeQueueItem(identifier) {
-            bathroomQueue = bathroomQueue.filter(q => q.id !== identifier && q.student_id !== identifier);
-            updateQueueBadges();
-            renderBathroomQueueUI();
-
-            try {
-                await _supabase.from('bathroom_queue').delete().match({ student_id: identifier, class: currentClass });
-            } catch(e) {}
-
-            broadcastQueueUpdate();
-        }
-
-        async function clearBathroomQueue() {
-            if (!confirm("Svuotare l'intera coda del bagno per questa classe?")) return;
-            bathroomQueue = [];
-            updateQueueBadges();
-            renderBathroomQueueUI();
-
-            try {
-                await _supabase.from('bathroom_queue').delete().eq('class', currentClass);
-            } catch(e) {}
-
-            broadcastQueueUpdate();
-            toast('Coda Svuotata', 'Tutte le prenotazioni sono state rimosse.', 'info');
-        }
-
-        async function startBathroomTrip(studentId, deskId) {
-            bathroomQueue = bathroomQueue.filter(q => q.student_id !== studentId);
-            updateQueueBadges();
-
-            try {
-                await _supabase.from('bathroom_queue').delete().eq('student_id', studentId).eq('class', currentClass);
-            } catch(e) {}
-
-            selectedStudentId = deskId;
-            pendingStatus = 'bagno';
-            await confirmStatusChange();
-
-            renderBathroomQueueUI();
-            broadcastQueueUpdate();
-        }
-
-        async function forceBathroomReturn(occupantDeskId) {
-            selectedStudentId = occupantDeskId;
-            pendingStatus = 'presente';
-            await confirmStatusChange();
-            renderBathroomQueueUI();
-            broadcastQueueUpdate();
-            toast('Rientro Confermato', 'Il bagno è ora libero. Turno abilitato per il primo in coda.', 'success');
-        }
-
-        function broadcastQueueUpdate() {
-            try {
-                _supabase.channel('smartcheck_channel').send({
-                    type: 'broadcast',
-                    event: 'QUEUE_SYNC',
-                    payload: { class: currentClass, queue: bathroomQueue }
-                });
-            } catch(e) {}
-        }
-
-        // ================= CONSOLE FLOTTA HARDWARE & ASSISTENTE AI (ADMIN) =================
-        async function loadDevicesData() {
-            try {
-                const { data, error } = await _supabase.from('devices').select('*');
-                if (!error && data && data.length > 0) {
-                    schoolDevices = data;
-                }
-            } catch(e) {}
-            renderFleetDashboard();
-        }
-
-        function openAdminConsoleModal() {
-            if (currentUser?.role !== 'admin') return;
-            document.getElementById('modal-admin-console')?.classList.remove('hidden');
-            loadDevicesData();
-        }
-
-        function closeAdminConsoleModal() {
-            document.getElementById('modal-admin-console')?.classList.add('hidden');
-        }
-
-        function switchAdminTab(tab) {
-            document.getElementById('content-admin-fleet')?.classList.toggle('hidden', tab !== 'fleet');
-            document.getElementById('content-admin-ai')?.classList.toggle('hidden', tab !== 'ai');
-            
-            const btnFleet = document.getElementById('tab-admin-fleet');
-            const btnAi = document.getElementById('tab-admin-ai');
-            
-            if (tab === 'fleet') {
-                btnFleet.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md";
-                btnAi.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
-            } else {
-                btnAi.className = "px-3.5 py-1.5 rounded-lg bg-purple-600 text-white shadow-md";
-                btnFleet.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
-            }
-        }
-
-        function renderFleetDashboard() {
-            const container = document.getElementById('devices-grid-container');
-            if (!container) return;
-
-            let totalNodes = schoolDevices.length;
-            let onlineNodes = schoolDevices.filter(d => d.status === 'online').length;
-            let batteryWarnings = schoolDevices.filter(d => d.battery_level < 20).length;
-            let tamperAlerts = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper').length;
-
-            document.getElementById('metric-total-nodes').innerText = totalNodes;
-            document.getElementById('metric-online-nodes').innerText = onlineNodes;
-            document.getElementById('metric-battery-warning').innerText = batteryWarnings;
-            document.getElementById('metric-tamper-alerts').innerText = tamperAlerts;
-
-            container.innerHTML = '';
-            schoolDevices.forEach(d => {
-                let statusColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
-                let statusText = "Online";
-                let borderPulse = "border-slate-800";
-
-                if (d.is_tampered || d.status === 'tamper') {
-                    statusColor = "bg-red-500/30 text-red-400 border-red-500/60 animate-pulse";
-                    statusText = "MANOMESSO (STRAPPO)";
-                    borderPulse = "border-red-500/80 shadow-red-950/50 shadow-lg";
-                } else if (d.status === 'warning' || d.battery_level < 20) {
-                    statusColor = "bg-amber-500/20 text-amber-400 border-amber-500/40";
-                    statusText = "Batteria Scarica";
-                } else if (d.status === 'offline') {
-                    statusColor = "bg-slate-800 text-slate-500 border-slate-700";
-                    statusText = "Disconnesso";
-                }
-
-                let battColor = d.battery_level < 20 ? 'text-red-400' : (d.battery_level < 50 ? 'text-amber-400' : 'text-emerald-400');
-                let rssiColor = d.rssi < -75 ? 'text-amber-400' : 'text-blue-400';
-
-                container.innerHTML += `
-                    <div class="bg-slate-900/90 border ${borderPulse} p-4 rounded-2xl flex flex-col justify-between transition hover:border-slate-700">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full ${d.status === 'online' ? 'bg-emerald-400 animate-pulse' : (d.status === 'tamper' ? 'bg-red-500 animate-ping' : 'bg-slate-600')}"></span>
-                                    <span class="font-extrabold text-sm text-white">${esc(d.device_name)}</span>
-                                </div>
-                                <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${statusColor}">${statusText}</span>
-                            </div>
-
-                            <div class="text-[11px] text-slate-400 font-mono mb-3 flex items-center justify-between">
-                                <span><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i>${esc(d.location)}</span>
-                                <span class="text-[10px] text-slate-500">${esc(d.device_code)}</span>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-black/30 p-2.5 rounded-xl border border-white/5 mb-3">
-                                <div>
-                                    <span class="text-slate-500 text-[10px] block">BATTERIA 18650</span>
-                                    <span class="font-bold ${battColor}"><i class="fa-solid fa-battery-half mr-1"></i>${d.battery_level}% (${d.battery_voltage}V)</span>
-                                </div>
-                                <div>
-                                    <span class="text-slate-500 text-[10px] block">SEGNALE WI-FI</span>
-                                    <span class="font-bold ${rssiColor}"><i class="fa-solid fa-wifi mr-1"></i>${d.rssi} dBm</span>
-                                </div>
-                                <div class="col-span-2 pt-1 border-t border-white/5 flex justify-between text-slate-400 text-[10px]">
-                                    <span>IP: ${esc(d.ip_address || 'DHCP')}</span>
-                                    <span>Ultimo ping: ${esc(d.last_ping || 'adesso')}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 pt-1 border-t border-slate-800/80">
-                            <button onclick="pingDeviceNode('${d.device_code}')" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] rounded-lg transition">
-                                <i class="fa-solid fa-satellite-dish mr-1 text-blue-400"></i> Ping
-                            </button>
-                            <button onclick="toggleTamperTest('${d.device_code}')" class="py-1.5 px-3 bg-red-950/40 hover:bg-red-900/40 text-red-400 border border-red-800/50 font-bold text-[11px] rounded-lg transition" title="Simula o ripristina allarme strappo parete">
-                                <i class="fa-solid fa-bell"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function pingDeviceNode(code) {
-            toast('Ping Inviato', `Pacchetto MQTT Heartbeat trasmesso al nodo ${code}`, 'info');
-        }
-
-        function toggleTamperTest(code) {
-            const d = schoolDevices.find(dev => dev.device_code === code);
-            if (d) {
-                d.is_tampered = !d.is_tampered;
-                d.status = d.is_tampered ? 'tamper' : 'online';
-                renderFleetDashboard();
-                if (d.is_tampered) {
-                    toast('ALLARME TAMPER', `Rilevato distacco dalla parete per il dispositivo ${d.device_name}!`, 'error', 5000);
-                } else {
-                    toast('Allarme Ripristinato', `Nodo ${d.device_name} riallineato correttamente.`, 'success');
-                }
-            }
-        }
-
-        // ================= CHAT ASSISTENTE AI DIAGNOSTICO =================
-        function sendQuickAiPrompt(text) {
-            const input = document.getElementById('ai-chat-input');
-            if (input) {
-                input.value = text;
-                sendAiMessage();
-            }
-        }
-
-        function sendAiMessage() {
-            const input = document.getElementById('ai-chat-input');
-            const history = document.getElementById('ai-chat-history');
-            if (!input || !history) return;
-
-            const text = input.value.trim();
-            if (!text) return;
-
-            // Messaggio utente
-            history.innerHTML += `
-                <div class="flex items-start justify-end gap-2.5">
-                    <div class="bg-blue-600 p-3 rounded-2xl rounded-tr-none text-xs text-white max-w-xl leading-relaxed shadow">
-                        ${esc(text)}
-                    </div>
-                    <div class="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-black shrink-0">Tu</div>
-                </div>
-            `;
-            input.value = '';
-            history.scrollTop = history.scrollHeight;
-
-            // Risposta dell'AI locale con analisi diagnostica reale
-            setTimeout(() => {
-                const response = generateLocalAiResponse(text);
-                history.innerHTML += `
-                    <div class="flex items-start gap-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div>
-                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">
-                            ${response}
-                        </div>
-                    </div>
-                `;
-                history.scrollTop = history.scrollHeight;
-            }, 450);
-        }
-
-        function generateLocalAiResponse(query) {
-            const q = query.toLowerCase();
-            const total = schoolDevices.length;
-            const online = schoolDevices.filter(d => d.status === 'online').length;
-            const offline = schoolDevices.filter(d => d.status === 'offline');
-            const tamp = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper');
-            const lowBatt = schoolDevices.filter(d => d.battery_level < 20);
-
-            if (q.includes('tamper') || q.includes('strappo') || q.includes('manomiss') || q.includes('rubato')) {
-                if (tamp.length > 0) {
-                    return `🚨 <strong>ATTENZIONE:</strong> Rilevato allarme di manomissione attivo sul nodo <strong>${tamp[0].device_name}</strong> (${tamp[0].location}). Il microswitch posteriore a parete è aperto. Verifica fisicamente la postazione.`;
-                }
-                return `✅ Nessun allarme di manomissione o distacco a parete registrato. Tutti i microswitch tamper risultano integri e chiusi.`;
-            }
-
-            if (q.includes('batteri') || q.includes('scaric') || q.includes('18650')) {
-                if (lowBatt.length > 0) {
-                    return `⚠️ <strong>Report Batterie:</strong> Il dispositivo <strong>${lowBatt[0].device_name}</strong> (${lowBatt[0].location}) ha la carica residua al <strong>${lowBatt[0].battery_level}%</strong> (${lowBatt[0].battery_voltage}V). Si consiglia la sostituzione o l'allacciamento temporaneo alla canalina PoE.`;
-                }
-                return `🔋 Tutte le celle 18650 della flotta presentano una tensione ottimale compresa tra 3.8V e 4.18V (&gt;60% di carica).`;
-            }
-
-            if (q.includes('bagno') || q.includes('uscita') || q.includes('coda')) {
-                let occupante = null;
-                if (localSchoolDB[currentClass]) {
-                    occupante = Object.values(localSchoolDB[currentClass]).find(s => s.status === 'bagno');
-                }
-                return `🚻 <strong>Telemetria Bagni (${currentClass || 'Istituto'}):</strong><br>• Stato Bagno: ${occupante ? `Occupato da <strong>${occupante.name}</strong>` : 'Attualmente Libero'}<br>• Alunni in coda d'attesa: <strong>${bathroomQueue.length}</strong>`;
-            }
-
-            if (q.includes('stato') || q.includes('nodi') || q.includes('offline') || q.includes('dispositivi')) {
-                let offlineText = offline.length > 0 ? `<br>⚠️ Nodi disconnessi: <strong>${offline.map(d=>d.device_name).join(', ')}</strong>.` : '<br>Tutti i nodi sono regolarmente sincronizzati.';
-                return `📊 <strong>Diagnostica Flotta SmartCheck32:</strong><br>• Nodi totali censiti: <strong>${total}</strong><br>• Connessi regolarmente (MQTT LAN): <strong>${online} / ${total}</strong>${offlineText}`;
-            }
-
-            return `Ho analizzato i log di sistema dell'infrastruttura scolastica. Tutti i servizi interni (Database locale PostgreSQL, MQTT Broker e WebSockets) sono operativi sulla subnet LAN. Puoi chiedermi lo stato delle batterie, i nodi offline o verificare gli allarmi di manomissione a parete.`;
-        }
-
-        // Selettore Ala Mobile
-        function switchMobileAisle(aisle) {
-            currentMobileAisle = aisle;
-            ['left', 'center', 'right', 'all'].forEach(k => {
-                const b = document.getElementById(`tab-aisle-${k}`);
-                if (b) {
-                    if (k === aisle) {
-                        b.className = "flex-1 py-2 rounded-xl text-center transition border aisle-pill-active font-black";
-                    } else {
-                        b.className = "flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400 hover:text-white";
-                    }
-                }
-            });
-            renderMobileClassroom(localSchoolDB[currentClass]);
-        }
-
-        // Generatore Scheda Banco Mobile
-        function createMobileDeskCard(id, data) {
-            const d = data[id] || { name: 'Libero', status: 'assente', time: '--:--' };
-            const isLibero = (d.name === 'Libero');
-            const statusClass = String(d.status || 'assente').replace(/_/g,'-');
-            
-            const studentNotes = (d.db_id && localNotesDB[d.db_id]) ? localNotesDB[d.db_id] : [];
-            const hasWarning = studentNotes.some(n => n.type === 'warning');
-            const hasNotes = studentNotes.length > 0;
-            const noteFlag = hasWarning 
-                ? `<span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" title="Richiamo Disciplinare"></span>` 
-                : (hasNotes ? `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping" title="Annotazione"></span>` : '');
-
-            const card = document.createElement('div');
-            card.className = `p-3 rounded-2xl status-${statusClass} ${isLibero ? 'opacity-30 cursor-default' : 'cursor-pointer active:scale-[0.98]'} transition-all shadow-md flex flex-col justify-between min-h-[105px]`;
-
-            card.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <span class="text-[9px] font-mono font-bold opacity-60">#${id.split('_')[1]}</span>
-                    <div class="flex items-center gap-1.5">
-                        ${noteFlag}
-                        <span class="text-[8px] font-mono font-black uppercase tracking-wider py-0.5 px-2 rounded-md bg-black/40">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
-                    </div>
-                </div>
-                <div class="my-1">
-                    <div class="font-extrabold text-sm text-white leading-tight break-words">${esc(d.name)}</div>
-                </div>
-                <div class="flex justify-between items-center text-[9px] font-mono opacity-80 pt-1 border-t border-white/10">
-                    <span>${isLibero ? '--' : 'Ultimo orario:'}</span>
-                    <span class="font-bold">${esc(d.time || '--:--')}</span>
-                </div>
-            `;
-
-            if (!isLibero) {
-                card.onclick = () => openStudentDetail(id);
-            }
-            return card;
-        }
-
-        // Render Aula Mobile
-        function renderMobileClassroom(data) {
-            const container = document.getElementById('mobile-classroom-grid');
-            if (!container || !data) return;
-            container.innerHTML = '';
-
-            const left = []; for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
-            const center = [`banco_09`]; for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
-            const right = []; for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
-
-            const renderSection = (title, deskIds, icon) => {
-                const sec = document.createElement('div');
-                sec.className = "bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800 space-y-3";
-                sec.innerHTML = `
-                    <div class="flex items-center justify-between px-1">
-                        <div class="flex items-center gap-2 text-xs font-mono font-black text-slate-300 uppercase tracking-wider">
-                            <i class="fa-solid ${icon} text-blue-400"></i> ${title}
-                        </div>
-                        <span class="text-[10px] font-mono text-slate-500">${deskIds.length} Banchi</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2.5"></div>
-                `;
-                const g = sec.querySelector('div:last-child');
-                deskIds.forEach(id => g.appendChild(createMobileDeskCard(id, data)));
-                container.appendChild(sec);
-            };
-
-            if (currentMobileAisle === 'left' || currentMobileAisle === 'all') {
-                renderSection("Ala Sinistra", left, "fa-arrow-left");
-            }
-            if (currentMobileAisle === 'center' || currentMobileAisle === 'all') {
-                renderSection("Fila Centrale", center, "fa-arrows-to-dot");
-            }
-            if (currentMobileAisle === 'right' || currentMobileAisle === 'all') {
-                renderSection("Ala Destra", right, "fa-arrow-right");
-            }
-        }
-
-        // Generatore Scheda Banco Desktop PC
-        function createDeskCard(id, data, isSingle=false) {
-            const d = data[id] || {name:'Libero',status:'assente',time:'--:--'};
-            const wrap = document.createElement('div'); 
-            wrap.className = isSingle ? 'w-full max-w-[340px] lg:max-w-[420px] xl:max-w-[480px] mx-auto' : 'w-full';
-
-            const btn = document.createElement('button'); 
-            btn.type = 'button'; 
-            btn.className = 'w-full block outline-none h-full';
-            btn.disabled = (d.name === 'Libero');
-
-            const studentNotes = (d.db_id && localNotesDB[d.db_id]) ? localNotesDB[d.db_id] : [];
-            const hasWarning = studentNotes.some(n => n.type === 'warning');
-            const hasNotes = studentNotes.length > 0;
-            const noteFlag = hasWarning 
-                ? `<i class="fa-solid fa-circle-exclamation text-red-500 animate-pulse absolute top-3 right-3 text-sm lg:text-base z-20 drop-shadow" title="Richiamo Disciplinare"></i>`
-                : (hasNotes ? `<i class="fa-solid fa-circle-info text-amber-400 absolute top-3 right-3 text-sm lg:text-base z-20 drop-shadow" title="Annotazione"></i>` : '');
-            
-            const statusClass = String(d.status || 'assente').replace(/_/g,'-');
-            
-            btn.innerHTML = `<div class="relative h-28 md:h-32 lg:h-36 xl:h-44 2xl:h-48 w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between shadow-xl status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100'} transition-all ${d.name==='Libero'?'cursor-default':'cursor-pointer hover:scale-[1.03]'}">
-                ${noteFlag}
-                <div class="flex justify-between items-start">
-                    <span class="text-[10px] lg:text-xs xl:text-sm font-bold opacity-75 font-mono">#${id.split('_')[1]}</span>
-                    <span class="text-[9px] lg:text-[10px] xl:text-xs font-mono font-black uppercase tracking-wider opacity-95 py-1 px-2.5 lg:px-3 rounded-lg bg-black/40 border border-white/5">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
-                </div>
-                <div class="text-center flex-grow flex items-center justify-center px-1 lg:px-2 my-1">
-                    <h3 class="font-extrabold text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl leading-tight uppercase w-full break-words text-white tracking-wide">${esc(d.name)}</h3>
-                </div>
-                <div class="text-center">
-                    <span class="text-[10px] lg:text-xs xl:text-sm font-mono font-semibold opacity-85 bg-black/40 px-3 py-1 rounded-lg border border-white/5 text-slate-300">${esc(d.time || '--:--')}</span>
-                </div>
-            </div>`;
-
-            if (d.name !== 'Libero') { 
-                btn.onclick = () => openStudentDetail(id);
-            }
-            wrap.appendChild(btn); 
-            return wrap;
-        }
-
-        // Render Griglia Aula Desktop
-        function renderGrid(data) {
-            if (!data) return;
-            renderMobileClassroom(data);
-
-            const grid = document.getElementById('classroom-grid'); 
-            if (!grid) return; 
-            grid.innerHTML = '';
-
-            const makeColumn = (label, deskIds) => {
-                const col = document.createElement('div');
-                col.className = 'flex flex-col-reverse gap-3 lg:gap-4 xl:gap-5 flex-1'; 
-                const labelEl = document.createElement('div');
-                labelEl.className = 'text-center text-xs lg:text-sm font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last';
-                labelEl.textContent = label;
-                col.appendChild(labelEl);
-                for (let i = 0; i < deskIds.length; i += 2) {
-                    const pair = deskIds.slice(i, i+2);
-                    const row = document.createElement('div'); 
-                    row.className = 'grid grid-cols-2 gap-3 lg:gap-4 xl:gap-5';
-                    pair.forEach(id => row.appendChild(createDeskCard(id, data)));
-                    col.appendChild(row);
-                }
-                return col;
-            };
-
-            const left = []; for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
-            const center = [`banco_09`]; for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
-            const right = []; for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
-
-            const leftCol = makeColumn('ALA SINISTRA', left);
-            const centerCol = document.createElement('div'); 
-            centerCol.className = 'flex flex-col-reverse gap-3 lg:gap-4 xl:gap-5 flex-1';
-            const centerLabel = document.createElement('div'); 
-            centerLabel.className = 'text-center text-xs lg:text-sm font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last'; 
-            centerLabel.textContent = 'FILA CENTRALE'; 
-            centerCol.appendChild(centerLabel);
-            
-            const single = document.createElement('div'); 
-            single.className = 'flex justify-center w-full'; 
-            single.appendChild(createDeskCard('banco_09', data, true)); 
-            centerCol.appendChild(single);
-            
-            const centerPairs = center.slice(1);
-            for (let i=0;i<centerPairs.length;i+=2) {
-                const row = document.createElement('div'); 
-                row.className = 'grid grid-cols-2 gap-3 lg:gap-4 xl:gap-5';
-                row.appendChild(createDeskCard(centerPairs[i], data));
-                if (centerPairs[i+1]) row.appendChild(createDeskCard(centerPairs[i+1], data));
-                centerCol.appendChild(row);
-            }
-
-            const rightCol = makeColumn('ALA DESTRA', right);
-            grid.appendChild(leftCol); grid.appendChild(centerCol); grid.appendChild(rightCol);
-
-            let out = null; 
-            Object.values(data).forEach(v => { if (v.status === 'bagno') out = v.name; });
-            const bath = document.getElementById('bathroom-bar');
-            if (bath && !bath.classList.contains('hidden')) {
-                const queueInfo = bathroomQueue.length > 0 ? `<span class="ml-1.5 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/40 text-[10px] font-bold text-cyan-300">Coda: ${bathroomQueue.length}</span>` : '';
-                bath.innerHTML = out 
-                    ? `<div class="px-4 py-1.5 rounded-full border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-center gap-2 animate-pulse shadow-lg shadow-cyan-950/50 backdrop-blur-md">
-                         <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0"></span>
-                         <span class="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider truncate">BAGNO: <span class="text-white font-sans font-extrabold">${esc(out)}</span></span>
-                         ${queueInfo}
-                       </div>` 
-                    : `<div class="px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/20 flex items-center justify-center gap-2 shadow-md backdrop-blur-md">
-                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
-                         <span class="text-xs font-mono font-bold text-emerald-300 uppercase tracking-wider">BAGNO LIBERO</span>
-                         ${queueInfo}
-                       </div>`;
-            }
-        }
-
-        // Modale Dettaglio Studente
-        function openStudentDetail(id) {
-            const student = localSchoolDB[currentClass]?.[selectedStudentId = id];
-            if (!student || student.name === 'Libero') return;
-            pendingStatus = student.status;
-
-            document.getElementById('modal-detail-name').innerText = student.name;
-            const statusEl = document.getElementById('modal-detail-status');
-            statusEl.innerText = student.status.toUpperCase().replace('_', ' ');
-
-            const colorMap = {
-                presente: "text-emerald-400",
-                bagno: "text-cyan-400 animate-pulse",
-                ritardo: "text-amber-400",
-                assente: "text-red-400",
-                uscita_anticipata: "text-yellow-400",
-                fuori_aula: "text-indigo-400"
-            };
-            statusEl.className = `text-xl sm:text-2xl font-black ${colorMap[student.status] || 'text-white'}`;
-            document.getElementById('modal-detail-count').innerText = student.history.length;
-
-            const tbody = document.getElementById('modal-history-body');
-            tbody.innerHTML = "";
-            student.history.slice().reverse().forEach(h => {
-                let durataStringa = h.in ? `<span class="text-[10px] text-amber-300 font-mono font-bold ml-2 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-500/30">⏱ ${calcolaDurata(h.out, h.in)}</span>` : '';
-                tbody.innerHTML += `<tr class="hover:bg-slate-800/25 transition"><td class="px-4 sm:px-5 py-3 font-bold text-cyan-400 font-mono">${h.out}</td><td class="px-4 sm:px-5 py-3 font-bold text-emerald-400 font-mono">${h.in || '--:--'} ${durataStringa}</td><td class="px-4 sm:px-5 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
-            });
-
-            document.getElementById('status-view-mode').classList.remove('hidden');
-            document.getElementById('status-edit-mode').classList.add('hidden');
-
-            const isTeacher = (currentUser?.role !== 'studente');
-            document.getElementById('status-edit-hint')?.classList.toggle('hidden', !isTeacher);
-            document.getElementById('teacher-note-input')?.classList.toggle('hidden', !isTeacher);
-            document.getElementById('grade-input-area')?.classList.toggle('hidden', !isTeacher);
-
-            switchTab('presence');
-            document.getElementById('student-modal-tabs')?.classList.remove('hidden');
-
-            document.getElementById('modal-student-detail').classList.remove('hidden');
-        }
-
-        function toggleStatusEdit() {
-            if (currentUser?.role === 'studente') return;
-            const viewMode = document.getElementById('status-view-mode');
-            const editMode = document.getElementById('status-edit-mode');
-            const isEditing = !editMode.classList.contains('hidden');
-            
-            viewMode.classList.toggle('hidden', !isEditing);
-            editMode.classList.toggle('hidden', isEditing);
-            
-            if (!isEditing) {
-                const current = localSchoolDB[currentClass]?.[selectedStudentId]?.status;
-                selectStatusPreview(current);
-            }
-        }
-
-        function selectStatusPreview(status) {
-            pendingStatus = status;
-            document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('btn-selected'));
-            document.getElementById(`btn-${status}`)?.classList.add('btn-selected');
-        }
-
-        // Conferma cambio stato presenza
-        async function confirmStatusChange() {
-            if (!pendingStatus) {
-                toast('Seleziona Stato', 'Scegli uno stato prima di salvare.', 'info');
-                return;
-            }
-            const student = localSchoolDB[currentClass]?.[selectedStudentId];
-            if (!student) return;
-
-            const oldStatus = student.status;
-            const nowObj = new Date();
-            const now = nowObj.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-            const totalM = nowObj.getHours() * 60 + nowObj.getMinutes();
-            const isOrarioScolastico = (totalM >= 480 && totalM < 810);
-
-            student.status = pendingStatus;
-            student.time = (pendingStatus === 'presente') ? (isOrarioScolastico ? '08:00' : now) : (pendingStatus === 'assente' ? '--:--' : now);
-
-            if (pendingStatus === 'bagno' && oldStatus !== 'bagno') {
-                student.history.push({ out: now, in: null });
-            } else if (oldStatus === 'bagno' && pendingStatus !== 'bagno') {
-                for (let i = student.history.length - 1; i >= 0; i--) {
-                    if (student.history[i].in === null) {
-                        student.history[i].in = now;
-                        break;
-                    }
-                }
-            }
-
-            renderGrid(localSchoolDB[currentClass]);
-            openStudentDetail(selectedStudentId);
-
-            if (student.db_id && currentClassId) {
-                try {
-                    await _supabase.from('attendance').upsert({
-                        student_id: student.db_id,
-                        class_id: currentClassId,
-                        date: selectedDate,
-                        status: pendingStatus,
-                        time: student.time
-                    }, { onConflict: 'student_id, date' });
-                    toast('Presenza Salvata', `${student.name} → ${pendingStatus.toUpperCase().replace('_', ' ')} (${student.time})`, 'success');
-                } catch(err) {
-                    console.error("Errore salvataggio presenza:", err);
-                    toast('Errore Sincronizzazione', 'Salvataggio non riuscito su DB.', 'error');
-                }
-            }
-        }
-
-        // Registro e Firme
-        function openSignModal() {
-            const m = document.getElementById('modal-sign');
-            if (!m) return;
-            m.classList.remove('hidden');
-            
-            const isStud = (currentUser?.role === 'studente');
-            document.getElementById('reg-header-student')?.classList.toggle('hidden', !isStud);
-            document.getElementById('reg-header-teacher')?.classList.toggle('hidden', isStud);
-            document.getElementById('new-signature-form')?.classList.toggle('hidden', isStud);
-            
-            if (!isStud) updateTeacherForm();
-            renderCalendarStrip();
-            renderSignaturesList();
-        }
-
-        function updateTeacherForm() {
-            const isToday = (selectedDate === getTodayStr());
-            const form = document.getElementById('new-signature-form');
-            if (form) form.classList.toggle('hidden', !isToday);
-        }
-
-        function renderCalendarStrip() {
-            const container = document.getElementById('cv-calendar-container');
-            if (!container) return;
-            container.innerHTML = '';
-            const labels = ['D','L','M','M','G','V','S'];
-            const selected = new Date(`${selectedDate}T12:00:00`);
-            for (let i=-3; i<=3; i++) {
-                const d = new Date(selected);
-                d.setDate(selected.getDate() + i);
-                const iso = d.toISOString().slice(0,10);
-                const isFuture = iso > getTodayStr();
-                const day = document.createElement('button');
-                day.type = 'button';
-                day.className = `cv-day ${iso===selectedDate?'active':''} ${iso===getTodayStr()?'today':''} ${isFuture?'future':''}`;
-                day.disabled = isFuture;
-                day.innerHTML = `<span class="cv-day-letter">${labels[d.getDay()]}</span><div class="cv-day-number">${d.getDate()}</div>`;
-                if (!isFuture) day.onclick = () => changeDate(iso);
-                container.appendChild(day);
-            }
-        }
-
-        function selectSignHour(h) {
-            selectedSignHour = h;
-            for (let i=1; i<=5; i++) {
-                const btn = document.getElementById(`hour-btn-${i}`);
-                if (btn) {
-                    btn.className = (i === h)
-                        ? 'flex-1 py-1.5 rounded-lg bg-blue-600 border border-blue-400 text-xs font-mono font-bold text-white shadow-lg'
-                        : 'flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold hover:bg-slate-700 text-slate-300 transition';
-                }
-            }
-        }
-
-        function renderSignaturesList() {
-            const container = document.getElementById('signatures-list');
-            if (!container) return;
-            container.innerHTML = '';
-            
-            if (!onlineSignatures || onlineSignatures.length === 0) {
-                document.getElementById('no-signatures')?.classList.remove('hidden');
-                return;
-            }
-            document.getElementById('no-signatures')?.classList.add('hidden');
-            
-            onlineSignatures.forEach(sig => {
-                const canDelete = currentUser && (currentUser.role === 'admin' || currentUser.name === sig.teacher);
-                const deleteBtn = canDelete ? `<button onclick="deleteSignature('${sig.id}')" class="text-red-500 hover:text-red-300 p-1.5 ml-auto"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
-                container.innerHTML += `<div class="bg-slate-900/80 border border-slate-800 p-3 rounded-xl flex flex-col gap-1.5 relative group"><div class="flex justify-between items-start"><span class="text-[10px] font-mono font-bold bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded uppercase tracking-wider">${sig.hour}° ORA • ${esc(sig.subject)}</span>${deleteBtn}</div><p class="text-xs font-medium text-slate-200 leading-snug">${esc(sig.topic)}</p><div class="text-[10px] text-slate-500 flex items-center gap-1"><i class="fa-solid fa-user-tie text-[9px]"></i> ${esc(sig.teacher)}</div></div>`;
-            });
-        }
-
-        async function saveSignature() {
-            if (!selectedSignHour) { toast('Ora Mancante', 'Seleziona l\'ora di lezione.', 'error'); return; }
-            const subj = document.getElementById('subject-search').value.trim();
-            const topic = document.getElementById('sign-argomento').value.trim();
-            if (!subj || !topic) { toast('Dati Incompleti', 'Specifica materia e argomento svolto.', 'error'); return; }
-            
-            setLoading(true, "Registrazione firma...");
-            try {
-                await _supabase.from('signatures').insert([{
-                    date: selectedDate,
-                    hour: selectedSignHour,
-                    teacher: currentUser?.name || 'Docente',
-                    subject: subj,
-                    topic: topic,
-                    class: currentClass
-                }]);
-                
-                toast('Firma Apposta', `${selectedSignHour}° ora registrata con successo.`, 'success');
-                document.getElementById('modal-sign').classList.add('hidden');
-                document.getElementById('sign-argomento').value = '';
-                selectSignHour(null);
-                
-                await loadDayData(selectedDate);
-                renderSignaturesList();
-                updateSignatureDisplay();
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        async function deleteSignature(id) {
-            if (!confirm("Eliminare questa firma dal registro?")) return;
-            setLoading(true, "Eliminazione...");
-            try {
-                await _supabase.from('signatures').delete().eq('id', id);
-                await loadDayData(selectedDate);
-                renderSignaturesList();
-                updateSignatureDisplay();
-                toast('Firma Cancellata', '', 'success');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        function updateSignatureDisplay() {
-            const last = onlineSignatures && onlineSignatures.length > 0 ? onlineSignatures[onlineSignatures.length - 1] : null;
-            const disp = document.getElementById('signature-display');
-            if (disp) {
-                disp.innerText = last ? `${last.hour}° Ora • ${last.subject}: ${last.topic}` : "Clicca per aprire il Registro di Classe";
-            }
-        }
-
-        function filterSubjects() {
-            const input = document.getElementById('subject-search').value.toLowerCase();
-            const drop = document.getElementById('subject-dropdown');
-            drop.innerHTML = "";
-            ALL_SUBJECTS.forEach(s => {
-                if (s.toLowerCase().includes(input)) {
-                    const div = document.createElement('div');
-                    div.innerText = s;
-                    div.className = "p-2 hover:bg-blue-600/50 cursor-pointer text-xs";
-                    div.onclick = () => {
-                        document.getElementById('subject-search').value = s;
-                        drop.classList.add('hidden');
-                    };
-                    drop.appendChild(div);
-                }
-            });
-            drop.classList.remove('hidden');
-        }
-
-        // Agenda
-        function openAgendaModal() {
-            document.getElementById('modal-agenda').classList.remove('hidden');
-            document.getElementById('btn-add-agenda')?.classList.toggle('hidden', currentUser?.role === 'studente');
-            renderAgendaList();
-        }
-
-        function openAddAgendaModal() {
-            document.getElementById('modal-add-agenda').classList.remove('hidden');
-            const sel = document.getElementById('agenda-subject');
-            sel.innerHTML = "";
-            ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`);
-        }
-
-        function selectAgendaType(t) {
-            pendingAgendaType = t;
-            document.getElementById('btn-type-compito').className = (t === 'compito') ? 'btn-selected py-2.5 bg-emerald-950/40 text-emerald-400 font-bold rounded-xl text-xs uppercase' : 'py-2.5 bg-slate-800 text-slate-400 font-bold rounded-xl text-xs uppercase';
-            document.getElementById('btn-type-verifica').className = (t === 'verifica') ? 'btn-selected py-2.5 bg-red-950/40 text-red-400 font-bold rounded-xl text-xs uppercase' : 'py-2.5 bg-slate-800 text-slate-400 font-bold rounded-xl text-xs uppercase';
-        }
-
-        function renderAgendaList() {
-            const list = document.getElementById('agenda-list');
-            if (!list) return;
-            const items = (onlineAgenda || []).filter(item => !currentClass || item.class === currentClass);
-            list.innerHTML = '';
-            if (items.length === 0) {
-                list.innerHTML = '<div class="p-8 text-center text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-2xl">Nessun impegno in agenda per questa classe.</div>';
-                return;
-            }
-            items.forEach(item => {
-                const el = document.createElement('div');
-                const isTask = item.type === 'compito';
-                el.className = `p-4 rounded-xl mb-2 flex justify-between items-start border-l-4 ${isTask ? 'border-emerald-500 bg-emerald-950/10' : 'border-red-500 bg-red-950/10'} border-slate-800/60`;
-                const canDelete = (currentUser?.role !== 'studente');
-                el.innerHTML = `<div><span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-black/40 text-slate-300 inline-block mb-1">${esc(item.date||'--')} • ${esc(item.subject||'')}</span><p class="text-xs text-slate-200 mt-1">${esc(item.description||'')}</p></div>`;
-                if (canDelete && item.id) {
-                    const b = document.createElement('button');
-                    b.className = 'bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white p-2 rounded-lg transition ml-4 flex-shrink-0';
-                    b.innerHTML = '<i class="fa-solid fa-trash text-xs"></i>';
-                    b.onclick = () => deleteAgendaItem(item.id);
-                    el.appendChild(b);
-                }
-                list.appendChild(el);
-            });
-        }
-
-        async function saveAgendaEntry() {
-            if (!pendingAgendaType) { toast('Tipo Richiesto', 'Seleziona se si tratta di Compito o Verifica.', 'error'); return; }
-            const dateInput = document.getElementById('agenda-date').value;
-            if (!dateInput) { toast('Data Mancante', 'Inserisci una data valida.', 'error'); return; }
-            const d = new Date(dateInput);
-            const formatted = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
-            setLoading(true, "Registrazione...");
-            try {
-                const { data, error } = await _supabase.from('agenda').insert([{
-                    date: formatted,
-                    subject: document.getElementById('agenda-subject').value,
-                    type: pendingAgendaType,
-                    description: document.getElementById('agenda-desc').value,
-                    class: currentClass
-                }]).select();
-                if (error) throw error;
-                if (data && data.length > 0) onlineAgenda.push(data[0]);
-                document.getElementById('modal-add-agenda').classList.add('hidden');
-                renderAgendaList();
-                toast('Agenda Aggiornata', 'Attività registrata con successo!', 'success');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        async function deleteAgendaItem(id) {
-            if (!confirm("Eliminare questa annotazione dall'agenda?")) return;
-            setLoading(true, "Eliminazione...");
-            try {
-                await _supabase.from('agenda').delete().eq('id', id);
-                onlineAgenda = onlineAgenda.filter(a => a.id !== id);
-                renderAgendaList();
-                toast('Impegno Rimosso', '', 'success');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        function toggleNoticeModal() {
-            document.getElementById('modal-notices')?.classList.toggle('hidden');
-        }
-
-        // Valutazioni e Medie
-        function backToGradePicker() {
-            selectedStudentId = null;
-            renderClassGradePicker();
-        }
-
-        function openGradesModal() {
-            const modal = document.getElementById('modal-grades');
-            const list = document.getElementById('grades-list');
-            const backBtn = document.getElementById('btn-grades-back');
-            if (!modal || !list) return;
-
-            let targetId = null;
-            let targetName = '';
-
-            if (currentUser?.role === 'studente') {
-                targetId = currentUser.id;
-                targetName = currentUser.name || 'I miei voti';
-                backBtn?.classList.add('hidden');
-            } else {
-                const student = localSchoolDB[currentClass]?.[selectedStudentId];
-                if (student?.db_id) {
-                    targetId = student.db_id;
-                    targetName = student.name;
-                    backBtn?.classList.remove('hidden');
-                } else {
-                    backBtn?.classList.add('hidden');
-                }
-            }
-
-            if (!targetId) {
-                renderClassGradePicker();
-                modal.classList.remove('hidden');
-                return;
-            }
-
-            const myGrades = (localGradesDB[targetId] || []).slice().sort((a,b) => String(b.date||'').localeCompare(String(a.date||'')));
-            const subjects = {}; 
-            myGrades.forEach(g => { 
-                const subj = g.subject || 'Generale'; 
-                if(!subjects[subj]) subjects[subj] = []; 
-                subjects[subj].push(g); 
-            });
-
-            const allV = myGrades.map(g => parseGradeNum(g.value)).filter(n => !isNaN(n)); 
-            const hasGrades = allV.length > 0;
-            const avgNum = hasGrades ? (allV.reduce((a,b) => a+b, 0) / allV.length) : 0; 
-            
-            const totalAvgEl = document.getElementById('grades-total-avg');
-            const totalCountEl = document.getElementById('grades-total-count');
-            const header = document.getElementById('grades-header-bg');
-
-            if (!hasGrades || avgNum === 0) {
-                header.className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-slate-800";
-                totalAvgEl.innerText = "0";
-                totalCountEl.innerText = `0 valutazioni • ${targetName}`;
-            } else {
-                const avgFormatted = formatAverage(avgNum);
-                totalAvgEl.innerText = avgFormatted;
-                totalCountEl.innerText = `${allV.length} valutazioni • ${targetName}`;
-
-                if (avgNum >= 6) {
-                    header.className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-cv-green";
-                } else if (avgNum >= 5) {
-                    header.className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-cv-orange";
-                } else {
-                    header.className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-cv-red";
-                }
-            }
-
-            list.innerHTML = ''; 
-            const entries = Object.entries(subjects); 
-            if (entries.length === 0) { 
-                list.innerHTML = '<div class="p-8 text-center text-slate-500 font-mono text-xs">Nessuna valutazione registrata.</div>'; 
-            }
-
-            entries.forEach(([subj, votes], idx) => {
-                const subjNums = votes.map(v => parseGradeNum(v.value)).filter(n => !isNaN(n));
-                const subHas = subjNums.length > 0;
-                const avgSub = subHas ? (subjNums.reduce((a,b) => a + b, 0) / subjNums.length) : 0; 
-                const avgSubStr = formatAverage(avgSub);
-                const circleClass = (!subHas || avgSub === 0) ? 'g-gray' : (avgSub >= 6 ? 'g-green' : (avgSub >= 5 ? 'g-orange' : 'g-red'));
-                const safeId = `sc-grade-${idx}`; 
-                
-                const card = document.createElement('div');
-                card.className = 'mb-2.5';
-                card.innerHTML = `
-                    <div class="cv-card p-3.5 flex justify-between items-center cursor-pointer" onclick="toggleGradeDetails('${safeId}')">
-                        <div>
-                            <div class="text-white font-bold text-sm">${esc(subj)}</div>
-                            <div class="text-[10px] font-mono text-slate-400 uppercase">${votes.length} valutazioni</div>
-                        </div>
-                        <div class="grade-circle ${circleClass}" style="--percent:${Math.min(100, Number(avgSub)*10)}%">
-                            <span class="grade-value">${esc(avgSubStr)}</span>
-                        </div>
-                    </div>
-                    <div id="${safeId}" class="hidden bg-slate-900/60 p-3.5 border-x border-b border-slate-800 rounded-b-xl space-y-2">
-                        ${votes.map(v => `
-                            <div class="flex justify-between items-center py-1.5 border-b border-slate-800/60 last:border-0 font-mono">
-                                <div><span class="text-[10px] text-slate-500 block">${esc(v.date||'--')}</span><span class="text-xs text-slate-300 uppercase">${esc(v.type||'')}</span></div>
-                                <span class="font-black ${parseGradeNum(v.value)>=6?'text-emerald-400':'text-red-400'}">${esc(v.value)}</span>
-                            </div>
-                        `).join('')}
-                    </div>`;
-                list.appendChild(card);
-            });
-            modal.classList.remove('hidden');
-        }
-
-        function toggleGradeDetails(id) {
-            document.getElementById(id)?.classList.toggle('hidden');
-        }
-
-        function renderClassGradePicker() {
-            const list = document.getElementById('grades-list');
-            if (!list) return;
-            document.getElementById('btn-grades-back')?.classList.add('hidden');
-            document.getElementById('grades-total-avg').innerText = '--';
-            document.getElementById('grades-total-count').innerText = "Seleziona uno studente";
-            document.getElementById('grades-header-bg').className = "cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-slate-800";
-
-            list.innerHTML = '<div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold mb-3 px-1">Seleziona Studente</div>';
-            
-            const students = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s.name !== 'Libero');
-            
-            students.sort((a, b) => {
-                const partsA = a[1].name.trim().split(' ');
-                const cognomeA = partsA.slice(1).join(' ') || partsA[0];
-                const partsB = b[1].name.trim().split(' ');
-                const cognomeB = partsB.slice(1).join(' ') || partsB[0];
-                return cognomeA.localeCompare(cognomeB, 'it', { sensitivity: 'base' });
-            });
-
-            students.forEach(([deskId, s]) => {
-                const grades = s.db_id ? (localGradesDB[s.db_id] || []) : [];
-                const nums = grades.map(g => parseGradeNum(g.value)).filter(n => !isNaN(n));
-                const hasV = nums.length > 0;
-                const avg = hasV ? (nums.reduce((a,b)=>a+b,0)/nums.length) : 0;
-                const avgDisplay = hasV ? formatAverage(avg) : '--';
-                const avgColor = (!hasV || avg === 0) ? 'text-slate-600' : (avg >= 6 ? 'text-emerald-400' : (avg >= 5 ? 'text-amber-400' : 'text-red-400'));
-
-                const item = document.createElement('button');
-                item.className = 'w-full text-left p-3.5 bg-slate-900/70 border border-slate-800 rounded-xl mb-2 hover:border-blue-500/60 transition flex items-center justify-between';
-                item.innerHTML = `<div><div class="font-bold text-white text-sm">${esc(s.name)}</div><div class="text-[10px] font-mono text-slate-500 uppercase">${deskId.replace('banco_','Banco #')}</div></div><div class="text-lg font-black font-mono ${avgColor}">${avgDisplay}</div>`;
-                item.onclick = () => {
-                    selectedStudentId = deskId;
-                    openGradesModal();
-                };
-                list.appendChild(item);
-            });
-        }
-
-        function switchTab(t) {
-            document.getElementById('content-presence')?.classList.toggle('hidden', t !== 'presence');
-            document.getElementById('content-grades')?.classList.toggle('hidden', t !== 'grades');
-            document.getElementById('content-notes')?.classList.toggle('hidden', t !== 'notes');
-
-            ['presence', 'grades', 'notes'].forEach(tab => {
-                const el = document.getElementById(`tab-${tab}`);
-                if (el) {
-                    if (tab === t) el.className = "text-blue-400 border-b-2 border-blue-400 pb-1";
-                    else el.className = "text-slate-500 hover:text-white pb-1";
-                }
-            });
-
-            if (t === 'grades') loadTeacherGradesView();
-            if (t === 'notes') loadNotes();
-        }
-
-        function loadTeacherGradesView() {
-            const student = localSchoolDB[currentClass]?.[selectedStudentId];
-            if (!student?.db_id) return;
-            
-            const isTeacher = (currentUser?.role !== 'studente');
-            document.getElementById('grade-input-area')?.classList.toggle('hidden', !isTeacher);
-
-            const subjSelect = document.getElementById('new-grade-subject');
-            if (subjSelect && subjSelect.children.length === 0) {
-                ALL_SUBJECTS.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s;
-                    opt.textContent = s;
-                    if (currentUser?.subject && s === currentUser.subject) opt.selected = true;
-                    subjSelect.appendChild(opt);
-                });
-            }
-
-            const isSpecificTeacher = (currentUser?.role === 'docente' && currentUser?.subject);
-            const list = document.getElementById('teacher-grades-list');
-            list.innerHTML = "";
-            
-            const allStudentGrades = (localGradesDB[student.db_id] || []);
-            const grades = isSpecificTeacher ? allStudentGrades.filter(g => g.subject === currentUser.subject) : allStudentGrades;
-
-            document.getElementById('teacher-subject-name').innerText = isTeacher 
-                ? (isSpecificTeacher ? currentUser.subject : 'Tutte le Materie (Admin)') 
-                : 'Valutazioni dello Studente';
-
-            if (grades.length === 0) {
-                list.innerHTML = `<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Nessun voto registrato per ${esc(student.name)}.</td></tr>`;
-                return;
-            }
-            grades.forEach(g => {
-                const num = parseGradeNum(g.value);
-                const color = num >= 6 ? 'text-emerald-400' : num >= 5 ? 'text-amber-400' : 'text-red-400';
-                const deleteBtn = isTeacher ? `
-                    <button onclick="deleteGrade('${g.id}')" class="text-red-500 hover:text-white transition p-1" title="Elimina">
-                        <i class="fa-solid fa-trash text-xs"></i>
-                    </button>` : '';
-
-                list.innerHTML += `
-                    <tr class="hover:bg-slate-800/30 transition">
-                        <td class="px-4 py-2.5 text-slate-400">${esc(g.date)}</td>
-                        <td class="px-4 py-2.5 font-semibold text-slate-200">${esc(g.subject || 'Generale')}</td>
-                        <td class="px-4 py-2.5 uppercase text-[10px] text-slate-400">${esc(g.type)}</td>
-                        <td class="px-4 py-2.5 text-right font-black ${color}">${esc(g.value)}</td>
-                        <td class="px-4 py-2.5 text-right">${deleteBtn}</td>
-                    </tr>`;
-            });
-        }
-
-        async function addGrade() {
-            const student = localSchoolDB[currentClass]?.[selectedStudentId];
-            if (!student) return;
-
-            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-            
-            if (!student.db_id || !uuidRegex.test(student.db_id)) {
-                const { data: sData } = await _supabase.from('registry').select('id').eq('full_name', student.name).limit(1);
-                if (sData && sData.length > 0) student.db_id = sData[0].id;
-            }
-            if (!student.db_id) {
-                toast('Errore di Riferimento', 'Studente non associato al database', 'error');
-                return;
-            }
-
-            let teacherId = currentUser?.id;
-            if (!teacherId || !uuidRegex.test(teacherId)) {
-                const { data: adminUser } = await _supabase.from('registry').select('id').eq('role', 'admin').limit(1);
-                if (adminUser && adminUser.length > 0) {
-                    teacherId = adminUser[0].id;
-                    if (currentUser) currentUser.id = teacherId;
-                }
-            }
-
-            if (!currentClassId && currentClass) {
-                const { data: cData } = await _supabase.from('classes').select('id').eq('name', currentClass).limit(1);
-                if (cData && cData.length > 0) currentClassId = cData[0].id;
-            }
-
-            const val = document.getElementById('new-grade-value').value;
-            const chosenSubject = document.getElementById('new-grade-subject')?.value || currentUser?.subject || 'Generale';
-            
-            setLoading(true, "Registrazione voto...");
-            try {
-                const { data: inserted, error } = await _supabase.from('grades').insert([{
-                    student_id: student.db_id,
-                    teacher_id: teacherId,
-                    subject: chosenSubject,
-                    value: String(val),
-                    type: document.getElementById('new-grade-type').value,
-                    date: new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}),
-                    class_id: currentClassId
-                }]).select();
-
-                if (error) throw error;
-
-                if (inserted && inserted.length > 0) {
-                    onlineGrades.push(inserted[0]);
-                    if (!localGradesDB[student.db_id]) localGradesDB[student.db_id] = [];
-                    localGradesDB[student.db_id].push(inserted[0]);
-                } else {
-                    await loadScopedSchoolData();
-                }
-
-                loadTeacherGradesView();
-                if (!document.getElementById('modal-grades').classList.contains('hidden')) {
-                    openGradesModal();
-                }
-                toast('Valutazione Inserita', `${student.name}: ${val} (${chosenSubject})`, 'success');
-            } catch(e) {
-                console.error("Errore inserimento voto:", e);
-                toast('Errore Inserimento', e.message || 'Transazione DB fallita.', 'error');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        async function deleteGrade(id) {
-            if (!confirm("Eliminare questa valutazione?")) return;
-            setLoading(true, "Eliminazione...");
-            try {
-                const { error } = await _supabase.from('grades').delete().eq('id', id);
-                if (error) throw error;
-                onlineGrades = onlineGrades.filter(g => g.id !== id);
-                for (let sId in localGradesDB) {
-                    localGradesDB[sId] = localGradesDB[sId].filter(g => g.id !== id);
-                }
-                loadTeacherGradesView();
-                if (!document.getElementById('modal-grades').classList.contains('hidden')) {
-                    openGradesModal();
-                }
-                toast('Valutazione Rimossa', '', 'success');
-            } catch(err) {
-                toast('Errore', err.message, 'error');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        function loadNotes() {
-            const student = localSchoolDB[currentClass]?.[selectedStudentId];
-            if (!student?.db_id) return;
-            const list = document.getElementById('notes-list');
-            list.innerHTML = "";
-            const notes = localNotesDB[student.db_id] || [];
-            if (notes.length === 0) {
-                list.innerHTML = '<div class="text-center text-slate-500 font-mono text-xs py-4">Nessuna annotazione presente.</div>';
-                return;
-            }
-            notes.forEach(n => {
-                const isWarning = (n.type === 'warning');
-                const borderColor = isWarning ? 'border-red-500 bg-red-950/20' : 'border-blue-500 bg-slate-900/90';
-                const typeBadge = isWarning 
-                    ? '<span class="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">Richiamo</span>'
-                    : '<span class="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">Annotazione</span>';
-
-                const authorName = n.teacher || n.teacher_name || localUsersDB[n.teacher_id] || (n.teacher_id === currentUser?.id ? currentUser.name : 'Docente');
-                const canDelete = (currentUser?.role === 'admin' || (currentUser?.role !== 'studente' && (currentUser?.name === authorName || currentUser?.id === n.teacher_id)));
-
-                list.innerHTML += `
-                    <div class="${borderColor} p-3.5 rounded-xl mb-2.5 border-l-4 border shadow-md">
-                        <div class="flex justify-between items-center mb-1.5 font-mono">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                ${typeBadge}
-                                <span class="text-[10px] text-slate-400 font-bold">${esc(n.date)}</span>
-                                <span class="text-[10px] text-blue-300 font-bold flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded border border-white/5">
-                                    <i class="fa-solid fa-user-tie text-[9px] text-blue-400"></i> ${esc(authorName)}
-                                </span>
-                            </div>
-                            ${canDelete ? `<button onclick="deleteNote('${n.id}')" class="text-red-400 hover:text-red-300 text-xs p-1 transition" title="Elimina nota"><i class="fa-solid fa-trash"></i></button>` : ''}
-                        </div>
-                        <p class="text-xs text-slate-200 mt-1 leading-relaxed font-medium">${esc(n.text)}</p>
-                    </div>`;
-            });
-        }
-
-        async function addNote() {
-            const student = localSchoolDB[currentClass]?.[selectedStudentId];
-            if (!student?.db_id) return;
-            const text = document.getElementById('note-text').value.trim();
-            if (!text) return;
-            setLoading(true, "Salvataggio nota...");
-            try {
-                const teacherName = currentUser?.name || 'Docente';
-                const nowTime = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-                const nowDate = new Date().toLocaleDateString('it-IT');
-                const noteType = document.getElementById('note-type').value;
-
-                let baseNote = {
-                    student_id: student.db_id,
-                    teacher_id: currentUser?.id,
-                    text: text,
-                    type: noteType,
-                    date: `${nowDate} ${nowTime}`,
-                    class_id: currentClassId
-                };
-
-                let inserted = false;
-                try {
-                    const { error: errCol } = await _supabase.from('notes').insert([{
-                        ...baseNote,
-                        teacher: teacherName
-                    }]);
-                    if (!errCol) inserted = true;
-                } catch(e) {}
-
-                if (!inserted) {
-                    const { error: errBase } = await _supabase.from('notes').insert([baseNote]);
-                    if (errBase) {
-                        const { error: errFallback } = await _supabase.from('notes').insert([{
-                            ...baseNote,
-                            date: nowDate
-                        }]);
-                        if (errFallback) throw errFallback;
-                    }
-                }
-
-                document.getElementById('note-text').value = '';
-                await loadScopedSchoolData();
-                loadNotes();
-                renderGrid(localSchoolDB[currentClass]);
-                toast('Nota Registrata', `Inserita da ${teacherName}`, 'success');
-            } catch(err) {
-                console.error("Errore salvataggio nota:", err);
-                toast('Errore Salvataggio', err.message || 'Impossibile salvare la nota.', 'error');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        async function deleteNote(id) {
-            if (!confirm("Eliminare questa annotazione?")) return;
-            setLoading(true, "Eliminazione...");
-            try {
-                await _supabase.from('notes').delete().eq('id', id);
-                await loadScopedSchoolData();
-                loadNotes();
-                renderGrid(localSchoolDB[currentClass]);
-                toast('Nota Eliminata', '', 'success');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        function openListModal() {
-            document.getElementById('modal-class-list').classList.remove('hidden');
-            filterListModal();
-        }
-
-        function filterListModal() {
-            const ul = document.getElementById('full-student-list');
-            if (!ul) return;
-            ul.innerHTML = "";
-            const q = (document.getElementById('list-search')?.value || '').toLowerCase();
-            
-            const students = Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s && s.name !== 'Libero');
-
-            students.sort((a, b) => {
-                const partsA = a[1].name.trim().split(' ');
-                const cognomeA = partsA.slice(1).join(' ') || partsA[0];
-                const partsB = b[1].name.trim().split(' ');
-                const cognomeB = partsB.slice(1).join(' ') || partsB[0];
-                return cognomeA.localeCompare(cognomeB, 'it', { sensitivity: 'base' });
-            });
-
-            students.forEach(([deskId, s]) => {
-                if (q && !s.name.toLowerCase().includes(q)) return;
-                
-                const parts = s.name.trim().split(' ');
-                const nome = parts[0];
-                const cognome = parts.slice(1).join(' ');
-
-                let statusBg = "bg-slate-800 text-slate-400 border border-slate-700";
-                if (s.status === 'presente') statusBg = "bg-emerald-950/40 text-emerald-400 border border-emerald-600/40";
-                else if (s.status === 'bagno') statusBg = "bg-cyan-950/40 text-cyan-400 border border-cyan-600/40 animate-pulse";
-                else if (s.status === 'assente') statusBg = "bg-red-950/40 text-red-400 border border-red-600/40";
-                else if (s.status === 'ritardo') statusBg = "bg-amber-950/40 text-amber-400 border border-amber-600/40";
-                else if (s.status === 'seconda_ora') statusBg = "bg-purple-950/40 text-purple-400 border border-purple-600/40";
-                else if (s.status === 'uscita_anticipata') statusBg = "bg-yellow-950/40 text-yellow-400 border border-yellow-600/40";
-                else if (s.status === 'fuori_aula') statusBg = "bg-indigo-950/40 text-indigo-400 border border-indigo-600/40";
-
-                ul.innerHTML += `
-                    <div onclick="document.getElementById('modal-class-list').classList.add('hidden'); openStudentDetail('${deskId}')" class="p-3.5 bg-[#11192e] border border-slate-800 rounded-xl flex justify-between items-center cursor-pointer hover:border-slate-700 hover:bg-[#15203a] transition">
-                        <div>
-                            <span class="font-extrabold text-white text-sm sm:text-base">${esc(cognome.toUpperCase())}</span> 
-                            <span class="text-slate-300 font-medium text-sm sm:text-base ml-1.5">${esc(nome)}</span>
-                            <span class="text-xs text-slate-500 font-mono ml-2">#${deskId.split('_')[1]}</span>
-                        </div>
-                        <span class="text-[10px] font-mono uppercase font-bold px-2.5 py-1 rounded ${statusBg}">${esc(s.status.replace('_',' '))}</span>
-                    </div>`;
-            });
-        }
-
-        function initRealtime() {
-            _supabase.channel('smartcheck_channel')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, payload => {
-                 if (payload.new && payload.new.date === selectedDate) {
-                     for (let id in localSchoolDB[currentClass]) {
-                         if (localSchoolDB[currentClass][id].db_id === payload.new.student_id) {
-                             localSchoolDB[currentClass][id].status = payload.new.status;
-                             localSchoolDB[currentClass][id].time = payload.new.time;
-                         }
-                     }
-                     renderGrid(localSchoolDB[currentClass]);
-                     renderBathroomQueueUI();
-                 }
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'signatures' }, () => {
-                loadDayData(selectedDate).then(() => {
-                    renderSignaturesList();
-                    updateSignatureDisplay();
-                });
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'agenda' }, () => {
-                _supabase.from('agenda').select('*').eq('class', currentClass).then(({data}) => {
-                    if (data) { onlineAgenda = data; renderAgendaList(); }
-                });
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'notes' }, async () => {
-                await loadScopedSchoolData();
-                renderGrid(localSchoolDB[currentClass]);
-                if (selectedStudentId && !document.getElementById('modal-student-detail').classList.contains('hidden')) {
-                    loadNotes();
-                }
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'bathroom_queue' }, async () => {
-                await loadBathroomQueueData();
-            })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'devices' }, async () => {
-                await loadDevicesData();
-            })
-            .on('broadcast', { event: 'QUEUE_SYNC' }, payload => {
-                if (payload.payload && payload.payload.class === currentClass) {
-                    bathroomQueue = payload.payload.queue || [];
-                    updateQueueBadges();
-                    renderBathroomQueueUI();
-                    renderGrid(localSchoolDB[currentClass]);
-                }
-            })
-            .subscribe();
-        }
-
-        async function verifyUser() {
-            const inputEl = document.getElementById('input-username');
-            const input = inputEl ? inputEl.value.trim().toLowerCase() : '';
-            const err = document.getElementById('login-error');
-            const errText = document.getElementById('error-text');
-            const btn = document.getElementById('btn-next');
-            
-            if (!input) {
-                toast('Campo Vuoto', 'Inserisci il nome utente d\'istituto', 'error');
-                return;
-            }
-
-            err.classList.add('hidden');
-            btn.innerText = "Verifica...";
-
-            try {
-                const { data, error } = await _supabase
-                    .from('registry')
-                    .select('*')
-                    .eq('username', input)
-                    .limit(1);
-
-                if (data && data.length > 0) {
-                    const user = data[0];
-                    tempUser = {
-                        id: user.id,
-                        u: user.username,
-                        name: user.full_name,
-                        role: user.role,
-                        pass: user.password,
-                        class_id: user.class_id,
-                        subject: user.subject || 'Generale'
-                    };
-                    document.getElementById('input-username').classList.add('hidden');
-                    document.getElementById('btn-next').classList.add('hidden');
-                    document.getElementById('password-container').classList.remove('hidden');
-                    document.getElementById('user-welcome').innerText = user.full_name;
-                    setTimeout(() => document.getElementById('input-password').focus(), 100);
-                } else if (input === 'admin') {
-                    tempUser = {
-                        id: '00000000-0000-0000-0000-000000000001',
-                        u: 'admin',
-                        name: 'Amministratore',
-                        role: 'admin',
-                        pass: 'admin',
-                        class_id: null,
-                        subject: 'Generale'
-                    };
-                    document.getElementById('input-username').classList.add('hidden');
-                    document.getElementById('btn-next').classList.add('hidden');
-                    document.getElementById('password-container').classList.remove('hidden');
-                    document.getElementById('user-welcome').innerText = "Amministratore";
-                    setTimeout(() => document.getElementById('input-password').focus(), 100);
-                } else {
-                    errText.innerText = "Utente non censito nel database";
-                    err.classList.remove('hidden');
-                }
-            } catch (e) {
-                console.error(e);
-                errText.innerText = "Errore di connessione al database";
-                err.classList.remove('hidden');
-            } finally {
-                btn.innerText = "Continua";
-            }
-        }
-
-        function processAuth() {
-            const passEl = document.getElementById('input-password');
-            const pass = passEl ? passEl.value : '';
-            const err = document.getElementById('login-error');
-            const errText = document.getElementById('error-text');
-
-            if (!tempUser) {
-                resetLogin();
-                return;
-            }
-
-            if (pass === tempUser.pass) {
-                currentUser = tempUser;
-                localStorage.setItem('SC_USER', JSON.stringify(currentUser));
-                document.getElementById('view-login').classList.add('hidden');
-                
-                if (currentUser.role === 'studente') {
-                    openUserHome();
-                } else {
-                    const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
-                    if (activeCls) {
-                        loadClassroom(activeCls);
-                    } else {
-                        initHub();
-                    }
-                }
-                startClock();
-                toast('Accesso Eseguito', `Benvenuto/a, ${currentUser.name}`, 'success');
-            } else {
-                errText.innerText = "Password non corretta";
-                err.classList.remove('hidden');
-            }
-        }
-
-        function resetLogin() {
-            tempUser = null;
-            document.getElementById('password-container').classList.add('hidden');
-            document.getElementById('input-username').classList.remove('hidden');
-            document.getElementById('btn-next').classList.remove('hidden');
-            document.getElementById('login-error').classList.add('hidden');
-            document.getElementById('input-password').value = '';
-            document.getElementById('input-username').focus();
-        }
-
-        function logout() {
-            localStorage.removeItem('SC_USER');
-            localStorage.removeItem('SC_ACTIVE_CLASS');
-            location.reload();
-        }
-
-        function initHub() {
-            document.getElementById('view-hub').classList.remove('hidden');
-            document.getElementById('hub-user-name').innerText = currentUser.name;
-            document.getElementById('hub-role-badge').innerText = (currentUser.role === 'admin' ? "ADMIN" : "DOCENTE");
-            
-            // Abilita pulsante Console Flotta & AI se Admin
-            const btnAdmin = document.getElementById('btn-open-admin-console');
-            if (btnAdmin) {
-                btnAdmin.classList.toggle('hidden', currentUser.role !== 'admin');
-            }
-
-            renderClassSelector();
-        }
-
-        async function renderClassSelector() {
-            const container = document.getElementById('classes-container');
-            if (!container) return;
-            container.innerHTML = '';
-            
-            for (const [dept, classes] of Object.entries(FULL_CLASSES_STRUCT)) {
-                const cfg = DEPT_CONFIG[dept] || {
-                    icon: "fa-chalkboard",
-                    badge: "Indirizzo",
-                    color: "text-blue-400",
-                    bgBadge: "bg-blue-500/10 text-blue-400 border-blue-500/30",
-                    hoverBorder: "hover:border-blue-500 hover:shadow-blue-500/20"
-                };
-
-                const col = document.createElement('div');
-                col.className = 'flex flex-col space-y-4 bg-slate-900/40 p-5 sm:p-6 lg:p-7 pb-6 sm:pb-8 rounded-3xl border border-slate-800/80 shadow-lg';
-                col.innerHTML = `
-                    <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center ${cfg.color} text-lg shadow-inner shrink-0">
-                                <i class="fa-solid ${cfg.icon}"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-base sm:text-lg font-black text-white tracking-wide uppercase">${dept}</h3>
-                                <div class="text-[10px] font-mono text-slate-400">${classes.length} Sezioni Attive</div>
-                            </div>
-                        </div>
-                        <span class="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border ${cfg.bgBadge} hidden sm:inline-block">${cfg.badge}</span>
-                    </div>
-                    <div class="class-list-container pt-1.5"></div>
-                `;
-                
-                const list = col.querySelector('.class-list-container');
-                classes.forEach(c => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.onclick = () => loadClassroom(c);
-                    btn.className = `w-full py-3.5 sm:py-4 px-4 sm:px-5 bg-gradient-to-br from-slate-900/90 to-slate-800/80 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} hover:text-white transition-all duration-200 text-left flex items-center justify-between group active:scale-[0.98] shadow-md hover:shadow-xl`;
-                    btn.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="text-xl sm:text-2xl font-black font-mono text-white group-hover:text-white tracking-wider leading-tight">${esc(c)}</span>
-                            <span class="text-[10px] font-mono text-slate-400 group-hover:text-slate-200 mt-1 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Registro & Banchi
-                            </span>
-                        </div>
-                        <div class="w-10 h-10 rounded-xl bg-slate-800/90 border border-slate-700/80 group-hover:bg-blue-600 group-hover:border-blue-400 group-hover:text-white text-slate-400 flex items-center justify-center transition-all shadow shrink-0 ml-2">
-                            <i class="fa-solid fa-arrow-right text-xs transition-transform group-hover:translate-x-0.5"></i>
-                        </div>
-                    `;
-                    list.appendChild(btn);
-                });
-                container.appendChild(col);
-            }
-        }
-
-        async function openUserHome() {
-            let className = '5AEE';
-            if (currentUser?.class_id) {
-                const { data } = await _supabase.from('classes').select('name').eq('id', currentUser.class_id).limit(1);
-                if (data && data[0]?.name) className = data[0].name;
-            }
-            await loadClassroom(className);
-        }
-
-        function backToHub() {
-            window.scrollTo(0, 0);
-            localStorage.removeItem('SC_ACTIVE_CLASS');
-            document.getElementById('view-classroom').classList.add('hidden');
-            document.getElementById('view-hub').classList.remove('hidden');
-            currentClass = null;
-            selectedStudentId = null;
-            renderClassSelector();
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            startClock();
-            switchMobileAisle('left');
-            
-            document.getElementById('input-username').addEventListener('keydown', e => { if (e.key === 'Enter') verifyUser(); });
-            document.getElementById('input-password').addEventListener('keydown', e => { if (e.key === 'Enter') processAuth(); });
-
-            const saved = localStorage.getItem('SC_USER');
-            if (saved) {
-                try {
-                    currentUser = JSON.parse(saved);
-                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-                    if (currentUser && (!currentUser.id || !uuidRegex.test(currentUser.id))) {
-                        const { data: uRow } = await _supabase.from('registry').select('id').eq('username', currentUser.u).limit(1);
-                        if (uRow && uRow[0]) {
-                            currentUser.id = uRow[0].id;
-                            localStorage.setItem('SC_USER', JSON.stringify(currentUser));
-                        }
-                    }
-                    document.getElementById('view-login').classList.add('hidden');
-                    
-                    if (currentUser.role === 'studente') {
-                        openUserHome();
-                    } else {
-                        const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
-                        if (activeCls) {
-                            loadClassroom(activeCls);
-                        } else {
-                            initHub();
-                        }
-                    }
-                } catch(e) {
-                    localStorage.removeItem('SC_USER');
-                    localStorage.removeItem('SC_ACTIVE_CLASS');
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+                localNotesDB =
