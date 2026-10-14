@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#060913">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Socket.io servito direttamente dal tuo server.js locale -->
     <script src="/socket.io/socket.io.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -16,10 +15,16 @@
     <style>
         :root {
             --bg-deep: #060913;
-            --panel-bg: rgba(13, 20, 36, 0.75);
+            --panel-bg: rgba(13, 20, 36, 0.78);
             --panel-border: rgba(255, 255, 255, 0.08);
         }
-        html, body { width: 100%; min-height: 100%; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+        }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-deep); 
@@ -37,13 +42,22 @@
         }
         .hidden { display: none !important; }
 
+        /* GESTIONE VISIBILITÀ AULA RESPONSIVE */
         #classroom-grid { display: none; }
         #mobile-classroom-grid { display: flex; flex-direction: column; }
         .desk-switcher-mobile { display: block; }
         .header-divider { display: none; }
 
-        .class-list-container { display: flex !important; flex-direction: column !important; gap: 12px !important; }
-        @media (min-width: 640px) { .class-list-container { gap: 15px !important; } }
+        .class-list-container {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+        }
+
+        @media (min-width: 640px) {
+            .class-list-container { gap: 15px !important; }
+        }
+
         @media (min-width: 768px) {
             #classroom-grid { display: grid !important; }
             #mobile-classroom-grid { display: none !important; }
@@ -57,6 +71,7 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #0b1120; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -73,6 +88,8 @@
         .status-fuori-aula { border: 2px solid #6366f1 !important; background: linear-gradient(145deg, rgba(49, 46, 129, 0.9), rgba(99, 102, 241, 0.2)) !important; color: #a5b4fc !important; }
 
         @keyframes pulseCyan { 0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.5); } 70% { box-shadow: 0 0 0 14px rgba(6,182,212,0); } 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); } }
+
+        /* LAB BENCH HIGHLIGHT */
         .bench-highlight { border: 2px solid #f59e0b !important; box-shadow: 0 0 25px rgba(245, 158, 11, 0.45) !important; transform: scale(1.02); }
 
         .dock-btn { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.08); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -125,7 +142,7 @@
 
     <div id="sc-toast-container" class="sc-toast-container"></div>
     <div id="sc-loading" class="sc-loading hidden">
-        <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Sincronizzazione locale...</span></div>
+        <div class="sc-loading-card"><span class="sc-spinner"></span><span id="sc-loading-text">Sincronizzazione locale in corso...</span></div>
     </div>
 
     <!-- ================= 1. LOGIN SCREEN ================= -->
@@ -135,19 +152,19 @@
             <div class="lg:col-span-6 bg-gradient-to-br from-blue-950/40 via-slate-900/60 to-purple-950/30 p-6 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800/80">
                 <div>
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono font-bold text-emerald-400 mb-4 sm:mb-6 lg:mb-8 uppercase tracking-wider">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span> Server Locale Intranet Attivo
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span> Architettura Locale Sicura (Zero-Cloud)
                     </div>
                     <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-none mb-3 sm:mb-5">
                         Smart<span class="text-blue-500">Check</span><span class="text-slate-500 text-2xl sm:text-3xl lg:text-4xl font-mono">.OS</span>
                     </h1>
                     <p class="text-slate-300 text-sm sm:text-base lg:text-lg leading-relaxed font-light">
-                        Piattaforma locale ad alta sicurezza per registro presenze, coda bagno, tracciamento banchi di laboratorio e armadio componenti.
+                        Piattaforma centralizzata intranet per la gestione di presenze, coda bagno, banchi laboratorio e tracciamento armadio componenti in tempo reale.
                     </p>
                 </div>
                 
                 <div class="mt-6 sm:mt-8 lg:mt-12 pt-4 sm:pt-6 border-t border-slate-800/60 flex items-center justify-between text-xs sm:text-sm font-mono text-slate-400">
                     <div>ANNO SCOL. <span class="text-white font-bold">2026/2027</span></div>
-                    <div class="px-2.5 py-1 rounded-md bg-slate-800 text-emerald-400 font-bold text-xs">LOCAL v2026.3</div>
+                    <div class="px-2.5 py-1 rounded-md bg-slate-800 text-emerald-400 font-bold text-xs">LOCAL v2026.4</div>
                 </div>
             </div>
 
@@ -155,11 +172,11 @@
                 <div class="w-full max-w-md mx-auto space-y-5 sm:space-y-7">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Autenticazione</h2>
-                        <p class="text-slate-400 text-xs sm:text-sm mt-1">Accedi al nodo locale con le tue credenziali d'istituto</p>
+                        <p class="text-slate-400 text-xs sm:text-sm mt-1">Accedi al server locale d'istituto con le tue credenziali</p>
                     </div>
                     
                     <div id="login-form-container" class="space-y-4 sm:space-y-5">
-                        <div>
+                        <div id="username-field-wrap">
                             <label class="block text-xs font-mono uppercase font-bold text-slate-300 mb-2">Identificativo Utente</label>
                             <div class="relative">
                                 <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -216,7 +233,7 @@
                             <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Hub Istituto</h2>
                             <span id="hub-role-badge" class="text-[10px] sm:text-xs font-mono font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg border border-slate-700 uppercase bg-slate-800/70 text-slate-300">--</span>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Sessione protetta JWT: <span id="hub-user-name" class="text-white font-bold">--</span></p>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Sessione attiva: <span id="hub-user-name" class="text-white font-bold">--</span></p>
                     </div>
                 </div>
                 
@@ -233,10 +250,10 @@
             <div class="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
                 <div>
                     <h3 class="text-lg sm:text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi d'aula o la postazione di Laboratorio & Armadio Componenti.</p>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi d'aula, i banchi di laboratorio e l'armadio componenti.</p>
                 </div>
                 <div class="hidden md:flex items-center gap-2 text-xs font-mono text-emerald-400 bg-black/30 px-3.5 py-2 rounded-xl border border-emerald-800/50 shrink-0 ml-4">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> DB Locale SQLite + Socket.io
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Server Locale LAN Attivo
                 </div>
             </div>
 
@@ -246,7 +263,7 @@
         </div>
 
         <footer class="mt-8 sm:mt-12 text-center text-xs font-mono text-slate-600">
-            SmartCheck School OS • Ecosistema Locale Indipendente (Zero-Cloud GDPR Safe) 2026/2027
+            SmartCheck School OS • Ecosistema Scolastico Locale Indipendente (SQLite + WebSockets) 2026/2027
         </footer>
     </div>
 
@@ -272,65 +289,63 @@
                     </div>
                 </div>
 
-                <!-- Controlli: Data, Elenco, Registro -->
-                <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex items-center justify-between md:justify-end gap-2.5 sm:gap-3.5 lg:gap-4 xl:gap-5 md:ml-auto md:order-2">
-                    <div class="relative group cursor-pointer flex-grow md:flex-grow-0" onclick="openNativeDatePicker()">
-                        <div class="glass-panel px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl lg:rounded-2xl flex items-center gap-2.5 border border-slate-700/70 hover:border-blue-500/60 transition relative">
-                            <i class="fa-regular fa-calendar text-sm lg:text-base text-blue-400 shrink-0"></i>
+                <!-- Controlli: Selettore Modalità (Aula / Lab / Armadio), Data, Elenco, Registro -->
+                <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex flex-wrap items-center justify-between md:justify-end gap-2 sm:gap-3 md:ml-auto md:order-2">
+                    
+                    <!-- SWITCHER MODALITÀ: AULA / LABORATORIO / ARMADIO -->
+                    <div class="flex items-center bg-slate-900/95 p-1 rounded-xl border border-slate-700/80 text-[11px] font-mono font-bold">
+                        <button onclick="switchMainMode('aula')" id="mode-btn-aula" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white shadow flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-chalkboard"></i> <span>Aula</span>
+                        </button>
+                        <button onclick="switchMainMode('lab')" id="mode-btn-lab" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-flask"></i> <span>Banchi Lab</span>
+                            <span id="badge-lab-inuse" class="hidden px-1.5 py-0.2 rounded-full bg-amber-500 text-black text-[9px] font-black">0</span>
+                        </button>
+                        <button onclick="switchMainMode('cabinet')" id="mode-btn-cabinet" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-boxes-stacked"></i> <span>Armadio</span>
+                        </button>
+                    </div>
+
+                    <!-- Selettore Data -->
+                    <div class="relative group cursor-pointer" onclick="openNativeDatePicker()">
+                        <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-2 border border-slate-700/70 hover:border-blue-500/60 transition relative">
+                            <i class="fa-regular fa-calendar text-xs text-blue-400 shrink-0"></i>
                             <div class="flex flex-col text-left">
-                                <span class="text-[7px] sm:text-[8px] text-slate-500 font-mono font-bold uppercase tracking-widest leading-none">DATA</span>
-                                <span id="date-display" class="font-mono text-xs sm:text-sm font-bold text-white uppercase tracking-wider truncate">OGGI</span>
+                                <span class="text-[7px] text-slate-500 font-mono font-bold uppercase tracking-widest leading-none">DATA</span>
+                                <span id="date-display" class="font-mono text-xs font-bold text-white uppercase tracking-wider truncate">OGGI</span>
                             </div>
                             <input type="date" id="date-picker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30" onchange="changeDate(this.value)">
-                            <button type="button" onclick="event.stopPropagation(); resetToToday();" class="text-[8px] sm:text-[9px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 ml-1.5 z-40 relative">OGGI</button>
+                            <button type="button" onclick="event.stopPropagation(); resetToToday();" class="text-[8px] font-mono font-black uppercase px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 z-40 relative">OGGI</button>
                         </div>
                     </div>
 
-                    <button onclick="openListModal()" class="px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl lg:rounded-2xl text-xs sm:text-sm font-bold text-slate-200 transition flex items-center gap-2 shadow-sm shrink-0">
-                        <i class="fa-solid fa-list-check text-slate-400 text-xs sm:text-sm"></i> <span>Elenco</span>
+                    <button onclick="openListModal()" class="px-3 py-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 transition flex items-center gap-1.5 shadow-sm shrink-0">
+                        <i class="fa-solid fa-list-check text-slate-400 text-xs"></i> <span class="hidden sm:inline">Elenco</span>
                     </button>
 
-                    <button id="sign-btn" onclick="openSignModal()" class="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl lg:rounded-2xl text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-2 shrink-0">
-                        <i class="fa-solid fa-pen-nib text-xs sm:text-sm"></i> <span>Registro</span>
+                    <button id="sign-btn" onclick="openSignModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-pen-nib text-xs"></i> <span class="hidden sm:inline">Registro</span>
                     </button>
                 </div>
 
-                <div class="header-divider shrink-0 h-8 w-[1.5px] bg-slate-700/80 mx-2.5 sm:mx-3 lg:mx-4 xl:mx-5 md:order-3"></div>
+                <div class="header-divider shrink-0 h-8 w-[1.5px] bg-slate-700/80 mx-2.5 sm:mx-3 lg:mx-4 md:order-3"></div>
 
-                <div class="col-start-2 row-start-1 justify-self-end flex items-center gap-2.5 sm:gap-3 lg:gap-4 xl:gap-5 md:order-4 shrink-0">
+                <!-- Blocco Orologio & Logout -->
+                <div class="col-start-2 row-start-1 justify-self-end flex items-center gap-2.5 sm:gap-3 md:order-4 shrink-0">
                     <div class="text-right flex flex-col justify-center">
-                        <div id="clock" class="mono text-sm sm:text-xl lg:text-2xl font-black text-white tracking-wider leading-none">00:00:00</div>
-                        <div id="hour-badge" class="text-[7px] sm:text-[9px] lg:text-[10px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-0.5 sm:mt-1">CARICAMENTO...</div>
+                        <div id="clock" class="mono text-sm sm:text-xl font-black text-white tracking-wider leading-none">00:00:00</div>
+                        <div id="hour-badge" class="text-[7px] sm:text-[9px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-0.5">CARICAMENTO...</div>
                     </div>
-                    <button onclick="logout()" title="Disconnetti" class="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 flex items-center justify-center bg-red-950/30 text-red-400 border border-red-900/40 rounded-xl lg:rounded-2xl text-sm hover:bg-red-900/40 hover:text-white transition shrink-0">
+                    <button onclick="logout()" title="Disconnetti" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-red-950/30 text-red-400 border border-red-900/40 rounded-xl text-sm hover:bg-red-900/40 hover:text-white transition shrink-0">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
                 </div>
-            </div>
 
-            <!-- BARRA SWITCH MODALITÀ: AULA | LABORATORIO | PANNELLO ARMADIO -->
-            <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800 w-full sm:w-auto">
-                    <button onclick="switchWorkspaceMode('aula')" id="btn-mode-aula" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-2 bg-blue-600 text-white shadow-md">
-                        <i class="fa-solid fa-chair"></i> <span>Mappa Aula</span>
-                    </button>
-                    <button onclick="switchWorkspaceMode('lab')" id="btn-mode-lab" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-2 text-slate-400 hover:text-white">
-                        <i class="fa-solid fa-microchip"></i> <span>Banchi Laboratorio</span>
-                    </button>
-                    <button onclick="switchWorkspaceMode('cabinet')" id="btn-mode-cabinet" class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-2 text-slate-400 hover:text-white relative">
-                        <i class="fa-solid fa-boxes-stacked"></i> <span>Armadio Componenti</span>
-                        <span id="badge-missing-items" class="hidden ml-1 px-1.5 py-0.2 rounded-full bg-amber-500 text-black font-black text-[10px]">0</span>
-                    </button>
-                </div>
-
-                <div id="lab-status-pill" class="hidden sm:flex items-center gap-2 text-[11px] font-mono px-3 py-1 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-300">
-                    <i class="fa-solid fa-shield-check"></i> <span id="lab-status-pill-text">Armadio Completo (0 strumenti fuori)</span>
-                </div>
             </div>
         </header>
 
-        <!-- ================= SEZIONE A: MAPPA AULA TRADIZIONALE ================= -->
-        <main id="workspace-aula" class="flex-grow flex flex-col items-center justify-between w-full px-4 lg:px-10 xl:px-16 pt-2 pb-24 max-w-[1850px] mx-auto min-h-[calc(100vh-115px)]">
+        <!-- ================= CONTENUTO 3A: MAPPA AULA TRADIZIONALE ================= -->
+        <main id="section-mode-aula" class="flex-grow flex flex-col items-center justify-between w-full px-4 lg:px-10 xl:px-16 pt-2 pb-24 max-w-[1850px] mx-auto min-h-[calc(100vh-65px)]">
             
             <div id="history-warning" class="hidden w-full max-w-md bg-amber-950/30 border border-amber-500/40 rounded-full py-1 px-4 mb-1.5 flex items-center justify-center gap-2 text-amber-300 backdrop-blur-md animate-pulse text-center">
                 <i class="fa-solid fa-clock-rotate-left text-xs"></i> 
@@ -343,37 +358,25 @@
             <!-- SELETTORE ALI PER SMARTPHONE -->
             <div class="desk-switcher-mobile w-full max-w-md mb-3">
                 <div class="p-1 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center gap-1 text-xs font-mono font-bold">
-                    <button onclick="switchMobileAisle('left')" id="tab-aisle-left" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">
-                        Ala SX <span class="text-[10px] opacity-60">(8)</span>
-                    </button>
-                    <button onclick="switchMobileAisle('center')" id="tab-aisle-center" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">
-                        Centro <span class="text-[10px] opacity-60">(7)</span>
-                    </button>
-                    <button onclick="switchMobileAisle('right')" id="tab-aisle-right" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">
-                        Ala DX <span class="text-[10px] opacity-60">(8)</span>
-                    </button>
-                    <button onclick="switchMobileAisle('all')" id="tab-aisle-all" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">
-                        Tutti
-                    </button>
+                    <button onclick="switchMobileAisle('left')" id="tab-aisle-left" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Ala SX (8)</button>
+                    <button onclick="switchMobileAisle('center')" id="tab-aisle-center" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Centro (7)</button>
+                    <button onclick="switchMobileAisle('right')" id="tab-aisle-right" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Ala DX (8)</button>
+                    <button onclick="switchMobileAisle('all')" id="tab-aisle-all" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Tutti</button>
                 </div>
             </div>
 
-            <!-- GRIGLIA MOBILE -->
             <div id="mobile-classroom-grid" class="w-full space-y-3"></div>
-
-            <!-- GRIGLIA DESKTOP WIDESCREEN -->
             <div class="grid-cols-3 gap-6 lg:gap-10 xl:gap-16 2xl:gap-20 w-full my-auto flex-grow items-center" id="classroom-grid"></div>
 
             <!-- Cattedra Docente -->
             <div id="teacher-desk" onclick="openSignModal()" class="mt-4 lg:mt-6 mb-2 w-full max-w-md md:max-w-lg lg:max-w-xl min-h-[64px] lg:min-h-[76px] px-6 py-3.5 bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-blue-950/80 glass-panel border-2 border-blue-500/50 border-b-4 border-b-blue-500 rounded-2xl sm:rounded-3xl flex items-center justify-between cursor-pointer hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/30 hover:scale-[1.02] transition-all group shadow-xl relative overflow-hidden">
-                <div class="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 <div class="flex items-center gap-4 min-w-0">
-                    <div class="w-11 h-11 lg:w-12 lg:h-12 rounded-2xl bg-blue-600/20 border border-blue-400/40 flex items-center justify-center text-blue-400 text-lg lg:text-xl group-hover:scale-105 group-hover:bg-blue-600 group-hover:text-white transition shadow-inner shrink-0">
+                    <div class="w-11 h-11 lg:w-12 lg:h-12 rounded-2xl bg-blue-600/20 border border-blue-400/40 flex items-center justify-center text-blue-400 text-lg lg:text-xl group-hover:bg-blue-600 group-hover:text-white transition shrink-0">
                         <i class="fa-solid fa-chalkboard-user"></i>
                     </div>
                     <div class="truncate">
                         <div class="flex items-center gap-2">
-                            <span class="text-blue-400 font-black tracking-[0.22em] uppercase text-xs lg:text-sm group-hover:text-blue-300 leading-none">CATTEDRA DOCENTE</span>
+                            <span class="text-blue-400 font-black tracking-[0.22em] uppercase text-xs lg:text-sm leading-none">CATTEDRA DOCENTE</span>
                             <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
                         </div>
                         <div id="signature-display" class="text-xs lg:text-sm text-slate-300 font-mono mt-1 truncate">
@@ -383,111 +386,90 @@
                 </div>
                 <div class="hidden sm:flex items-center gap-2.5 pl-4 border-l border-slate-800 shrink-0">
                     <span class="text-[11px] font-mono font-bold uppercase text-slate-400 group-hover:text-white">Giornale</span>
-                    <i class="fa-solid fa-arrow-right text-xs text-slate-500 group-hover:text-blue-400 group-hover:translate-x-1 transition-transform"></i>
+                    <i class="fa-solid fa-arrow-right text-xs text-slate-500 group-hover:text-blue-400"></i>
                 </div>
             </div>
         </main>
 
-        <!-- ================= SEZIONE B: VISTA BANCHI LABORATORIO & RICERCA COMPONENTI ================= -->
-        <section id="workspace-lab" class="hidden flex-grow flex flex-col w-full px-4 lg:px-10 xl:px-16 pt-4 pb-28 max-w-[1850px] mx-auto space-y-5 fade-in">
+        <!-- ================= CONTENUTO 3B: VISTA BANCHI LABORATORIO & RICERCA COMPONENTI ================= -->
+        <section id="section-mode-lab" class="hidden flex-grow flex flex-col w-full px-4 lg:px-10 xl:px-16 pt-4 pb-24 max-w-[1850px] mx-auto">
             
-            <!-- Barra Ricerca Componente ("Chi ha il Multimetro?") + Azioni Rapide -->
-            <div class="glass-panel p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+            <!-- Banner Stato Laboratorio & Ricerca Componenti per Studenti/Docenti -->
+            <div class="glass-panel p-4 sm:p-5 rounded-3xl border border-slate-800 mb-6 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-mono font-bold uppercase">Mappa Live Laboratorio</span>
-                        <h2 class="text-lg sm:text-xl font-black text-white">Postazioni di Lavoro & Tracciamento Strumenti</h2>
+                    <div class="flex items-center gap-2.5">
+                        <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-mono font-bold uppercase">Mappa Live Laboratorio</span>
+                        <span id="lab-missing-alert-pill" class="hidden px-2.5 py-0.5 rounded-full bg-red-500/20 border border-red-500/50 text-red-300 text-[10px] font-mono font-bold uppercase animate-pulse"></span>
                     </div>
-                    <p class="text-xs text-slate-400 mt-1">Visualizza in tempo reale i gruppi assegnati ai banchi e individua subito dove si trovano multimetri, sonde e kit.</p>
+                    <h2 class="text-xl sm:text-2xl font-black text-white mt-1">Banchi di Lavoro & Dotazione Componenti</h2>
+                    <p class="text-xs text-slate-400">Visualizza chi lavora a ciascun banco e quali strumenti dell'armadio sono attualmente in uso sui banchi.</p>
                 </div>
 
-                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
-                    <div class="relative flex-grow sm:w-72">
+                <!-- Barra di Ricerca Componente ("Chi ha preso il multimetro?") -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 min-w-[280px] lg:min-w-[460px]">
+                    <div class="relative flex-grow">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-400 text-xs"></i>
-                        <input type="text" id="lab-search-input" oninput="renderLabWorkbenches()" placeholder="Cerca componente (es. Multimetro, Sonda)..." class="w-full bg-slate-900/95 border border-slate-700 text-white pl-9 pr-3 py-2.5 rounded-xl text-xs outline-none focus:border-amber-400">
+                        <input type="text" id="lab-search-input" oninput="renderLabView()" placeholder="Cerca componente (es. Multimetro, Sonda, ESP32) o studente..." class="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-400 rounded-xl pl-9 pr-4 py-2.5 text-xs sm:text-sm text-white outline-none">
                     </div>
-                    <button onclick="switchWorkspaceMode('cabinet')" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-2 shrink-0 shadow-lg shadow-amber-500/20">
+                    <button onclick="switchMainMode('cabinet')" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-amber-600/20">
                         <i class="fa-solid fa-box-open"></i> <span>Apri Armadio</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Filtro Rapido Dotazione Armadio -->
-            <div id="lab-quick-inventory-bar" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none"></div>
-
-            <!-- Griglia 8 Banchi di Laboratorio -->
-            <div id="lab-workbenches-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5"></div>
+            <!-- Griglia 8 Banchi Laboratorio -->
+            <div id="lab-workbenches-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 my-auto"></div>
         </section>
 
-        <!-- ================= SEZIONE C: PANNELLO OPERATORE ARMADIO COMPONENTI ================= -->
-        <section id="workspace-cabinet" class="hidden flex-grow flex flex-col w-full px-4 lg:px-10 xl:px-16 pt-4 pb-28 max-w-[1850px] mx-auto space-y-5 fade-in">
+        <!-- ================= CONTENUTO 3C: PANNELLO OPERATORE ARMADIO COMPONENTI ================= -->
+        <section id="section-mode-cabinet" class="hidden flex-grow flex flex-col w-full px-4 lg:px-10 xl:px-16 pt-4 pb-24 max-w-[1850px] mx-auto">
             
-            <!-- Intestazione Armadio & Alert Mancanze -->
-            <div id="cabinet-alert-banner" class="p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all"></div>
+            <!-- Alert Superiore Controllo Mancanze -->
+            <div id="cabinet-status-banner" class="mb-5 p-4 sm:p-5 rounded-3xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"></div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
-                <!-- Colonna Sinistra (7 col): Pannello Touch Prelievo dall'Armadio -->
-                <div class="lg:col-span-7 glass-panel p-5 sm:p-6 rounded-3xl border border-slate-800 space-y-5">
-                    <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
-                        <div class="flex items-center gap-3">
-                            <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl">
-                                <i class="fa-solid fa-boxes-stacked"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg sm:text-xl font-black text-white">Terminale Armadio di Laboratorio</h3>
-                                <p class="text-xs text-slate-400">Seleziona il banco di destinazione e tocca il componente da prelevare</p>
-                            </div>
+                <!-- Colonna SX (7 col): Dotazione Armadio e Pulsanti di Prelievo -->
+                <div class="lg:col-span-7 glass-panel p-5 sm:p-6 rounded-3xl border border-slate-800">
+                    <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-800">
+                        <div>
+                            <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-boxes-stacked text-blue-400"></i> Inventario Armadio di Laboratorio
+                            </h3>
+                            <p class="text-xs text-slate-400">Seleziona il banco/studente e registra l'uscita di uno strumento dall'armadio</p>
                         </div>
-                        <span class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[10px] font-mono font-bold text-cyan-400">
-                            <i class="fa-solid fa-wifi mr-1"></i> Nodo SC32-LAB-EL Attivo
-                        </span>
-                    </div>
 
-                    <!-- Selettore Operatore e Banco Destinazione -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/90 p-4 rounded-2xl border border-slate-800">
-                        <div>
-                            <label class="text-[10px] font-mono uppercase font-bold text-slate-400 block mb-1">1. Chi preleva (Badge NFC / Utente)</label>
-                            <select id="cabinet-student-select" onchange="syncCabinetBenchFromStudent()" class="w-full bg-slate-950 border border-slate-700 text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none focus:border-blue-500"></select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-mono uppercase font-bold text-slate-400 block mb-1">2. Banco di Lavoro Destinazione</label>
-                            <select id="cabinet-bench-select" class="w-full bg-slate-950 border border-slate-700 text-amber-300 px-3 py-2.5 rounded-xl text-xs font-mono font-bold outline-none focus:border-amber-500">
-                                <option value="lab_banco_01">Banco Lab #01</option>
-                                <option value="lab_banco_02">Banco Lab #02</option>
-                                <option value="lab_banco_03">Banco Lab #03</option>
-                                <option value="lab_banco_04">Banco Lab #04</option>
-                                <option value="lab_banco_05">Banco Lab #05</option>
-                                <option value="lab_banco_06">Banco Lab #06</option>
-                                <option value="lab_banco_07">Banco Lab #07</option>
-                                <option value="lab_banco_08">Banco Lab #08</option>
-                            </select>
+                        <!-- Selettore Banco Destinazione per il Prelievo -->
+                        <div class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-700">
+                            <span class="text-[10px] font-mono uppercase font-bold text-slate-400">Destinazione:</span>
+                            <select id="cabinet-checkout-bench" class="bg-slate-800 text-white text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg border border-slate-700 outline-none"></select>
                         </div>
                     </div>
 
-                    <!-- Griglia Scaffali e Componenti Armadio -->
-                    <div id="cabinet-inventory-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
+                    <div id="cabinet-inventory-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
                 </div>
 
-                <!-- Colonna Destra (5 col): Componenti Fuori dall'Armadio (Da Riconsegnare) + Storico Orari -->
+                <!-- Colonna DX (5 col): Componenti Fuori dall'Armadio (Da Restituire) + Cronologia -->
                 <div class="lg:col-span-5 space-y-5">
                     <div class="glass-panel p-5 sm:p-6 rounded-3xl border border-slate-800">
-                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
                             <div>
-                                <h3 class="text-base sm:text-lg font-black text-white">Componenti Attualmente ai Banchi</h3>
-                                <p class="text-xs text-slate-400">Premi "Restituisci" quando il componente viene rimesso nell'armadio</p>
+                                <h3 class="text-base sm:text-lg font-black text-amber-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-hand-holding-hand"></i> Componenti Attualmente Fuori
+                                </h3>
+                                <p class="text-[11px] text-slate-400">Premi "Riponi nell'Armadio" quando il componente viene riconsegnato</p>
                             </div>
-                            <span id="cabinet-out-counter" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-black">0 fuori</span>
+                            <span id="cabinet-out-count" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-mono text-xs font-black">0</span>
                         </div>
-                        <div id="cabinet-active-loans-list" class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar"></div>
+                        <div id="cabinet-active-loans-list" class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1"></div>
                     </div>
 
+                    <!-- Registro Storico Prelievi/Riconsegne con Orario -->
                     <div class="glass-panel p-5 sm:p-6 rounded-3xl border border-slate-800">
-                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
-                            <h3 class="text-xs font-mono uppercase font-bold text-slate-400">Registro Cronologico Movimenti Armadio (Oggi)</h3>
-                            <i class="fa-solid fa-clock-rotate-left text-slate-500 text-xs"></i>
-                        </div>
-                        <div id="cabinet-history-list" class="space-y-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar text-xs font-mono"></div>
+                        <h3 class="text-sm font-mono uppercase font-bold text-slate-400 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Registro Cronologico Movimenti Armadio
+                        </h3>
+                        <div id="cabinet-history-list" class="space-y-2 max-h-[240px] overflow-y-auto pr-1 text-xs font-mono"></div>
                     </div>
                 </div>
 
@@ -514,7 +496,7 @@
                     <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Coda</span>
                     <span id="queue-badge-count" class="hidden absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-cyan-500 text-[9px] font-black text-black flex items-center justify-center font-mono shadow-md animate-pulse">0</span>
                 </button>
-                <button onclick="switchWorkspaceMode('lab')" class="dock-btn relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-blue-400 hover:text-blue-300 group" title="Mappa Laboratorio & Armadio">
+                <button onclick="switchMainMode('lab')" class="dock-btn relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-purple-400 hover:text-purple-300 group" title="Vista Laboratorio & Armadio">
                     <i class="fa-solid fa-screwdriver-wrench text-sm sm:text-base"></i>
                     <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Lab</span>
                 </button>
@@ -534,11 +516,10 @@
         </div>
     </div>
 
-    <!-- ================= MODALI ================= -->
-    
-    <!-- MODALE PANNELLO ADMIN: FLOTTA SMARTCHECK32 & ASSISTENTE AI -->
+    <!-- ================= MODALE CONSOLE FLOTTA ESP32 & ASSISTENTE AI ================= -->
     <div id="modal-admin-console" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-lg p-3 sm:p-6">
         <div class="glass-panel w-full max-w-6xl max-h-[92vh] p-5 sm:p-8 rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
+            
             <div class="flex flex-wrap justify-between items-center gap-3 pb-4 border-b border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="w-11 h-11 rounded-2xl bg-blue-600/25 border border-blue-500/40 flex items-center justify-center text-blue-400 text-xl font-black shrink-0">
@@ -549,7 +530,7 @@
                             <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Console Hardware & Diagnostica AI</h2>
                             <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold uppercase">Admin Root</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Telemetria nodi ESP32 d'istituto, controllo armadi laboratorio e assistente diagnostico</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Telemetria nodi ESP32 d'istituto, controllo armadi e assistente diagnostico locale</p>
                     </div>
                 </div>
                 
@@ -562,6 +543,7 @@
                 </div>
             </div>
 
+            <!-- SCHEDA 1: FLOTTA ESP32 -->
             <div id="content-admin-fleet" class="flex-grow flex flex-col overflow-hidden pt-4">
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                     <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
@@ -569,7 +551,7 @@
                         <div class="text-xl sm:text-2xl font-black text-white font-mono mt-0.5" id="metric-total-nodes">0</div>
                     </div>
                     <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
-                        <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Nodi Online (15s)</div>
+                        <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Nodi Online</div>
                         <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono mt-0.5" id="metric-online-nodes">0</div>
                     </div>
                     <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
@@ -581,41 +563,41 @@
                         <div class="text-xl sm:text-2xl font-black text-red-400 font-mono mt-0.5" id="metric-tamper-alerts">0</div>
                     </div>
                 </div>
-
-                <div class="flex-grow overflow-y-auto custom-scrollbar pr-1">
+                <div class="flex-grow overflow-y-auto pr-1">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" id="devices-grid-container"></div>
                 </div>
             </div>
 
+            <!-- SCHEDA 2: ASSISTENTE AI LOCALE -->
             <div id="content-admin-ai" class="hidden flex-grow flex flex-col overflow-hidden pt-4">
                 <div class="p-3 bg-gradient-to-r from-purple-950/30 to-blue-950/20 border border-purple-500/20 rounded-2xl mb-3 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-xs font-mono text-purple-300">
                         <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-                        Motore Diagnostico Locale SmartCheck AI • Analisi Nodi, Bagni & Armadio Lab
+                        Motore Diagnostico Locale SmartCheck AI • Connesso a SQLite & Telemetria Lab
                     </div>
-                    <span class="text-[10px] font-mono text-emerald-400">Server SQLite Connesso</span>
+                    <span class="text-[10px] font-mono text-emerald-400">100% Offline Ready</span>
                 </div>
 
-                <div class="flex-grow bg-[#090e1a]/80 border border-slate-800 rounded-2xl p-4 overflow-y-auto custom-scrollbar space-y-3" id="ai-chat-history">
+                <div class="flex-grow bg-[#090e1a]/80 border border-slate-800 rounded-2xl p-4 overflow-y-auto space-y-3" id="ai-chat-history">
                     <div class="flex items-start gap-2.5">
                         <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div>
                         <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">
-                            Ciao Amministratore. Sono l'assistente diagnostico di <strong>SmartCheck OS</strong> collegato al database locale. Posso controllare lo stato dei moduli ESP32, verificare gli allarmi Tamper, la coda del bagno e controllare <strong>quali componenti mancano nell'armadio di laboratorio</strong>.
+                            Ciao Amministratore. Sono l'assistente diagnostico locale di <strong>SmartCheck OS</strong>. Posso verificare in tempo reale lo stato dei moduli ESP32, le batterie 18650, gli allarmi Tamper, la coda del bagno e <strong>quali componenti mancano nell'armadio di laboratorio</strong>.
                         </div>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2 py-2 overflow-x-auto scrollbar-none text-[11px] font-mono">
-                    <button onclick="sendQuickAiPrompt('Quali componenti mancano nell\'armadio di laboratorio?')" class="px-3 py-1 bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 rounded-lg border border-amber-700/50 whitespace-nowrap transition">📦 Controllo Armadio Lab</button>
-                    <button onclick="sendQuickAiPrompt('Stato generale dei nodi ESP32 e anomalie')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔍 Stato Nodi ESP32</button>
-                    <button onclick="sendQuickAiPrompt('Quali dispositivi hanno batteria bassa o segnale scarso?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Batterie</button>
-                    <button onclick="sendQuickAiPrompt('Ci sono allarmi di manomissione Tamper?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
-                    <button onclick="sendQuickAiPrompt('Mostrami la situazione attuale delle uscite e della coda bagno')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚻 Coda Bagno</button>
+                    <button onclick="sendQuickAiPrompt('Stato generale dei nodi ESP32')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔍 Stato Nodi ESP32</button>
+                    <button onclick="sendQuickAiPrompt('Quali componenti mancano nell\'armadio di laboratorio?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-amber-500/30 whitespace-nowrap transition">📦 Controllo Armadio Lab</button>
+                    <button onclick="sendQuickAiPrompt('Verifica batterie scariche')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🔋 Verifica Batterie</button>
+                    <button onclick="sendQuickAiPrompt('Ci sono allarmi Tamper?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚨 Allarmi Tamper</button>
+                    <button onclick="sendQuickAiPrompt('Situazione coda bagno')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 whitespace-nowrap transition">🚻 Coda Bagno</button>
                 </div>
 
                 <div class="flex items-center gap-2 pt-1">
-                    <input type="text" id="ai-chat-input" placeholder="Chiedi un controllo su nodi ESP32, batterie, armadio laboratorio o coda bagno..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
-                    <button onclick="sendAiMessage()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-2 shadow-lg shadow-purple-600/25">
+                    <input type="text" id="ai-chat-input" placeholder="Chiedi chi ha un componente, lo stato dei moduli ESP32 o della coda bagno..." onkeydown="if(event.key==='Enter') sendAiMessage()" class="flex-grow bg-slate-900 border border-slate-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500">
+                    <button onclick="sendAiMessage()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-2 shadow-lg">
                         <span>Invia</span> <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
                 </div>
@@ -623,7 +605,7 @@
         </div>
     </div>
 
-    <!-- MODALE CODA BAGNO -->
+    <!-- ================= MODALE CODA BAGNO ================= -->
     <div id="modal-bathroom-queue" class="hidden fixed inset-0 z-[95] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-xl max-h-[90vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden shadow-2xl">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
@@ -633,7 +615,7 @@
                     </div>
                     <div>
                         <h2 class="text-lg sm:text-xl font-black text-white tracking-tight">Gestione Coda Bagno</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Sincronizzazione istantanea locale (Socket.io)</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Sincronizzazione locale WebSocket istantanea</p>
                     </div>
                 </div>
                 <button onclick="closeBathroomQueueModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">✕</button>
@@ -647,7 +629,7 @@
                     <span>Fila d'Attesa</span>
                     <span id="queue-total-waiting" class="text-cyan-400">0 in coda</span>
                 </div>
-                <div id="queue-list-container" class="overflow-y-auto custom-scrollbar flex-grow space-y-2 pr-1"></div>
+                <div id="queue-list-container" class="overflow-y-auto flex-grow space-y-2 pr-1"></div>
             </div>
 
             <div id="queue-teacher-controls" class="hidden pt-3 mt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
@@ -659,7 +641,7 @@
         </div>
     </div>
 
-    <!-- MODALE AGENDA -->
+    <!-- ================= MODALI AGENDA, BACHECA, FIRME, VOTI, STUDENTE, ELENCO ================= -->
     <div id="modal-agenda" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
@@ -674,15 +656,10 @@
                     <button onclick="document.getElementById('modal-agenda').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
                 </div>
             </div>
-            <div class="flex gap-3 mb-3">
-                <span class="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-bold uppercase">Compiti</span>
-                <span class="px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono font-bold uppercase">Verifiche</span>
-            </div>
-            <div class="overflow-y-auto flex-grow custom-scrollbar space-y-3" id="agenda-list"></div>
+            <div class="overflow-y-auto flex-grow space-y-3" id="agenda-list"></div>
         </div>
     </div>
 
-    <!-- MODALE AGGIUNGI AGENDA -->
     <div id="modal-add-agenda" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl relative border border-slate-700">
             <button onclick="document.getElementById('modal-add-agenda').classList.add('hidden')" class="absolute top-5 right-5 text-slate-400 hover:text-white">✕</button>
@@ -704,12 +681,11 @@
                     <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Descrizione Attività</label>
                     <textarea id="agenda-desc" rows="3" class="w-full bg-slate-900 border border-slate-700 text-white p-3 rounded-xl text-sm outline-none focus:border-blue-500" placeholder="Pagine, capitoli o esercizi..."></textarea>
                 </div>
-                <button onclick="saveAgendaEntry()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-600/25">Registra Impegno</button>
+                <button onclick="saveAgendaEntry()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg">Registra Impegno</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE BACHECA -->
     <div id="modal-notices" class="hidden fixed inset-0 z-[75] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-800">
@@ -719,42 +695,34 @@
                 </div>
                 <button onclick="toggleNoticeModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
             </div>
-            <div class="overflow-y-auto flex-grow space-y-3 custom-scrollbar" id="modal-notices-list">
+            <div class="overflow-y-auto flex-grow space-y-3" id="modal-notices-list">
                 <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
-                    <span class="text-[10px] font-mono font-bold text-blue-400 uppercase">Circolare Interna #42</span>
-                    <h4 class="text-sm font-bold text-white mt-1">Regolamento Prelievo Strumentazione di Laboratorio</h4>
-                    <p class="text-xs text-slate-300 mt-1">Ogni gruppo di lavoro è tenuto a registrare sul Pannello Armadio il prelievo di multimetri, sonde e kit microcontrollori, riconsegnandoli prima del suono della campanella.</p>
+                    <span class="text-[10px] font-mono uppercase font-bold text-blue-400">Circolare Interna #42</span>
+                    <h4 class="font-bold text-white text-sm mt-1">Regolamento Utilizzo Strumentazione di Laboratorio</h4>
+                    <p class="text-xs text-slate-400 mt-1">Tutti i componenti e gli strumenti prelevati dall'armadio devono essere registrati sul Pannello Armadio e riposti entro 5 minuti dal termine della lezione.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODALE REGISTRO FIRME -->
     <div id="modal-sign" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-xl p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl max-h-[90vh] flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight" id="reg-title">Giornale del Professore</h2>
+                    <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">Giornale del Professore</h2>
                     <p class="text-xs text-slate-400 mt-0.5">Firme e argomenti svolti in aula</p>
                 </div>
                 <button onclick="document.getElementById('modal-sign').classList.add('hidden')" class="text-slate-400 hover:text-white">✕</button>
             </div>
-
-            <div id="reg-header-teacher">
-                 <div id="cv-calendar-container" class="cv-calendar-strip px-1"></div>
-            </div>
-            <div id="reg-header-student" class="hidden text-center mb-3">
-                 <span class="text-slate-400 text-xs font-mono uppercase font-bold">Attività Didattica Registrata</span>
-            </div>
-            
-            <div class="flex-grow overflow-y-auto custom-scrollbar mb-4 sm:mb-6 bg-slate-900/60 rounded-2xl p-3 sm:p-4 border border-slate-800 min-h-[160px]">
+            <div id="reg-header-teacher"><div id="cv-calendar-container" class="cv-calendar-strip px-1"></div></div>
+            <div id="reg-header-student" class="hidden text-center mb-3"><span class="text-slate-400 text-xs font-mono uppercase font-bold">Attività Didattica Registrata</span></div>
+            <div class="flex-grow overflow-y-auto mb-4 bg-slate-900/60 rounded-2xl p-3 sm:p-4 border border-slate-800 min-h-[160px]">
                 <div id="signatures-list" class="space-y-3"></div>
                 <div id="no-signatures" class="flex flex-col items-center justify-center h-full text-slate-500 opacity-60 py-8">
                     <i class="fa-regular fa-folder-open text-3xl mb-2"></i>
                     <span class="text-xs font-mono font-bold uppercase tracking-wider">Nessuna firma registrata</span>
                 </div>
             </div>
-
             <div id="new-signature-form" class="border-t border-slate-800 pt-3 sm:pt-4 hidden">
                 <h3 class="text-xs font-mono font-bold text-blue-400 uppercase mb-2">Aggiungi Firma</h3>
                 <div class="flex gap-1.5 sm:gap-2 mb-3">
@@ -776,7 +744,6 @@
         </div>
     </div>
 
-    <!-- MODALE VALUTAZIONI (VOTI) -->
     <div id="modal-grades" class="hidden fixed inset-0 z-[85] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
         <div class="bg-[#0b1220] w-full max-w-md max-h-[88vh] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col">
             <div id="grades-header-bg" class="cv-header p-5 sm:p-6 pb-6 sm:pb-8 bg-slate-800">
@@ -797,11 +764,10 @@
                     <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 border-white/20 flex items-center justify-center text-xl sm:text-2xl font-black font-mono bg-white/10" id="grades-total-avg">0</div>
                 </div>
             </div>
-            <div class="bg-[#0b1220] flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar" id="grades-list"></div>
+            <div class="bg-[#0b1220] flex-grow overflow-y-auto p-4 space-y-3" id="grades-list"></div>
         </div>
     </div>
 
-    <!-- MODALE SCHEDA STUDENTE -->
     <div id="modal-student-detail" class="hidden fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-700/80 shadow-2xl relative">
             <div class="flex justify-between items-start mb-5 sm:mb-6">
@@ -864,30 +830,24 @@
                 <div id="grade-input-area" class="bg-[#11192e] p-4 rounded-2xl border border-slate-800 mb-5 flex flex-wrap gap-3 items-end">
                     <div class="flex-grow min-w-[140px]">
                         <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Materia</label>
-                        <select id="new-grade-subject" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 text-xs outline-none focus:border-blue-500"></select>
+                        <select id="new-grade-subject" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 text-xs outline-none"></select>
                     </div>
                     <div class="w-24">
                         <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Voto</label>
-                        <select id="new-grade-value" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 font-mono font-bold text-xs outline-none focus:border-blue-500">
-                            <option value="10">10</option><option value="9.75">10-</option><option value="9.5">9 1/2</option><option value="9.25">9+</option><option value="9">9</option><option value="8.75">9-</option><option value="8.5">8 1/2</option><option value="8.25">8+</option><option value="8">8</option><option value="7.75">8-</option><option value="7.5">7 1/2</option><option value="7.25">7+</option><option value="7">7</option><option value="6.75">7-</option><option value="6.5">6 1/2</option><option value="6.25">6+</option><option value="6">6</option><option value="5.75">6-</option><option value="5.5">5 1/2</option><option value="5.25">5+</option><option value="5">5</option><option value="4.75">5-</option><option value="4.5">4 1/2</option><option value="4.25">4+</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option>
+                        <select id="new-grade-value" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 font-mono font-bold text-xs outline-none">
+                            <option value="10">10</option><option value="9.5">9.5</option><option value="9">9</option><option value="8.5">8.5</option><option value="8">8</option><option value="7.5">7.5</option><option value="7">7</option><option value="6.5">6.5</option><option value="6">6</option><option value="5.5">5.5</option><option value="5">5</option><option value="4.5">4.5</option><option value="4">4</option>
                         </select>
                     </div>
                     <div class="w-24">
                         <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Tipo</label>
-                        <select id="new-grade-type" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 text-xs outline-none focus:border-blue-500"><option>Scritto</option><option>Orale</option><option>Pratico</option></select>
+                        <select id="new-grade-type" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 text-xs outline-none"><option>Scritto</option><option>Orale</option><option>Pratico</option></select>
                     </div>
                     <button onclick="addGrade()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-5 rounded-xl h-9 uppercase font-mono text-xs">Aggiungi</button>
                 </div>
-                <div class="bg-[#0e1628] rounded-2xl border border-slate-800 max-h-60 overflow-y-auto custom-scrollbar">
+                <div class="bg-[#0e1628] rounded-2xl border border-slate-800 max-h-60 overflow-y-auto">
                     <table class="w-full text-left">
                         <thead class="bg-slate-900 text-[10px] font-mono uppercase text-slate-400 sticky top-0 z-10">
-                            <tr>
-                                <th class="px-4 py-2.5">Data</th>
-                                <th class="px-4 py-2.5">Materia</th>
-                                <th class="px-4 py-2.5">Tipo</th>
-                                <th class="px-4 py-2.5 text-right">Voto</th>
-                                <th class="px-4 py-2.5 text-right"></th>
-                            </tr>
+                            <tr><th class="px-4 py-2.5">Data</th><th class="px-4 py-2.5">Materia</th><th class="px-4 py-2.5">Tipo</th><th class="px-4 py-2.5 text-right">Voto</th><th class="px-4 py-2.5 text-right"></th></tr>
                         </thead>
                         <tbody id="teacher-grades-list" class="text-xs font-mono text-slate-300 divide-y divide-slate-800/60"></tbody>
                     </table>
@@ -896,38 +856,37 @@
             
             <div id="content-notes" class="hidden">
                 <div id="teacher-note-input" class="bg-[#11192e] p-4 rounded-2xl border border-slate-800 mb-5">
-                    <textarea id="note-text" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 text-xs mb-3 outline-none focus:border-blue-500" rows="3" placeholder="Annotazione o richiamo disciplinare..."></textarea>
+                    <textarea id="note-text" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 text-xs mb-3 outline-none" rows="3" placeholder="Annotazione o richiamo disciplinare..."></textarea>
                     <div class="flex justify-between items-center">
                         <select id="note-type" class="bg-slate-900 border border-slate-700 text-white rounded-xl p-2 text-xs font-mono font-bold uppercase"><option value="info">Annotazione</option><option value="warning">Richiamo</option></select>
                         <button onclick="addNote()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-5 rounded-xl text-xs uppercase font-mono">Salva Nota</button>
                     </div>
                 </div>
-                <div class="bg-[#0e1628] rounded-2xl border border-slate-800 max-h-60 overflow-y-auto custom-scrollbar p-3 space-y-2.5" id="notes-list"></div>
+                <div class="bg-[#0e1628] rounded-2xl border border-slate-800 max-h-60 overflow-y-auto p-3 space-y-2.5" id="notes-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODALE ELENCO ALUNNI -->
     <div id="modal-class-list" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <div class="glass-panel w-full max-w-2xl max-h-[85vh] p-5 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col border border-slate-700 relative overflow-hidden">
             <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Elenco Studenti</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Ordinamento alfabetico per cognome • <span id="list-class-name" class="text-blue-400 font-bold"></span></p>
+                    <p class="text-xs text-slate-400 mt-0.5">Ordinamento alfabetico per cognome</p>
                 </div>
                 <button onclick="document.getElementById('modal-class-list').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
             </div>
             <div class="relative mb-3 sm:mb-4">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                <input type="text" id="list-search" placeholder="Filtra per cognome o nome..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white pl-10 pr-4 py-2.5 sm:py-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                <input type="text" id="list-search" placeholder="Filtra per cognome o nome..." onkeyup="filterListModal()" class="w-full bg-slate-900 border border-slate-700 text-white pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none">
             </div>
-            <div class="overflow-y-auto flex-grow custom-scrollbar space-y-2" id="full-student-list"></div>
+            <div class="overflow-y-auto flex-grow space-y-2" id="full-student-list"></div>
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT ENGINE (100% LOCAL & SECURE) ================= -->
+    <!-- ================= JAVASCRIPT ENGINE (100% LOCALE + SOCKET.IO + LABORATORIO) ================= -->
     <script>
-        const socket = io();
+        const socket = (typeof io !== 'undefined') ? io() : null;
 
         const ALL_SUBJECTS = ["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
         
@@ -938,33 +897,33 @@
         };
 
         const DEPT_CONFIG = {
-            "ELETTRONICA": { icon: "fa-microchip", badge: "Tecnologico", color: "text-blue-400", bgBadge: "bg-blue-500/10 text-blue-400 border-blue-500/30", hoverBorder: "hover:border-blue-500 hover:shadow-blue-500/25 hover:from-blue-950/60 hover:to-slate-900/90" },
-            "MECCANICA": { icon: "fa-gears", badge: "Meccatronica & Meccanica", color: "text-amber-400", bgBadge: "bg-amber-500/10 text-amber-400 border-amber-500/30", hoverBorder: "hover:border-amber-500 hover:shadow-amber-500/25 hover:from-amber-950/60 hover:to-slate-900/90" },
-            "CHIMICA": { icon: "fa-flask-vial", badge: "Biotecnologie & Materiali", color: "text-emerald-400", bgBadge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30", hoverBorder: "hover:border-emerald-500 hover:shadow-emerald-500/25 hover:from-emerald-950/60 hover:to-slate-900/90" }
+            "ELETTRONICA": { icon: "fa-microchip", badge: "Tecnologico", color: "text-blue-400", bgBadge: "bg-blue-500/10 text-blue-400 border-blue-500/30", hoverBorder: "hover:border-blue-500 hover:shadow-blue-500/25" },
+            "MECCANICA": { icon: "fa-gears", badge: "Meccatronica", color: "text-amber-400", bgBadge: "bg-amber-500/10 text-amber-400 border-amber-500/30", hoverBorder: "hover:border-amber-500 hover:shadow-amber-500/25" },
+            "CHIMICA": { icon: "fa-flask-vial", badge: "Biotecnologie", color: "text-emerald-400", bgBadge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30", hoverBorder: "hover:border-emerald-500 hover:shadow-emerald-500/25" }
         };
 
-        let currentUser = null; 
+        let currentUser = null;
         let verifiedUsername = null;
-        let currentClass = null; 
-        let currentClassId = null; 
-        let selectedStudentId = null; 
-        let pendingStatus = null; 
-        let selectedSignHour = null; 
+        let currentClass = null;
+        let currentClassId = null;
+        let currentMainMode = 'aula'; // 'aula' | 'lab' | 'cabinet'
+        let selectedStudentId = null;
+        let pendingStatus = null;
+        let selectedSignHour = null;
         let pendingAgendaType = null;
         let clockTimer = null;
         let currentMobileAisle = 'left';
-        let currentWorkspaceMode = 'aula';
-        
+
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
 
         let classStudents = [];
         let localSchoolDB = {};
-        let onlineGrades = []; 
-        let onlineNotes = []; 
-        let onlineAgenda = []; 
+        let onlineGrades = [];
+        let onlineNotes = [];
+        let onlineAgenda = [];
         let onlineSignatures = [];
-        let localGradesDB = {}; 
+        let localGradesDB = {};
         let localNotesDB = {};
         let localUsersDB = {};
         let bathroomQueue = [];
@@ -980,14 +939,13 @@
         };
 
         function esc(val) { return String(val ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
-        
-        async function apiFetch(url, options = {}) {
-            const res = await fetch(url, {
-                headers: { 'Content-Type': 'application/json' },
-                ...options
-            });
+
+        async function api(url, method = 'GET', body = null) {
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(url, opts);
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || 'Errore comunicazione server');
+            if (!res.ok) throw new Error(data.error || `Errore HTTP ${res.status}`);
             return data;
         }
 
@@ -997,9 +955,9 @@
             const icon = type === 'success' ? '✓' : type === 'error' ? '!' : 'i';
             const node = document.createElement('div');
             node.className = `sc-toast ${type}`;
-            node.innerHTML = `<div class="sc-toast-icon">${icon}</div><div><div class="sc-toast-title font-mono">${esc(title)}</div>${message ? `<div class="sc-toast-msg">${esc(message)}</div>`:''}</div>`;
+            node.innerHTML = `<div class="sc-toast-icon">${icon}</div><div><div class="sc-toast-title font-mono font-bold text-xs text-white">${esc(title)}</div>${message ? `<div class="sc-toast-msg text-[11px] text-slate-300 mt-0.5">${esc(message)}</div>`:''}</div>`;
             wrap.appendChild(node);
-            setTimeout(() => { node.style.opacity='0'; node.style.transform='translateY(-6px)'; setTimeout(()=>node.remove(), 200); }, timeout);
+            setTimeout(() => { node.style.opacity='0'; setTimeout(()=>node.remove(), 200); }, timeout);
         }
 
         function setLoading(show, text='Caricamento...') {
@@ -1021,20 +979,12 @@
         function parseGradeNum(val) {
             if (typeof val === 'number') return val;
             if (!val) return NaN;
-            let s = String(val).trim().replace(',', '.');
-            if (s.endsWith('+')) return parseFloat(s.slice(0, -1)) + 0.25;
-            if (s.endsWith('-')) return parseFloat(s.slice(0, -1)) - 0.25;
-            if (s.includes('½') || s.includes('1/2')) return parseFloat(s.replace(/½|1\/2/g, '')) + 0.5;
-            return parseFloat(s);
+            return parseFloat(String(val).trim().replace(',', '.'));
         }
 
         function formatAverage(avgNum) {
             if (isNaN(avgNum) || avgNum <= 0) return "0";
-            if (Math.abs(avgNum - 10) < 0.001) return "10";
-            if (Number.isInteger(avgNum) || Math.abs(avgNum - Math.round(avgNum)) < 0.001) {
-                return Math.round(avgNum).toFixed(1);
-            }
-            return avgNum.toFixed(2);
+            return avgNum.toFixed(2).replace(/\.00$/, '.0');
         }
 
         function updateClockDisplay() {
@@ -1043,7 +993,6 @@
             if (!el) return;
             const now = new Date();
             el.innerText = now.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-            
             const totalM = now.getHours() * 60 + now.getMinutes();
             let s = "FUORI ORARIO";
             if (totalM >= 505 && totalM < 585) s = "1° ORA (8:25-9:45)";
@@ -1061,11 +1010,8 @@
 
         function openNativeDatePicker() {
             const el = document.getElementById('date-picker');
-            if (el) {
-                if (typeof el.showPicker === 'function') {
-                    try { el.showPicker(); return; } catch(e) {}
-                }
-                el.focus();
+            if (el && typeof el.showPicker === 'function') {
+                try { el.showPicker(); return; } catch(e) {}
             }
         }
 
@@ -1075,7 +1021,6 @@
             if (!val) return;
             selectedDate = val;
             const isToday = (selectedDate === getTodayStr());
-            
             const disp = document.getElementById('date-display');
             if (disp) disp.innerText = isToday ? "OGGI" : new Date(val + "T12:00:00").toLocaleDateString('it-IT');
             const picker = document.getElementById('date-picker');
@@ -1084,9 +1029,90 @@
             document.getElementById('history-warning')?.classList.toggle('hidden', isToday);
             document.getElementById('bathroom-bar')?.classList.toggle('hidden', !isToday);
 
-            await syncClassBundle(false);
+            await syncClassroomData();
         }
 
+        // ================= 1. LOGIN SICURO CON SERVER LOCALE =================
+        async function verifyUser() {
+            if (window.location.protocol === 'file:') {
+                toast('Apri tramite Server!', 'Apri http://localhost:3000 nel browser dopo aver avviato node server.js', 'error', 6000);
+                return;
+            }
+            const inputEl = document.getElementById('input-username');
+            const input = inputEl ? inputEl.value.trim().toLowerCase() : '';
+            const err = document.getElementById('login-error');
+            const errText = document.getElementById('error-text');
+            const btn = document.getElementById('btn-next');
+
+            if (!input) {
+                toast('Campo Vuoto', 'Inserisci il nome utente (es. navarroli.antonio o admin)', 'error');
+                return;
+            }
+
+            err.classList.add('hidden');
+            btn.innerText = "Verifica...";
+
+            try {
+                const data = await api('/api/auth/verify', 'POST', { username: input });
+                verifiedUsername = data.username;
+                document.getElementById('username-field-wrap').classList.add('hidden');
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('password-container').classList.remove('hidden');
+                document.getElementById('user-welcome').innerText = data.full_name;
+                setTimeout(() => document.getElementById('input-password').focus(), 100);
+            } catch (e) {
+                errText.innerText = e.message || "Utente non trovato";
+                err.classList.remove('hidden');
+            } finally {
+                btn.innerText = "Continua";
+            }
+        }
+
+        async function processAuth() {
+            const passEl = document.getElementById('input-password');
+            const password = passEl ? passEl.value : '';
+            const err = document.getElementById('login-error');
+            const errText = document.getElementById('error-text');
+
+            if (!verifiedUsername) { resetLogin(); return; }
+
+            try {
+                const data = await api('/api/auth/login', 'POST', { username: verifiedUsername, password });
+                currentUser = data.user;
+                document.getElementById('view-login').classList.add('hidden');
+
+                if (currentUser.role === 'studente') {
+                    await loadClassroom('5AEE');
+                } else {
+                    const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
+                    if (activeCls) await loadClassroom(activeCls);
+                    else initHub();
+                }
+                startClock();
+                toast('Accesso Eseguito', `Benvenuto/a, ${currentUser.name}`, 'success');
+            } catch (e) {
+                errText.innerText = e.message || "Password non corretta";
+                err.classList.remove('hidden');
+            }
+        }
+
+        function resetLogin() {
+            verifiedUsername = null;
+            document.getElementById('password-container').classList.add('hidden');
+            document.getElementById('username-field-wrap').classList.remove('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('input-password').value = '';
+            document.getElementById('input-username').focus();
+        }
+
+        async function logout() {
+            await api('/api/auth/logout', 'POST').catch(() => {});
+            localStorage.removeItem('SC_ACTIVE_CLASS');
+            location.reload();
+        }
+
+        // ================= 2. CARICAMENTO AULA & SINCRONIZZAZIONE LOCALE =================
         function buildLocalClassState(students) {
             const data = {};
             for (let i=1; i<=23; i++) {
@@ -1094,27 +1120,56 @@
                 data[id] = { db_id: null, name: 'Libero', status: 'assente', time: '--:--', history: [] };
             }
             students.forEach((stud, idx) => {
-                const targetDesk = stud.desk_id && data[stud.desk_id] ? stud.desk_id : `banco_${String(idx + 1).padStart(2, '0')}`;
-                if (data[targetDesk]) {
-                    data[targetDesk].db_id = stud.id;
-                    data[targetDesk].name = stud.full_name;
+                const deskId = stud.desk_id || `banco_${String(idx + 1).padStart(2, '0')}`;
+                if (data[deskId]) {
+                    data[deskId].db_id = stud.id;
+                    data[deskId].name = stud.full_name;
                 }
             });
             return data;
         }
 
-        // ================= SINCRONIZZAZIONE BUNDLE LOCALE =================
-        async function syncClassBundle(showSpinner = false) {
-            if (!currentClass) return;
-            if (showSpinner) setLoading(true, `Sincronizzazione ${currentClass}...`);
+        async function loadClassroom(cls) {
+            window.scrollTo(0, 0);
+            currentClass = cls;
+            localStorage.setItem('SC_ACTIVE_CLASS', cls);
+
+            document.getElementById('view-hub')?.classList.add('hidden');
+            document.getElementById('view-classroom')?.classList.remove('hidden');
+            document.getElementById('class-header-name').innerText = cls;
+
+            const isStud = currentUser?.role === 'studente';
+            document.getElementById('back-btn')?.classList.toggle('hidden', isStud);
+            document.getElementById('sign-btn')?.classList.toggle('hidden', isStud);
+
+            const badge = document.getElementById('role-badge');
+            if (badge) {
+                badge.innerText = isStud ? 'STUDENTE' : (currentUser?.role || 'DOCENTE').toUpperCase();
+                badge.className = isStud 
+                    ? 'px-2 py-0.5 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-700/50 text-[10px] font-mono font-bold'
+                    : 'px-2 py-0.5 rounded-lg bg-blue-950/60 text-blue-300 border border-blue-700/50 text-[10px] font-mono font-bold';
+            }
+
+            setLoading(true, `Caricamento ${cls}...`);
             try {
-                const bundle = await apiFetch(`/api/class-bundle/${encodeURIComponent(currentClass)}?date=${encodeURIComponent(selectedDate)}`);
+                await syncClassroomData();
+                await syncLabData();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function syncClassroomData() {
+            if (!currentClass) return;
+            try {
+                const bundle = await api(`/api/class-bundle/${encodeURIComponent(currentClass)}?date=${selectedDate}`);
                 currentClassId = bundle.classId;
                 classStudents = bundle.students || [];
-                localSchoolDB[currentClass] = buildLocalClassState(classStudents);
 
                 localUsersDB = {};
                 (bundle.allUsers || []).forEach(u => { localUsersDB[u.id] = u.full_name; });
+
+                localSchoolDB[currentClass] = buildLocalClassState(classStudents);
 
                 (bundle.attendance || []).forEach(row => {
                     const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id);
@@ -1138,4 +1193,1270 @@
                     localGradesDB[g.student_id].push(g);
                 });
 
-                localNotesDB =
+                localNotesDB = {};
+                onlineNotes.forEach(n => {
+                    if (!localNotesDB[n.student_id]) localNotesDB[n.student_id] = [];
+                    localNotesDB[n.student_id].push(n);
+                });
+
+                updateQueueBadges();
+                renderGrid(localSchoolDB[currentClass]);
+                renderSignaturesList();
+                updateSignatureDisplay();
+                if (!document.getElementById('modal-bathroom-queue').classList.contains('hidden')) {
+                    renderBathroomQueueUI();
+                }
+            } catch (e) {
+                console.error("Errore sync:", e);
+            }
+        }
+
+        // ================= 3. NUOVO SISTEMA: LABORATORIO & ARMADIO COMPONENTI =================
+        function switchMainMode(mode) {
+            currentMainMode = mode;
+            document.getElementById('section-mode-aula')?.classList.toggle('hidden', mode !== 'aula');
+            document.getElementById('section-mode-lab')?.classList.toggle('hidden', mode !== 'lab');
+            document.getElementById('section-mode-cabinet')?.classList.toggle('hidden', mode !== 'cabinet');
+
+            ['aula', 'lab', 'cabinet'].forEach(m => {
+                const btn = document.getElementById(`mode-btn-${m}`);
+                if (!btn) return;
+                if (m === mode) {
+                    const activeColor = m === 'aula' ? 'bg-blue-600' : (m === 'lab' ? 'bg-amber-600' : 'bg-emerald-600');
+                    btn.className = `px-3 py-1.5 rounded-lg ${activeColor} text-white shadow flex items-center gap-1.5 transition`;
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition";
+                }
+            });
+
+            if (mode === 'lab' || mode === 'cabinet') {
+                syncLabData();
+            }
+        }
+
+        async function syncLabData() {
+            if (!currentClass) return;
+            try {
+                labState = await api(`/api/lab/state/${encodeURIComponent(currentClass)}`);
+                
+                // Aggiorna badge strumenti fuori dall'armadio
+                const inUseCount = (labState.activeLoans || []).length;
+                const badge = document.getElementById('badge-lab-inuse');
+                if (badge) {
+                    badge.innerText = inUseCount;
+                    badge.classList.toggle('hidden', inUseCount === 0);
+                }
+
+                renderLabView();
+                renderCabinetView();
+            } catch (e) {
+                console.error("Errore sync laboratorio:", e);
+            }
+        }
+
+        function renderLabView() {
+            const grid = document.getElementById('lab-workbenches-grid');
+            const alertPill = document.getElementById('lab-missing-alert-pill');
+            if (!grid) return;
+
+            const query = (document.getElementById('lab-search-input')?.value || '').trim().toLowerCase();
+            const inUseCount = (labState.activeLoans || []).length;
+
+            if (alertPill) {
+                alertPill.classList.toggle('hidden', inUseCount === 0);
+                alertPill.innerText = `${inUseCount} Strumenti fuori dall'armadio`;
+            }
+
+            grid.innerHTML = '';
+
+            (labState.workbenches || []).forEach(bench => {
+                const benchStudents = (labState.students || []).filter(s => s.workbench_id === bench.id);
+                const benchLoans = (labState.activeLoans || []).filter(l => l.workbench_id === bench.id);
+
+                // Controlla se la ricerca corrisponde a uno strumento o a uno studente di questo banco
+                const matchesSearch = query && (
+                    bench.name.toLowerCase().includes(query) ||
+                    benchStudents.some(s => s.full_name.toLowerCase().includes(query)) ||
+                    benchLoans.some(l => l.unit_label.toLowerCase().includes(query) || l.item_name.toLowerCase().includes(query))
+                );
+
+                const isMyBench = currentUser && benchStudents.some(s => s.id === currentUser.id);
+
+                const card = document.createElement('div');
+                card.className = `glass-panel p-5 rounded-3xl border transition-all flex flex-col justify-between ${matchesSearch ? 'bench-highlight' : (isMyBench ? 'border-blue-500/60' : 'border-slate-800')}`;
+
+                const studentsHtml = benchStudents.length > 0
+                    ? benchStudents.map(s => `
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs font-bold text-slate-200">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${esc(s.full_name)}
+                        </span>
+                    `).join('')
+                    : `<span class="text-xs font-mono text-slate-500 italic">Nessuno studente assegnato</span>`;
+
+                const loansHtml = benchLoans.length > 0
+                    ? benchLoans.map(l => `
+                        <div class="p-2.5 rounded-xl bg-amber-950/30 border border-amber-500/40 flex items-center justify-between gap-2">
+                            <div>
+                                <div class="text-xs font-black text-amber-300 font-mono"><i class="fa-solid fa-plug-circle-bolt mr-1"></i>${esc(l.unit_label)}</div>
+                                <div class="text-[10px] text-slate-400">Prelevato da <strong class="text-slate-200">${esc(l.student_name)}</strong> alle ${esc(l.taken_at)}</div>
+                            </div>
+                            <button onclick="checkinLabComponent('${l.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-mono font-bold uppercase shrink-0 transition" title="Segna come riposto nell'armadio">
+                                Riponi
+                            </button>
+                        </div>
+                    `).join('')
+                    : `<div class="p-3 rounded-xl border border-dashed border-slate-800 text-center text-[11px] font-mono text-slate-500">Nessun componente dell'armadio su questo banco</div>`;
+
+                const joinBenchBtn = (currentUser && !isMyBench && currentUser.role === 'studente')
+                    ? `<button onclick="assignMeToBench('${bench.id}')" class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 transition">Siediti qui</button>`
+                    : (isMyBench ? `<span class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-blue-600 text-white">Il tuo Banco</span>` : '');
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 font-mono font-black text-sm">
+                                    #${bench.id.slice(-2)}
+                                </div>
+                                <div>
+                                    <h3 class="font-extrabold text-white text-base leading-none">${esc(bench.name)}</h3>
+                                    <span class="text-[10px] font-mono text-slate-400">${esc(bench.lab_location)}</span>
+                                </div>
+                            </div>
+                            ${joinBenchBtn}
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="text-[10px] font-mono uppercase font-bold text-slate-400 mb-2">Gruppo di Lavoro (${benchStudents.length})</div>
+                            <div class="flex flex-wrap gap-1.5">${studentsHtml}</div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-amber-400 mb-2">
+                                <span>Dotazione Prelevata dall'Armadio</span>
+                                <span>${benchLoans.length} pezzi</span>
+                            </div>
+                            <div class="space-y-2">${loansHtml}</div>
+                        </div>
+                    </div>
+
+                    <button onclick="openQuickCabinetForBench('${bench.id}')" class="mt-4 w-full py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-plus text-amber-400 text-[10px]"></i> Preleva Componente per questo Banco
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderCabinetView() {
+            const banner = document.getElementById('cabinet-status-banner');
+            const benchSelect = document.getElementById('cabinet-checkout-bench');
+            const invList = document.getElementById('cabinet-inventory-list');
+            const activeList = document.getElementById('cabinet-active-loans-list');
+            const historyList = document.getElementById('cabinet-history-list');
+            const outCountEl = document.getElementById('cabinet-out-count');
+
+            if (!invList || !activeList) return;
+
+            // Popola selettore banco se vuoto
+            if (benchSelect && benchSelect.children.length === 0 && (labState.workbenches || []).length > 0) {
+                labState.workbenches.forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b.id;
+                    opt.textContent = b.name;
+                    if (currentUser?.workbench_id === b.id) opt.selected = true;
+                    benchSelect.appendChild(opt);
+                });
+            }
+
+            const activeLoans = labState.activeLoans || [];
+            if (outCountEl) outCountEl.innerText = activeLoans.length;
+
+            // Banner superiore controllo componenti mancanti nell'armadio
+            if (banner) {
+                if (activeLoans.length === 0) {
+                    banner.className = "mb-5 p-4 sm:p-5 rounded-3xl border border-emerald-500/40 bg-emerald-950/20 flex items-center justify-between gap-4";
+                    banner.innerHTML = `
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl shrink-0">
+                                <i class="fa-solid fa-shield-check"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-mono uppercase font-bold text-emerald-400">Controllo Integrità Armadio OK</div>
+                                <h3 class="text-base sm:text-lg font-black text-white">Tutti i componenti e multimetri sono regolarmente presenti nell'armadio</h3>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    banner.className = "mb-5 p-4 sm:p-5 rounded-3xl border border-amber-500/50 bg-amber-950/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4";
+                    banner.innerHTML = `
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl shrink-0 animate-pulse">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-mono uppercase font-bold text-amber-300">Attenzione: Componenti Fuori dall'Armadio</div>
+                                <h3 class="text-base sm:text-lg font-black text-white">Mancano ${activeLoans.length} componenti nell'armadio (attualmente distribuiti sui banchi)</h3>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Render Inventario Armadio
+            invList.innerHTML = '';
+            (labState.inventory || []).forEach(item => {
+                const isZero = item.available_qty <= 0;
+                const percent = Math.round((item.available_qty / item.total_qty) * 100);
+                const barColor = isZero ? 'bg-red-500' : (percent < 50 ? 'bg-amber-500' : 'bg-emerald-500');
+
+                invList.innerHTML += `
+                    <div class="p-4 rounded-2xl bg-slate-900/90 border ${isZero ? 'border-red-500/50' : 'border-slate-800'} flex flex-col justify-between gap-3">
+                        <div>
+                            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
+                                <span>${esc(item.shelf_position)}</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">${esc(item.item_code)}</span>
+                            </div>
+                            <h4 class="font-extrabold text-white text-sm sm:text-base">${esc(item.name)}</h4>
+                            <div class="mt-2.5 flex items-center justify-between text-xs font-mono">
+                                <span class="text-slate-400">Nell'armadio:</span>
+                                <span class="font-black ${isZero ? 'text-red-400' : 'text-emerald-400'}">${item.available_qty} / ${item.total_qty}</span>
+                            </div>
+                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-1.5">
+                                <div class="h-full ${barColor} transition-all" style="width: ${percent}%"></div>
+                            </div>
+                        </div>
+
+                        <button onclick="checkoutLabComponent('${item.id}')" ${isZero ? 'disabled' : ''} class="w-full py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition ${isZero ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20'}">
+                            ${isZero ? 'Esaurito nell\'Armadio' : '+ Preleva dall\'Armadio'}
+                        </button>
+                    </div>
+                `;
+            });
+
+            // Render Componenti Attualmente Fuori
+            activeList.innerHTML = '';
+            if (activeLoans.length === 0) {
+                activeList.innerHTML = `<div class="p-6 text-center text-xs font-mono text-slate-500 border border-dashed border-slate-800 rounded-2xl">Nessun componente fuori posto.</div>`;
+            } else {
+                activeLoans.forEach(l => {
+                    activeList.innerHTML += `
+                        <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-500/30 flex items-center justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px] font-black">${esc(l.workbench_id.replace('lab_banco_', 'Banco Lab #'))}</span>
+                                    <span class="font-extrabold text-white text-xs sm:text-sm">${esc(l.unit_label)}</span>
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-1">
+                                    Preso da <strong class="text-white">${esc(l.student_name)}</strong> • Ore <span class="font-mono text-amber-300">${esc(l.taken_at)}</span>
+                                </div>
+                            </div>
+                            <button onclick="checkinLabComponent('${l.id}')" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shrink-0">
+                                Riponi nell'Armadio
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+
+            // Render Storico Movimenti
+            if (historyList) {
+                historyList.innerHTML = '';
+                (labState.historyLoans || []).forEach(h => {
+                    const isRet = h.status === 'returned';
+                    historyList.innerHTML += `
+                        <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-between">
+                            <div>
+                                <span class="font-bold text-white">${esc(h.unit_label)}</span>
+                                <span class="text-slate-400"> • ${esc(h.student_name)} (${esc(h.workbench_id.replace('lab_banco_', 'B#'))})</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-cyan-400">${esc(h.taken_at)}</span> → 
+                                <span class="${isRet ? 'text-emerald-400' : 'text-amber-400 font-bold'}">${isRet ? esc(h.returned_at) : 'In uso'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        async function assignMeToBench(workbenchId) {
+            try {
+                await api('/api/lab/assign-bench', 'POST', { workbench_id: workbenchId });
+                if (currentUser) currentUser.workbench_id = workbenchId;
+                await syncLabData();
+                toast('Banco Aggiornato', `Ora risulti assegnato al ${workbenchId.replace('lab_banco_', 'Banco Lab #')}`, 'success');
+            } catch (e) {
+                toast('Errore', e.message, 'error');
+            }
+        }
+
+        function openQuickCabinetForBench(workbenchId) {
+            switchMainMode('cabinet');
+            const sel = document.getElementById('cabinet-checkout-bench');
+            if (sel) sel.value = workbenchId;
+        }
+
+        async function checkoutLabComponent(itemId) {
+            const benchId = document.getElementById('cabinet-checkout-bench')?.value || currentUser?.workbench_id || 'lab_banco_01';
+            try {
+                const res = await api('/api/lab/checkout', 'POST', {
+                    item_id: itemId,
+                    workbench_id: benchId,
+                    class_name: currentClass || '5AEE'
+                });
+                await syncLabData();
+                toast('Componente Prelevato', `${res.unitLabel} assegnato a ${res.benchId.replace('lab_banco_', 'Banco Lab #')}`, 'success');
+            } catch (e) {
+                toast('Impossibile Prelevare', e.message, 'error');
+            }
+        }
+
+        async function checkinLabComponent(loanId) {
+            try {
+                const res = await api('/api/lab/checkin', 'POST', { loan_id: loanId });
+                await syncLabData();
+                toast('Componente Restituito', `${res.unitLabel} riposto correttamente nell'armadio`, 'success');
+            } catch (e) {
+                toast('Errore Restituzione', e.message, 'error');
+            }
+        }
+
+        // ================= 4. GESTIONE CODA BAGNO (SERVER-SIDE) =================
+        function openBathroomQueueModal() {
+            document.getElementById('modal-bathroom-queue')?.classList.remove('hidden');
+            const isTeacher = (currentUser?.role !== 'studente');
+            document.getElementById('queue-teacher-controls')?.classList.toggle('hidden', !isTeacher);
+            renderBathroomQueueUI();
+        }
+
+        function closeBathroomQueueModal() {
+            document.getElementById('modal-bathroom-queue')?.classList.add('hidden');
+        }
+
+        function updateQueueBadges() {
+            const badge = document.getElementById('queue-badge-count');
+            if (badge) {
+                const count = bathroomQueue.length;
+                badge.innerText = count;
+                badge.classList.toggle('hidden', count === 0);
+            }
+        }
+
+        function renderBathroomQueueUI() {
+            const occupantCard = document.getElementById('queue-occupant-card');
+            const actionBox = document.getElementById('queue-action-box');
+            const listContainer = document.getElementById('queue-list-container');
+            const totalWaiting = document.getElementById('queue-total-waiting');
+
+            if (!occupantCard || !actionBox || !listContainer) return;
+
+            let occupant = null;
+            let occupantDeskId = null;
+            if (localSchoolDB[currentClass]) {
+                for (let [deskId, s] of Object.entries(localSchoolDB[currentClass])) {
+                    if (s && s.status === 'bagno') {
+                        occupant = s;
+                        occupantDeskId = deskId;
+                        break;
+                    }
+                }
+            }
+
+            const isTeacher = (currentUser?.role !== 'studente');
+
+            if (occupant) {
+                const lastHistory = occupant.history && occupant.history.length > 0 ? occupant.history[occupant.history.length - 1] : null;
+                const outTime = lastHistory ? lastHistory.out : occupant.time;
+                const returnBtn = isTeacher 
+                    ? `<button onclick="forceBathroomReturn('${occupantDeskId}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition">Segna Rientro</button>`
+                    : '';
+
+                occupantCard.className = "mb-4 p-4 rounded-2xl border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-between shadow-lg animate-pulse";
+                occupantCard.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+                        <div>
+                            <div class="text-[10px] font-mono uppercase font-bold text-cyan-300">Bagno Occupato</div>
+                            <div class="text-sm sm:text-base font-black text-white">${esc(occupant.name)} <span class="text-xs font-mono text-cyan-400 font-normal">#${occupantDeskId.split('_')[1]}</span></div>
+                            <div class="text-[10px] font-mono text-slate-400">Uscita alle ore ${esc(outTime)}</div>
+                        </div>
+                    </div>
+                    ${returnBtn}
+                `;
+            } else {
+                occupantCard.className = "mb-4 p-4 rounded-2xl border border-emerald-500/40 bg-emerald-950/20 flex items-center justify-between";
+                occupantCard.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                        <div>
+                            <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Bagno Libero</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-300">Nessun alunno attualmente fuori aula per il bagno</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            actionBox.innerHTML = '';
+            if (currentUser?.role === 'studente') {
+                const myStudentId = currentUser.id;
+                let myDeskEntry = localSchoolDB[currentClass] ? Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === myStudentId) : null;
+                const myDeskId = myDeskEntry ? myDeskEntry[0] : 'banco_01';
+                const myStudentData = myDeskEntry ? myDeskEntry[1] : null;
+                const isCurrentlyInBathroom = (myStudentData && myStudentData.status === 'bagno');
+                const queueIndex = bathroomQueue.findIndex(q => q.student_id === myStudentId);
+                const isInQueue = (queueIndex !== -1);
+                const isNextInLine = (queueIndex === 0);
+
+                if (isCurrentlyInBathroom) {
+                    actionBox.innerHTML = `
+                        <div class="p-3.5 bg-cyan-500/15 border border-cyan-500/40 rounded-2xl flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-cyan-300">Sei attualmente fuori al bagno.</span>
+                            <button onclick="forceBathroomReturn('${myDeskId}')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl">Sono Rientrato</button>
+                        </div>
+                    `;
+                } else if (isInQueue) {
+                    const canGoNow = (isNextInLine && !occupant);
+                    if (canGoNow) {
+                        actionBox.innerHTML = `
+                            <div class="p-3.5 bg-emerald-500/15 border border-emerald-500/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2 shadow-lg">
+                                <div>
+                                    <div class="text-xs font-black text-emerald-400">È IL TUO TURNO!</div>
+                                    <div class="text-[11px] text-slate-300">Il bagno è libero. Conferma per registrare l'uscita.</div>
+                                </div>
+                                <button onclick="startBathroomTrip('${myStudentId}', '${myDeskId}')" class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition shadow-md">
+                                    Esci al Bagno
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        actionBox.innerHTML = `
+                            <div class="p-3.5 bg-slate-900 border border-slate-700/80 rounded-2xl flex items-center justify-between gap-3">
+                                <div>
+                                    <div class="text-[10px] font-mono uppercase font-bold text-cyan-400">La tua posizione</div>
+                                    <div class="text-sm font-black text-white">${queueIndex + 1}° in fila d'attesa</div>
+                                </div>
+                                <button onclick="leaveBathroomQueue('${myStudentId}')" class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-300 font-bold text-xs rounded-xl transition">
+                                    Annulla
+                                </button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    actionBox.innerHTML = `
+                        <button onclick="joinBathroomQueue()" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-hand"></i> Prenotati per il Bagno dal tuo Banco
+                        </button>
+                    `;
+                }
+            }
+
+            totalWaiting.innerText = `${bathroomQueue.length} in attesa`;
+            listContainer.innerHTML = '';
+
+            if (bathroomQueue.length === 0) {
+                listContainer.innerHTML = `<div class="p-6 text-center text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-2xl">Nessuno studente in coda al momento.</div>`;
+                return;
+            }
+
+            bathroomQueue.forEach((item, index) => {
+                const isFirst = (index === 0);
+                const isReady = (isFirst && !occupant);
+                const badgeColor = isReady ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 animate-pulse' : 'bg-slate-800 text-slate-400 border-slate-700';
+
+                const removeBtn = isTeacher 
+                    ? `<button onclick="removeQueueItem('${item.id}')" class="text-red-400 hover:text-red-300 p-1.5 transition ml-2"><i class="fa-solid fa-trash text-xs"></i></button>`
+                    : '';
+
+                const callBtn = (isTeacher && isReady)
+                    ? `<button onclick="startBathroomTrip('${item.student_id}', '${item.desk_id}')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[10px] rounded-lg uppercase tracking-wider transition ml-1">Fai uscire</button>`
+                    : '';
+
+                listContainer.innerHTML += `
+                    <div class="p-3 bg-slate-900/80 border border-slate-800 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-lg ${isFirst ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400'} font-black text-xs flex items-center justify-center font-mono shrink-0">
+                                ${index + 1}°
+                            </div>
+                            <div>
+                                <div class="font-extrabold text-white text-xs sm:text-sm leading-tight">${esc(item.student_name)}</div>
+                                <div class="text-[9px] font-mono text-slate-400">#${esc(item.desk_id ? item.desk_id.replace('banco_','') : '--')} • Prenotato alle ${esc(item.booked_at || '--:--')}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded border ${badgeColor}">${isReady ? 'Turno Pronto' : 'In Attesa'}</span>
+                            ${callBtn}
+                            ${removeBtn}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function joinBathroomQueue() {
+            if (currentUser?.role !== 'studente') return;
+            const myDeskEntry = localSchoolDB[currentClass] ? Object.entries(localSchoolDB[currentClass]).find(([, s]) => s.db_id === currentUser.id) : null;
+            if (!myDeskEntry) return toast('Attenzione', 'Non risulti posizionato in questa classe.', 'error');
+
+            const [deskId, myData] = myDeskEntry;
+            if (myData.status === 'assente') return toast('Non puoi prenotarti', 'Risulti assente sul registro.', 'error');
+            if (myData.status === 'bagno') return toast('Già fuori', 'Risulti già al bagno.', 'info');
+
+            const nowTime = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+            try {
+                await api('/api/bathroom-queue/join', 'POST', {
+                    student_id: currentUser.id,
+                    student_name: currentUser.name,
+                    desk_id: deskId,
+                    class_name: currentClass,
+                    class_id: currentClassId,
+                    booked_at: nowTime
+                });
+                await syncClassroomData();
+                toast('Prenotazione Registrata', 'Sei in coda per il bagno', 'success');
+            } catch (e) {
+                toast('Attenzione', e.message, 'error');
+            }
+        }
+
+        async function leaveBathroomQueue(studentId) {
+            await api('/api/bathroom-queue/remove', 'POST', { identifier: studentId, class_name: currentClass });
+            await syncClassroomData();
+            toast('Prenotazione Annullata', 'Hai lasciato la fila del bagno', 'info');
+        }
+
+        async function removeQueueItem(identifier) {
+            await api('/api/bathroom-queue/remove', 'POST', { identifier, class_name: currentClass });
+            await syncClassroomData();
+        }
+
+        async function clearBathroomQueue() {
+            if (!confirm("Svuotare l'intera coda del bagno?")) return;
+            await api('/api/bathroom-queue/clear', 'POST', { class_name: currentClass });
+            await syncClassroomData();
+            toast('Coda Svuotata', '', 'info');
+        }
+
+        async function startBathroomTrip(studentId, deskId) {
+            selectedStudentId = deskId;
+            pendingStatus = 'bagno';
+            await confirmStatusChange();
+        }
+
+        async function forceBathroomReturn(occupantDeskId) {
+            selectedStudentId = occupantDeskId;
+            pendingStatus = 'presente';
+            await confirmStatusChange();
+            toast('Rientro Confermato', 'Il bagno è ora libero.', 'success');
+        }
+
+        // ================= 5. RENDER GRIGLIA AULA & MODIFICA STATO =================
+        function switchMobileAisle(aisle) {
+            currentMobileAisle = aisle;
+            ['left', 'center', 'right', 'all'].forEach(k => {
+                const b = document.getElementById(`tab-aisle-${k}`);
+                if (b) b.className = (k === aisle) ? "flex-1 py-2 rounded-xl text-center transition border aisle-pill-active font-black" : "flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400";
+            });
+            renderMobileClassroom(localSchoolDB[currentClass]);
+        }
+
+        function createMobileDeskCard(id, data) {
+            const d = data[id] || { name: 'Libero', status: 'assente', time: '--:--' };
+            const isLibero = (d.name === 'Libero');
+            const statusClass = String(d.status || 'assente').replace(/_/g,'-');
+            const card = document.createElement('div');
+            card.className = `p-3 rounded-2xl status-${statusClass} ${isLibero ? 'opacity-30' : 'cursor-pointer'} transition-all shadow-md flex flex-col justify-between min-h-[100px]`;
+            card.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-[9px] font-mono font-bold opacity-60">#${id.split('_')[1]}</span>
+                    <span class="text-[8px] font-mono font-black uppercase py-0.5 px-2 rounded-md bg-black/40">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
+                </div>
+                <div class="font-extrabold text-sm text-white leading-tight my-1">${esc(d.name)}</div>
+                <div class="text-[9px] font-mono opacity-80 text-right">${esc(d.time || '--:--')}</div>
+            `;
+            if (!isLibero) card.onclick = () => openStudentDetail(id);
+            return card;
+        }
+
+        function renderMobileClassroom(data) {
+            const container = document.getElementById('mobile-classroom-grid');
+            if (!container || !data) return;
+            container.innerHTML = '';
+            const left = []; for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
+            const center = [`banco_09`]; for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
+            const right = []; for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
+
+            const renderSection = (title, deskIds) => {
+                const sec = document.createElement('div');
+                sec.className = "bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800 space-y-3";
+                sec.innerHTML = `<div class="text-xs font-mono font-black text-slate-300 uppercase">${title}</div><div class="grid grid-cols-2 gap-2.5"></div>`;
+                const g = sec.querySelector('div:last-child');
+                deskIds.forEach(id => g.appendChild(createMobileDeskCard(id, data)));
+                container.appendChild(sec);
+            };
+            if (currentMobileAisle === 'left' || currentMobileAisle === 'all') renderSection("Ala Sinistra", left);
+            if (currentMobileAisle === 'center' || currentMobileAisle === 'all') renderSection("Fila Centrale", center);
+            if (currentMobileAisle === 'right' || currentMobileAisle === 'all') renderSection("Ala Destra", right);
+        }
+
+        function createDeskCard(id, data, isSingle=false) {
+            const d = data[id] || {name:'Libero',status:'assente',time:'--:--'};
+            const wrap = document.createElement('div'); 
+            wrap.className = isSingle ? 'w-full max-w-[340px] lg:max-w-[420px] mx-auto' : 'w-full';
+            const btn = document.createElement('button'); 
+            btn.type = 'button'; 
+            btn.className = 'w-full block outline-none h-full';
+            btn.disabled = (d.name === 'Libero');
+
+            const studentNotes = (d.db_id && localNotesDB[d.db_id]) ? localNotesDB[d.db_id] : [];
+            const hasWarning = studentNotes.some(n => n.type === 'warning');
+            const hasNotes = studentNotes.length > 0;
+            const noteFlag = hasWarning 
+                ? `<i class="fa-solid fa-circle-exclamation text-red-500 animate-pulse absolute top-3 right-3 text-sm z-20"></i>`
+                : (hasNotes ? `<i class="fa-solid fa-circle-info text-amber-400 absolute top-3 right-3 text-sm z-20"></i>` : '');
+            
+            const statusClass = String(d.status || 'assente').replace(/_/g,'-');
+            btn.innerHTML = `<div class="relative h-28 md:h-32 lg:h-36 xl:h-40 w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 flex flex-col justify-between shadow-xl status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100 hover:scale-[1.03]'} transition-all">
+                ${noteFlag}
+                <div class="flex justify-between items-start">
+                    <span class="text-[10px] lg:text-xs font-bold opacity-75 font-mono">#${id.split('_')[1]}</span>
+                    <span class="text-[9px] lg:text-[10px] font-mono font-black uppercase py-1 px-2.5 rounded-lg bg-black/40 border border-white/5">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
+                </div>
+                <div class="text-center flex-grow flex items-center justify-center px-1 my-1">
+                    <h3 class="font-extrabold text-xs md:text-sm lg:text-base xl:text-lg leading-tight uppercase w-full break-words text-white">${esc(d.name)}</h3>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] lg:text-xs font-mono font-semibold opacity-85 bg-black/40 px-3 py-1 rounded-lg border border-white/5 text-slate-300">${esc(d.time || '--:--')}</span>
+                </div>
+            </div>`;
+            if (d.name !== 'Libero') btn.onclick = () => openStudentDetail(id);
+            wrap.appendChild(btn); 
+            return wrap;
+        }
+
+        function renderGrid(data) {
+            if (!data) return;
+            renderMobileClassroom(data);
+            const grid = document.getElementById('classroom-grid'); 
+            if (!grid) return; 
+            grid.innerHTML = '';
+
+            const makeColumn = (label, deskIds) => {
+                const col = document.createElement('div');
+                col.className = 'flex flex-col-reverse gap-3 lg:gap-4 flex-1'; 
+                const labelEl = document.createElement('div');
+                labelEl.className = 'text-center text-xs font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last';
+                labelEl.textContent = label;
+                col.appendChild(labelEl);
+                for (let i = 0; i < deskIds.length; i += 2) {
+                    const row = document.createElement('div'); 
+                    row.className = 'grid grid-cols-2 gap-3 lg:gap-4';
+                    deskIds.slice(i, i+2).forEach(id => row.appendChild(createDeskCard(id, data)));
+                    col.appendChild(row);
+                }
+                return col;
+            };
+
+            const left = []; for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
+            const center = [`banco_09`]; for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
+            const right = []; for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
+
+            const leftCol = makeColumn('ALA SINISTRA', left);
+            const centerCol = document.createElement('div'); 
+            centerCol.className = 'flex flex-col-reverse gap-3 lg:gap-4 flex-1';
+            const centerLabel = document.createElement('div'); 
+            centerLabel.className = 'text-center text-xs font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last'; 
+            centerLabel.textContent = 'FILA CENTRALE'; 
+            centerCol.appendChild(centerLabel);
+            
+            const single = document.createElement('div'); 
+            single.className = 'flex justify-center w-full'; 
+            single.appendChild(createDeskCard('banco_09', data, true)); 
+            centerCol.appendChild(single);
+            
+            const centerPairs = center.slice(1);
+            for (let i=0;i<centerPairs.length;i+=2) {
+                const row = document.createElement('div'); 
+                row.className = 'grid grid-cols-2 gap-3 lg:gap-4';
+                row.appendChild(createDeskCard(centerPairs[i], data));
+                if (centerPairs[i+1]) row.appendChild(createDeskCard(centerPairs[i+1], data));
+                centerCol.appendChild(row);
+            }
+
+            grid.appendChild(leftCol); grid.appendChild(centerCol); grid.appendChild(makeColumn('ALA DESTRA', right));
+
+            let out = null; 
+            Object.values(data).forEach(v => { if (v.status === 'bagno') out = v.name; });
+            const bath = document.getElementById('bathroom-bar');
+            if (bath && !bath.classList.contains('hidden')) {
+                const queueInfo = bathroomQueue.length > 0 ? `<span class="ml-1.5 px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/40 text-[10px] font-bold text-cyan-300">Coda: ${bathroomQueue.length}</span>` : '';
+                bath.innerHTML = out 
+                    ? `<div class="px-4 py-1.5 rounded-full border border-cyan-500/50 bg-cyan-950/40 flex items-center justify-center gap-2 animate-pulse shadow-lg">
+                         <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0"></span>
+                         <span class="text-xs font-mono font-bold text-cyan-300 uppercase">BAGNO: <span class="text-white font-sans font-extrabold">${esc(out)}</span></span>
+                         ${queueInfo}
+                       </div>` 
+                    : `<div class="px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/20 flex items-center justify-center gap-2 shadow-md">
+                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
+                         <span class="text-xs font-mono font-bold text-emerald-300 uppercase">BAGNO LIBERO</span>
+                         ${queueInfo}
+                       </div>`;
+            }
+        }
+
+        function openStudentDetail(id) {
+            const student = localSchoolDB[currentClass]?.[selectedStudentId = id];
+            if (!student || student.name === 'Libero') return;
+            pendingStatus = student.status;
+
+            document.getElementById('modal-detail-name').innerText = student.name;
+            const statusEl = document.getElementById('modal-detail-status');
+            statusEl.innerText = student.status.toUpperCase().replace('_', ' ');
+            document.getElementById('modal-detail-count').innerText = student.history.length;
+
+            const tbody = document.getElementById('modal-history-body');
+            tbody.innerHTML = "";
+            student.history.slice().reverse().forEach(h => {
+                let durata = h.in ? `<span class="text-[10px] text-amber-300 font-mono font-bold ml-2 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-500/30">⏱ ${calcolaDurata(h.out, h.in)}</span>` : '';
+                tbody.innerHTML += `<tr><td class="px-4 py-3 font-bold text-cyan-400 font-mono">${h.out}</td><td class="px-4 py-3 font-bold text-emerald-400 font-mono">${h.in || '--:--'} ${durata}</td><td class="px-4 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
+            });
+
+            document.getElementById('status-view-mode').classList.remove('hidden');
+            document.getElementById('status-edit-mode').classList.add('hidden');
+
+            const isTeacher = (currentUser?.role !== 'studente');
+            document.getElementById('status-edit-hint')?.classList.toggle('hidden', !isTeacher);
+            document.getElementById('teacher-note-input')?.classList.toggle('hidden', !isTeacher);
+            document.getElementById('grade-input-area')?.classList.toggle('hidden', !isTeacher);
+
+            switchTab('presence');
+            document.getElementById('modal-student-detail').classList.remove('hidden');
+        }
+
+        function toggleStatusEdit() {
+            if (currentUser?.role === 'studente') return;
+            const viewMode = document.getElementById('status-view-mode');
+            const editMode = document.getElementById('status-edit-mode');
+            const isEditing = !editMode.classList.contains('hidden');
+            viewMode.classList.toggle('hidden', !isEditing);
+            editMode.classList.toggle('hidden', isEditing);
+            if (!isEditing) selectStatusPreview(localSchoolDB[currentClass]?.[selectedStudentId]?.status);
+        }
+
+        function selectStatusPreview(status) {
+            pendingStatus = status;
+            document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('btn-selected'));
+            document.getElementById(`btn-${status}`)?.classList.add('btn-selected');
+        }
+
+        async function confirmStatusChange() {
+            const student = localSchoolDB[currentClass]?.[selectedStudentId];
+            if (!student || !pendingStatus) return;
+
+            const now = new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+            const timeVal = (pendingStatus === 'assente') ? '--:--' : now;
+
+            try {
+                await api('/api/attendance', 'POST', {
+                    student_id: student.db_id,
+                    class_id: currentClassId,
+                    date: selectedDate,
+                    status: pendingStatus,
+                    time: timeVal
+                });
+                await syncClassroomData();
+                if (!document.getElementById('modal-student-detail').classList.contains('hidden')) {
+                    openStudentDetail(selectedStudentId);
+                }
+                toast('Presenza Aggiornata', `${student.name} → ${pendingStatus.toUpperCase()}`, 'success');
+            } catch (e) {
+                toast('Errore', e.message, 'error');
+            }
+        }
+
+        // ================= 6. CONSOLE FLOTTA ESP32 & ASSISTENTE AI =================
+        async function loadDevicesData() {
+            try {
+                const res = await api('/api/devices');
+                schoolDevices = res.devices || [];
+                renderFleetDashboard();
+            } catch(e) {}
+        }
+
+        function openAdminConsoleModal() {
+            if (currentUser?.role !== 'admin') return;
+            document.getElementById('modal-admin-console')?.classList.remove('hidden');
+            loadDevicesData();
+            syncLabData();
+        }
+
+        function closeAdminConsoleModal() {
+            document.getElementById('modal-admin-console')?.classList.add('hidden');
+        }
+
+        function switchAdminTab(tab) {
+            document.getElementById('content-admin-fleet')?.classList.toggle('hidden', tab !== 'fleet');
+            document.getElementById('content-admin-ai')?.classList.toggle('hidden', tab !== 'ai');
+            document.getElementById('tab-admin-fleet').className = tab === 'fleet' ? "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md" : "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white";
+            document.getElementById('tab-admin-ai').className = tab === 'ai' ? "px-3.5 py-1.5 rounded-lg bg-purple-600 text-white shadow-md" : "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white";
+        }
+
+        function renderFleetDashboard() {
+            const container = document.getElementById('devices-grid-container');
+            if (!container) return;
+
+            document.getElementById('metric-total-nodes').innerText = schoolDevices.length;
+            document.getElementById('metric-online-nodes').innerText = schoolDevices.filter(d => d.status === 'online').length;
+            document.getElementById('metric-battery-warning').innerText = schoolDevices.filter(d => d.battery_level < 20).length;
+            document.getElementById('metric-tamper-alerts').innerText = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper').length;
+
+            container.innerHTML = '';
+            schoolDevices.forEach(d => {
+                let statusColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+                let statusText = "Online";
+                if (d.is_tampered || d.status === 'tamper') {
+                    statusColor = "bg-red-500/30 text-red-400 border-red-500/60 animate-pulse";
+                    statusText = "MANOMESSO (STRAPPO)";
+                } else if (d.battery_level < 20) {
+                    statusColor = "bg-amber-500/20 text-amber-400 border-amber-500/40";
+                    statusText = "Batteria Scarica";
+                } else if (d.status === 'offline') {
+                    statusColor = "bg-slate-800 text-slate-500 border-slate-700";
+                    statusText = "Disconnesso";
+                }
+
+                container.innerHTML += `
+                    <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-extrabold text-sm text-white">${esc(d.device_name)}</span>
+                                <span class="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${statusColor}">${statusText}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400 font-mono mb-3">${esc(d.location)} • ${esc(d.device_code)}</div>
+                            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono bg-black/30 p-2.5 rounded-xl border border-white/5 mb-3">
+                                <div><span class="text-slate-500 text-[10px] block">BATTERIA 18650</span><span class="font-bold text-emerald-400">${d.battery_level}% (${d.battery_voltage}V)</span></div>
+                                <div><span class="text-slate-500 text-[10px] block">WI-FI RSSI</span><span class="font-bold text-blue-400">${d.rssi} dBm</span></div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 pt-1 border-t border-slate-800">
+                            <button onclick="toast('Ping OK', 'Nodo ${esc(d.device_code)} attivo su LAN', 'info')" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] rounded-lg">Ping</button>
+                            <button onclick="toggleTamperTest('${d.device_code}')" class="py-1.5 px-3 bg-red-950/40 hover:bg-red-900/40 text-red-400 border border-red-800/50 font-bold text-[11px] rounded-lg"><i class="fa-solid fa-bell"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function toggleTamperTest(code) {
+            await api('/api/devices/tamper', 'POST', { device_code: code });
+            await loadDevicesData();
+        }
+
+        function sendQuickAiPrompt(text) {
+            const input = document.getElementById('ai-chat-input');
+            if (input) { input.value = text; sendAiMessage(); }
+        }
+
+        function sendAiMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const history = document.getElementById('ai-chat-history');
+            if (!input || !history) return;
+            const text = input.value.trim();
+            if (!text) return;
+
+            history.innerHTML += `<div class="flex items-start justify-end gap-2.5"><div class="bg-blue-600 p-3 rounded-2xl rounded-tr-none text-xs text-white max-w-xl">${esc(text)}</div></div>`;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            setTimeout(() => {
+                const response = generateLocalAiResponse(text);
+                history.innerHTML += `<div class="flex items-start gap-2.5"><div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-black shrink-0">AI</div><div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl rounded-tl-none text-xs text-slate-200 max-w-xl leading-relaxed">${response}</div></div>`;
+                history.scrollTop = history.scrollHeight;
+            }, 250);
+        }
+
+        function generateLocalAiResponse(query) {
+            const q = query.toLowerCase();
+            const activeLoans = labState.activeLoans || [];
+            const tamp = schoolDevices.filter(d => d.is_tampered || d.status === 'tamper');
+            const lowBatt = schoolDevices.filter(d => d.battery_level < 20);
+
+            if (q.includes('armadio') || q.includes('component') || q.includes('multimetr') || q.includes('lab') || q.includes('manca')) {
+                if (activeLoans.length === 0) {
+                    return `📦 <strong>Diagnostica Armadio Laboratorio:</strong> Tutti gli strumenti risultano presenti nell'armadio (nessun componente mancante).`;
+                }
+                const list = activeLoans.map(l => `• <strong>${esc(l.unit_label)}</strong> → sul <strong>${esc(l.workbench_id.replace('lab_banco_', 'Banco Lab #'))}</strong> (preso da ${esc(l.student_name)} alle ${esc(l.taken_at)})`).join('<br>');
+                return `⚠️ <strong>Controllo Armadio Laboratorio:</strong> Risultano <strong>${activeLoans.length} componenti fuori dall'armadio</strong>:<br>${list}`;
+            }
+            if (q.includes('tamper') || q.includes('strappo') || q.includes('allarm')) {
+                return tamp.length > 0
+                    ? `🚨 <strong>ALLARME ATTIVO:</strong> Il modulo <strong>${esc(tamp[0].device_name)}</strong> (${esc(tamp[0].location)}) segnala apertura del microswitch Tamper!`
+                    : `✅ Tutti i microswitch anti-manomissione sono chiusi e regolari.`;
+            }
+            if (q.includes('batteri')) {
+                return lowBatt.length > 0
+                    ? `🔋 <strong>Avviso Batterie:</strong> ${lowBatt.map(d => `${esc(d.device_name)} (${d.battery_level}%)`).join(', ')} sotto la soglia del 20%.`
+                    : `🔋 Tutte le batterie 18650 sono cariche.`;
+            }
+            return `📊 <strong>Stato Ecosistema Locale SmartCheck:</strong><br>• Nodi ESP32 Online: <strong>${schoolDevices.filter(d=>d.status==='online').length}/${schoolDevices.length}</strong><br>• In coda per il bagno: <strong>${bathroomQueue.length}</strong><br>• Componenti fuori dall'armadio Lab: <strong>${activeLoans.length}</strong>`;
+        }
+
+        // ================= 7. FIRME, AGENDA, VOTI, NOTE & HUB =================
+        function openSignModal() {
+            document.getElementById('modal-sign')?.classList.remove('hidden');
+            const isStud = (currentUser?.role === 'studente');
+            document.getElementById('reg-header-student')?.classList.toggle('hidden', !isStud);
+            document.getElementById('reg-header-teacher')?.classList.toggle('hidden', isStud);
+            document.getElementById('new-signature-form')?.classList.toggle('hidden', isStud);
+            renderCalendarStrip();
+            renderSignaturesList();
+        }
+
+        function renderCalendarStrip() {
+            const container = document.getElementById('cv-calendar-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const labels = ['D','L','M','M','G','V','S'];
+            const selected = new Date(`${selectedDate}T12:00:00`);
+            for (let i=-3; i<=3; i++) {
+                const d = new Date(selected);
+                d.setDate(selected.getDate() + i);
+                const iso = d.toISOString().slice(0,10);
+                const day = document.createElement('button');
+                day.type = 'button';
+                day.className = `cv-day ${iso===selectedDate?'active':''} ${iso===getTodayStr()?'today':''}`;
+                day.innerHTML = `<span class="cv-day-letter">${labels[d.getDay()]}</span><div class="cv-day-number">${d.getDate()}</div>`;
+                day.onclick = () => changeDate(iso);
+                container.appendChild(day);
+            }
+        }
+
+        function selectSignHour(h) {
+            selectedSignHour = h;
+            for (let i=1; i<=5; i++) {
+                const btn = document.getElementById(`hour-btn-${i}`);
+                if (btn) btn.className = (i === h) ? 'flex-1 py-1.5 rounded-lg bg-blue-600 text-xs font-mono font-bold text-white' : 'flex-1 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono font-bold text-slate-300';
+            }
+        }
+
+        function renderSignaturesList() {
+            const container = document.getElementById('signatures-list');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!onlineSignatures || onlineSignatures.length === 0) {
+                document.getElementById('no-signatures')?.classList.remove('hidden');
+                return;
+            }
+            document.getElementById('no-signatures')?.classList.add('hidden');
+            onlineSignatures.forEach(sig => {
+                const canDelete = currentUser && currentUser.role !== 'studente';
+                const deleteBtn = canDelete ? `<button onclick="deleteSignature('${sig.id}')" class="text-red-500 hover:text-red-300 p-1.5 ml-auto"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+                container.innerHTML += `<div class="bg-slate-900/80 border border-slate-800 p-3 rounded-xl flex flex-col gap-1.5"><div class="flex justify-between items-start"><span class="text-[10px] font-mono font-bold bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded uppercase">${sig.hour}° ORA • ${esc(sig.subject)}</span>${deleteBtn}</div><p class="text-xs font-medium text-slate-200">${esc(sig.topic)}</p><div class="text-[10px] text-slate-500">${esc(sig.teacher)}</div></div>`;
+            });
+        }
+
+        async function saveSignature() {
+            if (!selectedSignHour) return toast('Ora Mancante', 'Seleziona l\'ora di lezione.', 'error');
+            const subj = document.getElementById('subject-search').value.trim();
+            const topic = document.getElementById('sign-argomento').value.trim();
+            if (!subj || !topic) return toast('Dati Incompleti', 'Specifica materia e argomento.', 'error');
+            await api('/api/signatures', 'POST', { date: selectedDate, hour: selectedSignHour, subject: subj, topic, class_name: currentClass });
+            document.getElementById('modal-sign').classList.add('hidden');
+            document.getElementById('sign-argomento').value = '';
+            await syncClassroomData();
+            toast('Firma Registrata', '', 'success');
+        }
+
+        async function deleteSignature(id) {
+            await api(`/api/signatures/${id}`, 'DELETE');
+            await syncClassroomData();
+        }
+
+        function updateSignatureDisplay() {
+            const last = onlineSignatures && onlineSignatures.length > 0 ? onlineSignatures[onlineSignatures.length - 1] : null;
+            const disp = document.getElementById('signature-display');
+            if (disp) disp.innerText = last ? `${last.hour}° Ora • ${last.subject}: ${last.topic}` : "Clicca per aprire il Registro di Classe";
+        }
+
+        function filterSubjects() {
+            const input = document.getElementById('subject-search').value.toLowerCase();
+            const drop = document.getElementById('subject-dropdown');
+            drop.innerHTML = "";
+            ALL_SUBJECTS.forEach(s => {
+                if (s.toLowerCase().includes(input)) {
+                    const div = document.createElement('div');
+                    div.innerText = s;
+                    div.className = "p-2 hover:bg-blue-600/50 cursor-pointer text-xs";
+                    div.onclick = () => { document.getElementById('subject-search').value = s; drop.classList.add('hidden'); };
+                    drop.appendChild(div);
+                }
+            });
+            drop.classList.remove('hidden');
+        }
+
+        function openAgendaModal() {
+            document.getElementById('modal-agenda').classList.remove('hidden');
+            document.getElementById('btn-add-agenda')?.classList.toggle('hidden', currentUser?.role === 'studente');
+            renderAgendaList();
+        }
+
+        function openAddAgendaModal() {
+            document.getElementById('modal-add-agenda').classList.remove('hidden');
+            const sel = document.getElementById('agenda-subject');
+            sel.innerHTML = "";
+            ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`);
+        }
+
+        function selectAgendaType(t) {
+            pendingAgendaType = t;
+            document.getElementById('btn-type-compito').className = (t === 'compito') ? 'btn-selected py-2.5 bg-emerald-950/40 text-emerald-400 font-bold rounded-xl text-xs uppercase' : 'py-2.5 bg-slate-800 text-slate-400 font-bold rounded-xl text-xs uppercase';
+            document.getElementById('btn-type-verifica').className = (t === 'verifica') ? 'btn-selected py-2.5 bg-red-950/40 text-red-400 font-bold rounded-xl text-xs uppercase' : 'py-2.5 bg-slate-800 text-slate-400 font-bold rounded-xl text-xs uppercase';
+        }
+
+        function renderAgendaList() {
+            const list = document.getElementById('agenda-list');
+            if (!list) return;
+            list.innerHTML = '';
+            if (onlineAgenda.length === 0) {
+                list.innerHTML = '<div class="p-8 text-center text-slate-500 font-mono text-xs border border-dashed border-slate-800 rounded-2xl">Nessun impegno in agenda.</div>';
+                return;
+            }
+            onlineAgenda.forEach(item => {
+                const isTask = item.type === 'compito';
+                const canDelete = (currentUser?.role !== 'studente');
+                list.innerHTML += `<div class="p-4 rounded-xl mb-2 flex justify-between items-start border-l-4 ${isTask ? 'border-emerald-500 bg-emerald-950/10' : 'border-red-500 bg-red-950/10'}"><div><span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-black/40 text-slate-300 inline-block mb-1">${esc(item.date)} • ${esc(item.subject)}</span><p class="text-xs text-slate-200 mt-1">${esc(item.description)}</p></div>${canDelete ? `<button onclick="deleteAgendaItem('${item.id}')" class="text-red-400 p-2"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}</div>`;
+            });
+        }
+
+        async function saveAgendaEntry() {
+            if (!pendingAgendaType) return toast('Tipo Richiesto', 'Seleziona Compito o Verifica.', 'error');
+            const dateInput = document.getElementById('agenda-date').value;
+            if (!dateInput) return toast('Data Mancante', 'Inserisci una data.', 'error');
+            const d = new Date(dateInput);
+            const formatted = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+            await api('/api/agenda', 'POST', { date: formatted, subject: document.getElementById('agenda-subject').value, type: pendingAgendaType, description: document.getElementById('agenda-desc').value, class_name: currentClass });
+            document.getElementById('modal-add-agenda').classList.add('hidden');
+            await syncClassroomData();
+            renderAgendaList();
+        }
+
+        async function deleteAgendaItem(id) {
+            await api(`/api/agenda/${id}`, 'DELETE');
+            await syncClassroomData();
+            renderAgendaList();
+        }
+
+        function toggleNoticeModal() { document.getElementById('modal-notices')?.classList.toggle('hidden'); }
+        function backToGradePicker() { selectedStudentId = null; renderClassGradePicker(); }
+
+        function openGradesModal() {
+            const modal = document.getElementById('modal-grades');
+            const list = document.getElementById('grades-list');
+            const backBtn = document.getElementById('btn-grades-back');
+            if (!modal || !list) return;
+
+            let targetId = currentUser?.role === 'studente' ? currentUser.id : localSchoolDB[currentClass]?.[selectedStudentId]?.db_id;
+            let targetName = currentUser?.role === 'studente' ? currentUser.name : localSchoolDB[currentClass]?.[selectedStudentId]?.name;
+
+            if (!targetId) {
+                renderClassGradePicker();
+                modal.classList.remove('hidden');
+                return;
+            }
+            backBtn?.classList.toggle('hidden', currentUser?.role === 'studente');
+
+            const myGrades = localGradesDB[targetId] || [];
+            const allV = myGrades.map(g => parseGradeNum(g.value)).filter(n => !isNaN(n));
+            const avgNum = allV.length > 0 ? (allV.reduce((a,b) => a+b, 0) / allV.length) : 0;
+
+            document.getElementById('grades-total-avg').innerText = allV.length > 0 ? formatAverage(avgNum) : '0';
+            document.getElementById('grades-total-count').innerText = `${allV.length} valutazioni • ${targetName}`;
+
+            list.innerHTML = myGrades.length === 0 ? '<div class="p-8 text-center text-slate-500 font-mono text-xs">Nessuna valutazione registrata.</div>' : '';
+            myGrades.forEach(v => {
+                list.innerHTML += `<div class="cv-card p-3.5 flex justify-between items-center font-mono"><div><div class="text-white font-bold text-sm font-sans">${esc(v.subject)}</div><div class="text-[10px] text-slate-400">${esc(v.date)} • ${esc(v.type)}</div></div><span class="text-lg font-black ${parseGradeNum(v.value)>=6?'text-emerald-400':'text-red-400'}">${esc(v.value)}</span></div>`;
+            });
+            modal.classList.remove('hidden');
+        }
+
+        function renderClassGradePicker() {
+            const list = document.getElementById('grades-list');
+            if (!list) return;
+            document.getElementById('btn-grades-back')?.classList.add('hidden');
+            document.getElementById('grades-total-avg').innerText = '--';
+            document.getElementById('grades-total-count').innerText = "Seleziona uno studente";
+            list.innerHTML = '';
+            Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s.name !== 'Libero').forEach(([deskId, s]) => {
+                const grades = localGradesDB[s.db_id] || [];
+                const nums = grades.map(g => parseGradeNum(g.value)).filter(n => !isNaN(n));
+                const avg = nums.length > 0 ? formatAverage(nums.reduce((a,b)=>a+b,0)/nums.length) : '--';
+                const item = document.createElement('button');
+                item.className = 'w-full text-left p-3.5 bg-slate-900/70 border border-slate-800 rounded-xl mb-2 flex items-center justify-between';
+                item.innerHTML = `<div class="font-bold text-white text-sm">${esc(s.name)}</div><div class="text-lg font-black font-mono text-blue-400">${avg}</div>`;
+                item.onclick = () => { selectedStudentId = deskId; openGradesModal(); };
+                list.appendChild(item);
+            });
+        }
+
+        function switchTab(t) {
+            document.getElementById('content-presence')?.classList.toggle('hidden', t !== 'presence');
+            document.getElementById('content-grades')?.classList.toggle('hidden', t !== 'grades');
+            document.getElementById('content-notes')?.classList.toggle('hidden', t !== 'notes');
+            if (t === 'grades') loadTeacherGradesView();
+            if (t === 'notes') loadNotes();
+        }
+
+        function loadTeacherGradesView() {
+            const student = localSchoolDB[currentClass]?.[selectedStudentId];
+            if (!student?.db_id) return;
+            const subjSelect = document.getElementById('new-grade-subject');
+            if (subjSelect && subjSelect.children.length === 0) {
+                ALL_SUBJECTS.forEach(s => subjSelect.innerHTML += `<option value="${s}">${s}</option>`);
+            }
+            const list = document.getElementById('teacher-grades-list');
+            list.innerHTML = "";
+            const grades = localGradesDB[student.db_id] || [];
+            const isTeacher = currentUser?.role !== 'studente';
+            grades.forEach(g => {
+                list.innerHTML += `<tr><td class="px-4 py-2.5">${esc(g.date)}</td><td class="px-4 py-2.5">${esc(g.subject)}</td><td class="px-4 py-2.5">${esc(g.type)}</td><td class="px-4 py-2.5 text-right font-black text-emerald-400">${esc(g.value)}</td><td class="px-4 py-2.5 text-right">${isTeacher ? `<button onclick="deleteGrade('${g.id}')" class="text-red-500"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}</td></tr>`;
+            });
+        }
+
+        async function addGrade() {
+            const student = localSchoolDB[currentClass]?.[selectedStudentId];
+            if (!student?.db_id) return;
+            await api('/api/grades', 'POST', {
+                student_id: student.db_id,
+                subject: document.getElementById('new-grade-subject').value,
+                value: document.getElementById('new-grade-value').value,
+                type: document.getElementById('new-grade-type').value,
+                date: new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'}),
+                class_id: currentClassId
+            });
+            await syncClassroomData();
+            loadTeacherGradesView();
+            toast('Voto Registrato', '', 'success');
+        }
+
+        async function deleteGrade(id) {
+            await api(`/api/grades/${id}`, 'DELETE');
+            await syncClassroomData();
+            loadTeacherGradesView();
+        }
+
+        function loadNotes() {
+            const student = localSchoolDB[currentClass]?.[selectedStudentId];
+            if (!student?.db_id) return;
+            const list = document.getElementById('notes-list');
+            list.innerHTML = "";
+            const notes = localNotesDB[student.db_id] || [];
+            notes.forEach(n => {
+                list.innerHTML += `<div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-start"><div><div class="text-[10px] font-mono text-blue-400">${esc(n.date)} • ${esc(n.teacher)}</div><p class="text-xs text-slate-200 mt-1">${esc(n.text)}</p></div>${currentUser?.role !== 'studente' ? `<button onclick="deleteNote('${n.id}')" class="text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`;
+            });
+        }
+
+        async function addNote() {
+            const student = localSchoolDB[currentClass]?.[selectedStudentId];
+            if (!student?.db_id) return;
+            const text = document.getElementById('note-text').value.trim();
+            if (!text) return;
+            await api('/api/notes', 'POST', {
+                student_id: student.db_id,
+                text,
+                type: document.getElementById('note-type').value,
+                date: new Date().toLocaleDateString('it-IT'),
+                class_id: currentClassId
+            });
+            document.getElementById('note-text').value = '';
+            await syncClassroomData();
+            loadNotes();
+        }
+
+        async function deleteNote(id) {
+            await api(`/api/notes/${id}`, 'DELETE');
+            await syncClassroomData();
+            loadNotes();
+        }
+
+        function openListModal() {
+            document.getElementById('modal-class-list').classList.remove('hidden');
+            filterListModal();
+        }
+
+        function filterListModal() {
+            const ul = document.getElementById('full-student-list');
+            if (!ul) return;
+            ul.innerHTML = "";
+            const q = (document.getElementById('list-search')?.value || '').toLowerCase();
+            Object.entries(localSchoolDB[currentClass] || {}).filter(([,s]) => s && s.name !== 'Libero').forEach(([deskId, s]) => {
+                if (q && !s.name.toLowerCase().includes(q)) return;
+                ul.innerHTML += `<div onclick="document.getElementById('modal-class-list').classList.add('hidden'); openStudentDetail('${deskId}')" class="p-3.5 bg-[#11192e] border border-slate-800 rounded-xl flex justify-between items-center cursor-pointer"><span class="font-bold text-white text-sm">${esc(s.name)} <span class="text-xs font-mono text-slate-500">#${deskId.split('_')[1]}</span></span><span class="text-[10px] font-mono uppercase font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300">${esc(s.status)}</span></div>`;
+            });
+        }
+
+        function initHub() {
+            document.getElementById('view-hub').classList.remove('hidden');
+            document.getElementById('hub-user-name').innerText = currentUser.name;
+            document.getElementById('hub-role-badge').innerText = currentUser.role.toUpperCase();
+            document.getElementById('btn-open-admin-console')?.classList.toggle('hidden', currentUser.role !== 'admin');
+            renderClassSelector();
+        }
+
+        function renderClassSelector() {
+            const container = document.getElementById('classes-container');
+            if (!container) return;
+            container.innerHTML = '';
+            for (const [dept, classes] of Object.entries(FULL_CLASSES_STRUCT)) {
+                const cfg = DEPT_CONFIG[dept];
+                const col = document.createElement('div');
+                col.className = 'flex flex-col space-y-4 bg-slate-900/40 p-5 sm:p-6 rounded-3xl border border-slate-800/80 shadow-lg';
+                col.innerHTML = `<div class="flex items-center justify-between pb-3.5 border-b border-slate-800"><h3 class="text-base font-black text-white uppercase">${dept}</h3><span class="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border ${cfg.bgBadge}">${cfg.badge}</span></div><div class="class-list-container pt-1.5"></div>`;
+                const list = col.querySelector('.class-list-container');
+                classes.forEach(c => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.onclick = () => loadClassroom(c);
+                    btn.className = `w-full py-3.5 px-4 bg-slate-900/90 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} text-left flex items-center justify-between transition`;
+                    btn.innerHTML = `<span class="text-xl font-black font-mono text-white">${esc(c)}</span><i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>`;
+                    list.appendChild(btn);
+                });
+                container.appendChild(col);
+            }
+        }
+
+        function backToHub() {
+            localStorage.removeItem('SC_ACTIVE_CLASS');
+            document.getElementById('view-classroom').classList.add('hidden');
+            initHub();
+        }
+
+        // Ascolto Eventi Real-Time Socket.io dal server locale
+        if (socket) {
+            socket.on('sync_needed', () => { if (currentClass) syncClassroomData(); });
+            socket.on('lab_sync', () => { if (currentClass) syncLabData(); });
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            startClock();
+            switchMobileAisle('left');
+            document.getElementById('input-username').addEventListener('keydown', e => { if (e.key === 'Enter') verifyUser(); });
+            document.getElementById('input-password').addEventListener('keydown', e => { if (e.key === 'Enter') processAuth(); });
+
+            // Ripristino automatico sessione da Cookie HttpOnly sicuro
+            try {
+                const data = await api('/api/auth/me');
+                if (data.user) {
+                    currentUser = data.user;
+                    document.getElementById('view-login').classList.add('hidden');
+                    if (currentUser.role === 'studente') await loadClassroom('5AEE');
+                    else {
+                        const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
+                        if (activeCls) await loadClassroom(activeCls);
+                        else initHub();
+                    }
+                }
+            } catch (e) {}
+        });
+    </script>
+</body>
+</html>
