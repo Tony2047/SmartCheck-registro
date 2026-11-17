@@ -141,7 +141,7 @@
 @keyframes cvL{from{opacity:.15;transform:translateX(-36px)}to{opacity:1;transform:none}}
 @keyframes cvR{from{opacity:.15;transform:translateX(36px)}to{opacity:1;transform:none}}
 .cv-slide-l{animation:cvL .35s cubic-bezier(.16,1,.3,1)}.cv-slide-r{animation:cvR .35s cubic-bezier(.16,1,.3,1)}
-.cv-day{width:46px}.cv-day-number{width:40px!important;height:40px!important;font-size:15px!important}
+.cv-day{width:46px}@media(max-width:640px){.cv-day{width:38px}.cv-day-number{width:34px!important;height:34px!important;font-size:13px!important}}.cv-day-number{width:40px!important;height:40px!important;font-size:15px!important}
 </style>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col selection:bg-blue-500">
@@ -299,25 +299,25 @@
                 <div class="col-span-2 row-start-2 border-t border-slate-800/60 pt-2 md:border-t-0 md:pt-0 flex flex-wrap items-center justify-between md:justify-end gap-2 sm:gap-3 md:ml-auto md:order-2">
                     
                     <!-- SWITCHER MODALITÀ: AULA / LABORATORIO / ARMADIO -->
-                    <div class="flex items-center bg-slate-900/95 p-1 rounded-xl border border-slate-700/80 text-[11px] font-mono font-bold">
-                        <button onclick="switchMainMode('aula')" id="mode-btn-aula" class="px-4 py-2.5 rounded-lg text-sm bg-blue-600 text-white shadow flex items-center gap-1.5 transition">
+                    <div class="flex items-center bg-slate-900/95 p-1 rounded-xl border border-slate-700/80 max-w-full overflow-x-auto scrollbar-none text-[11px] font-mono font-bold">
+                        <button onclick="switchMainMode('aula')" id="mode-btn-aula" class="px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-lg text-[11px] md:text-sm whitespace-nowrap bg-blue-600 text-white shadow flex items-center gap-1.5 transition">
                             <i class="fa-solid fa-chalkboard"></i> <span>Aula</span>
                         </button>
-                        <button onclick="switchMainMode('lab')" id="mode-btn-lab" class="px-4 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                        <button onclick="switchMainMode('lab')" id="mode-btn-lab" class="px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-lg text-[11px] md:text-sm whitespace-nowrap text-slate-400 hover:text-white flex items-center gap-1.5 transition">
                             <i class="fa-solid fa-flask"></i> <span>Banchi Lab</span>
                             <span id="badge-lab-inuse" class="hidden px-1.5 py-0.2 rounded-full bg-amber-500 text-black text-[9px] font-black">0</span>
                         </button>
-                        <button onclick="switchMainMode('cabinet')" id="mode-btn-cabinet" class="px-4 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                        <button onclick="switchMainMode('cabinet')" id="mode-btn-cabinet" class="px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-lg text-[11px] md:text-sm whitespace-nowrap text-slate-400 hover:text-white flex items-center gap-1.5 transition">
                             <i class="fa-solid fa-boxes-stacked"></i> <span>Armadio</span>
                         </button>
-                        <button onclick="switchMainMode('phones')" id="mode-btn-phones" class="px-4 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                        <button onclick="switchMainMode('phones')" id="mode-btn-phones" class="px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-lg text-[11px] md:text-sm whitespace-nowrap text-slate-400 hover:text-white flex items-center gap-1.5 transition">
                             <i class="fa-solid fa-mobile-screen"></i> <span>Telefoni</span>
                         </button>
                     </div>
 
                     <!-- Selettore Data -->
                     <div class="relative group cursor-pointer" onclick="openNativeDatePicker()">
-                        <div class="glass-panel px-4 py-2.5 rounded-xl flex items-center gap-2 border border-slate-700/70 hover:border-blue-500/60 transition relative">
+                        <div class="glass-panel px-3 py-1.5 md:px-4 md:py-2.5 rounded-xl flex items-center gap-2 border border-slate-700/70 hover:border-blue-500/60 transition relative">
                             <i class="fa-regular fa-calendar text-xs text-blue-400 shrink-0"></i>
                             <div class="flex flex-col text-left">
                                 <span class="text-[7px] text-slate-500 font-mono font-bold uppercase tracking-widest leading-none">DATA</span>
@@ -328,12 +328,12 @@
                         </div>
                     </div>
 
-                    <button onclick="openListModal()" class="px-4 py-3 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm font-bold text-slate-200 transition flex items-center gap-1.5 shadow-sm shrink-0">
-                        <i class="fa-solid fa-list-check text-slate-400 text-lg"></i> <span class="hidden sm:inline">Elenco</span>
+                    <button onclick="openListModal()" class="px-3 py-2 md:px-4 md:py-3 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs md:text-sm font-bold text-slate-200 transition flex items-center gap-1.5 shadow-sm shrink-0">
+                        <i class="fa-solid fa-list-check text-slate-400 text-sm md:text-lg"></i> <span class="hidden sm:inline">Elenco</span>
                     </button>
 
-                    <button id="sign-btn" onclick="openSignModal()" class="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5 shrink-0">
-                        <i class="fa-solid fa-pen-nib text-lg"></i> <span class="hidden sm:inline">Registro</span>
+                    <button id="sign-btn" onclick="openSignModal()" class="px-3.5 py-2 md:px-5 md:py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs md:text-sm font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-pen-nib text-sm md:text-lg"></i> <span class="hidden sm:inline">Registro</span>
                     </button>
                 </div>
 
@@ -345,7 +345,7 @@
                         <div id="clock" class="mono text-sm sm:text-xl font-black text-white tracking-wider leading-none">00:00:00</div>
                         <div id="hour-badge" class="text-[7px] sm:text-[9px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-0.5">CARICAMENTO...</div>
                     </div>
-                    <button onclick="logout()" title="Disconnetti" class="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center text-lg bg-red-950/30 text-red-400 border border-red-900/40 rounded-xl text-sm hover:bg-red-900/40 hover:text-white transition shrink-0">
+                    <button onclick="logout()" title="Disconnetti" class="w-9 h-9 md:w-12 md:h-12 flex items-center justify-center text-sm md:text-lg bg-red-950/30 text-red-400 border border-red-900/40 rounded-xl text-sm hover:bg-red-900/40 hover:text-white transition shrink-0">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
                 </div>
@@ -378,7 +378,8 @@
             <div class="grid-cols-3 gap-4 lg:gap-6 xl:gap-8 w-full my-auto flex-grow items-center" id="classroom-grid"></div>
 
             <!-- Cattedra Docente -->
-            <div id="teacher-desk" onclick="openSignModal()" class="mt-4 lg:mt-6 mb-2 w-full max-w-md md:max-w-lg lg:max-w-xl min-h-[64px] lg:min-h-[76px] px-6 py-3.5 bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-blue-950/80 glass-panel border-2 border-blue-500/50 border-b-4 border-b-blue-500 rounded-2xl sm:rounded-3xl flex items-center justify-between cursor-pointer hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/30 hover:scale-[1.02] transition-all group shadow-xl relative overflow-hidden">
+            <div class="flex items-center justify-center gap-3 lg:gap-5 w-full">
+            <div id="teacher-desk" onclick="openSignModal()" class="mt-4 lg:mt-6 mb-2 flex-1 min-w-0 max-w-md md:max-w-lg lg:max-w-xl min-h-[64px] lg:min-h-[76px] px-6 py-3.5 bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-blue-950/80 glass-panel border-2 border-blue-500/50 border-b-4 border-b-blue-500 rounded-2xl sm:rounded-3xl flex items-center justify-between cursor-pointer hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/30 hover:scale-[1.02] transition-all group shadow-xl relative overflow-hidden">
                 <div class="flex items-center gap-4 min-w-0">
                     <div class="w-11 h-11 lg:w-12 lg:h-12 rounded-2xl bg-blue-600/20 border border-blue-400/40 flex items-center justify-center text-blue-400 text-lg lg:text-xl group-hover:bg-blue-600 group-hover:text-white transition shrink-0">
                         <i class="fa-solid fa-chalkboard-user"></i>
@@ -397,6 +398,8 @@
                     <span class="text-[11px] font-mono font-bold uppercase text-slate-400 group-hover:text-white">Giornale</span>
                     <i class="fa-solid fa-arrow-right text-xs text-slate-500 group-hover:text-blue-400"></i>
                 </div>
+            </div>
+        <div id="phone-card-slot" class="shrink-0"></div>
             </div>
         </main>
 
@@ -493,22 +496,22 @@
         <!-- Dock Barra Inferiore -->
         <div class="fixed bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-auto max-w-5xl glass-panel px-3 sm:px-6 py-1.5 sm:py-2 rounded-2xl flex items-center justify-between sm:justify-center gap-3 sm:gap-6 shadow-2xl z-50 border border-slate-700/60 backdrop-blur-2xl">
             <div class="flex items-center gap-2 sm:gap-3.5 shrink-0">
-                <button onclick="openAgendaModal()" class="dock-btn w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center text-pink-400 hover:text-pink-300 group" title="Agenda Impegni">
-                    <i class="fa-solid fa-calendar-check text-lg sm:text-2xl"></i>
-                    <span class="text-[9px] sm:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Agenda</span>
+                <button onclick="openAgendaModal()" class="dock-btn w-10 h-10 md:w-14 md:h-14 rounded-xl flex flex-col items-center justify-center text-pink-400 hover:text-pink-300 group" title="Agenda Impegni">
+                    <i class="fa-solid fa-calendar-check text-base md:text-2xl"></i>
+                    <span class="text-[8px] md:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Agenda</span>
                 </button>
-                <button onclick="toggleNoticeModal()" class="dock-btn w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center text-amber-400 hover:text-amber-300 group" title="Bacheca Circolari">
-                    <i class="fa-solid fa-bullhorn text-lg sm:text-2xl"></i>
-                    <span class="text-[9px] sm:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Avvisi</span>
+                <button onclick="toggleNoticeModal()" class="dock-btn w-10 h-10 md:w-14 md:h-14 rounded-xl flex flex-col items-center justify-center text-amber-400 hover:text-amber-300 group" title="Bacheca Circolari">
+                    <i class="fa-solid fa-bullhorn text-base md:text-2xl"></i>
+                    <span class="text-[8px] md:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Avvisi</span>
                 </button>
-                <button onclick="openBathroomQueueModal()" class="dock-btn relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center text-cyan-400 hover:text-cyan-300 group" title="Coda Bagno">
-                    <i class="fa-solid fa-restroom text-lg sm:text-2xl"></i>
-                    <span class="text-[9px] sm:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Coda</span>
+                <button onclick="openBathroomQueueModal()" class="dock-btn relative w-10 h-10 md:w-14 md:h-14 rounded-xl flex flex-col items-center justify-center text-cyan-400 hover:text-cyan-300 group" title="Coda Bagno">
+                    <i class="fa-solid fa-restroom text-base md:text-2xl"></i>
+                    <span class="text-[8px] md:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Coda</span>
                     <span id="queue-badge-count" class="hidden absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-cyan-500 text-[9px] font-black text-black flex items-center justify-center font-mono shadow-md animate-pulse">0</span>
                 </button>
-                <button onclick="switchMainMode('lab')" class="dock-btn relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center text-purple-400 hover:text-purple-300 group" title="Vista Laboratorio & Armadio">
-                    <i class="fa-solid fa-screwdriver-wrench text-lg sm:text-2xl"></i>
-                    <span class="text-[9px] sm:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Lab</span>
+                <button onclick="switchMainMode('lab')" class="dock-btn relative w-10 h-10 md:w-14 md:h-14 rounded-xl flex flex-col items-center justify-center text-purple-400 hover:text-purple-300 group" title="Vista Laboratorio & Armadio">
+                    <i class="fa-solid fa-screwdriver-wrench text-base md:text-2xl"></i>
+                    <span class="text-[8px] md:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Lab</span>
                 </button>
             </div>
             
@@ -819,11 +822,11 @@
                     </div>
                     <div class="bg-[#11192e] p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center">
 <div class="text-xs sm:text-base font-mono text-slate-300 uppercase font-bold mb-2 tracking-wider">Uscite Registrate Oggi</div>
-<div id="modal-detail-count" class="text-6xl sm:text-7xl font-black text-white font-mono">0</div>
+<div id="modal-detail-count" class="text-5xl md:text-7xl font-black text-white font-mono">0</div>
                     </div>
                 </div>
                 <div class="bg-[#0e1628] rounded-2xl overflow-hidden border border-slate-800">
-                    <table class="w-full text-left text-base font-mono text-slate-300">
+                    <table class="w-full text-left text-sm md:text-base font-mono text-slate-300">
                         <thead class="bg-slate-900 text-xs sm:text-sm uppercase font-bold text-slate-400">
                             <tr><th class="px-4 sm:px-5 py-2.5">Uscita</th><th class="px-4 sm:px-5 py-2.5">Rientro</th><th class="px-4 sm:px-5 py-2.5 text-right">Stato</th></tr>
                         </thead>
@@ -894,7 +897,7 @@
         let calDir = 'r';
         // Disposizione banchi: righe dalla PRIMA (vicino alla cattedra) all'ULTIMA; numeri = #banco. 'phones' = cassetta telefoni
         const SEAT_LAYOUT = [
-            [['phones', 7], [23, 15], [1, 10], [21, 12]],
+            [[null, 7], [23, 15], [1, 10], [21, 12]],
             [[9, 8], [2, 14], [22, 4], [3, 18]],
             [[6, 5], [11, 20], [13, 17], [16, 19]]
         ];
@@ -1223,11 +1226,14 @@
         function phoneToggle(n) { if (currentUser?.role !== 'studente' && phoneStudent(n)) setPhoneSlot(n, !phoneState[n]); }
         window.setPhoneSlot = setPhoneSlot;
         function createPhoneCard() {
-            const w = document.createElement('div'); w.className = 'w-full';
             const total = Array.from({length: 24}, (_, i) => i + 1).filter(phoneStudent);
             const got = total.filter(n => phoneState[n]).length;
-            const dots = Array.from({length: 24}, (_, i) => { const n = i + 1; const c = !phoneStudent(n) ? 'bg-slate-700' : (phoneState[n] ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'); return `<i class="block h-3 rounded-full ${c}"></i>`; }).join('');
-            w.innerHTML = `<button type="button" onclick="switchMainMode('phones')" class="w-full block outline-none h-full"><div class="h-32 md:h-40 lg:h-[11.5rem] xl:h-[13rem] 2xl:h-[14.5rem] w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 flex flex-col justify-between border-2 border-slate-500 bg-slate-900/70 hover:bg-slate-800/80 transition shadow-xl"><div class="flex justify-between items-center"><span class="text-lg">📱</span><span class="text-xs lg:text-sm font-mono font-black px-2.5 py-1 rounded-lg bg-black/40 text-slate-200">${got}/${total.length}</span></div><div class="grid grid-cols-8 gap-1.5 lg:gap-2 my-auto">${dots}</div><div class="text-center text-xs lg:text-sm font-mono font-bold text-slate-300 uppercase tracking-widest">Cassetta telefoni</div></div></button>`;
+            const dots = Array.from({length: 24}, (_, i) => { const n = i + 1; const c = !phoneStudent(n) ? 'bg-slate-700' : (phoneState[n] ? 'bg-emerald-400' : 'bg-red-500'); return `<i class="block h-1.5 lg:h-2 rounded-full ${c}"></i>`; }).join('');
+            const w = document.createElement('button');
+            w.type = 'button';
+            w.onclick = () => switchMainMode('phones');
+            w.className = 'w-28 sm:w-40 lg:w-48 h-[64px] lg:h-[76px] mt-4 lg:mt-6 mb-2 rounded-2xl border-2 border-slate-500 bg-slate-900/70 hover:bg-slate-800/80 transition px-3 py-2 flex flex-col justify-between outline-none';
+            w.innerHTML = `<div class="flex justify-between items-center text-[10px] lg:text-xs font-mono font-bold text-slate-300"><span>📱 TELEFONI</span><span>${got}/${total.length}</span></div><div class="grid grid-cols-8 gap-1">${dots}</div>`;
             return w;
         }
         function renderPhones() {
@@ -1261,9 +1267,9 @@
                 if (!btn) return;
                 if (m === mode) {
                     const activeColor = m === 'aula' ? 'bg-blue-600' : (m === 'lab' ? 'bg-amber-600' : (m === 'phones' ? 'bg-fuchsia-600' : 'bg-emerald-600'));
-                    btn.className = `px-4 py-2.5 rounded-lg text-sm ${activeColor} text-white shadow flex items-center gap-1.5 transition`;
+                    btn.className = `px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-lg text-[11px] md:text-sm whitespace-nowrap ${activeColor} text-white shadow flex items-center gap-1.5 transition`;
                 } else {
-                    btn.className = "px-4 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition";
+                    btn.className = "px-2.5 py-1.5 md:px-4 md:py-2.5 rounded-lg text-[11px] md:text-sm whitespace-nowrap text-slate-400 hover:text-white flex items-center gap-1.5 transition";
                 }
             });
 
@@ -1852,14 +1858,14 @@
                 : (hasNotes ? `<i class="fa-solid fa-circle-info text-amber-400 absolute top-3 right-3 text-sm z-20"></i>` : '');
             
             const statusClass = String(d.status || 'assente').replace(/_/g,'-');
-            btn.innerHTML = `<div class="relative h-32 md:h-40 lg:h-[11.5rem] xl:h-[13rem] 2xl:h-[14.5rem] w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 flex flex-col justify-between shadow-xl status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100 hover:scale-[1.03]'} transition-all">
+            btn.innerHTML = `<div class="relative h-28 md:h-32 lg:h-40 xl:h-44 2xl:h-48 w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 flex flex-col justify-between shadow-xl status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100 hover:scale-[1.03]'} transition-all">
                 ${noteFlag}
                 <div class="flex justify-between items-start">
                     <span class="text-xs lg:text-sm font-bold opacity-75 font-mono">#${id.split('_')[1]}</span>
                     <span class="text-[10px] lg:text-xs font-mono font-black uppercase py-1 px-2.5 rounded-lg bg-black/40 border border-white/5">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
                 </div>
                 <div class="text-center flex-grow flex items-center justify-center px-1 my-1">
-                    <h3 class="font-extrabold text-sm md:text-base lg:text-xl xl:text-2xl leading-tight uppercase w-full break-words text-white">${esc(d.name)}</h3>
+                    <h3 class="font-extrabold text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl leading-tight uppercase w-full break-words text-white">${esc(d.name)}</h3>
                 </div>
                 <div class="text-center">
                     <span class="text-xs lg:text-base font-mono font-semibold opacity-85 bg-black/40 px-3 py-1 rounded-lg border border-white/5 text-slate-300">${esc(d.time || '--:--')}</span>
@@ -1879,7 +1885,7 @@
 
             SEAT_LAYOUT.forEach((rows, wi) => {
                 const col = document.createElement('div');
-                col.className = 'flex flex-col-reverse gap-3 lg:gap-4 flex-1';
+                col.className = 'flex flex-col-reverse gap-3 lg:gap-6 xl:gap-8 flex-1';
                 const labelEl = document.createElement('div');
                 labelEl.className = 'text-center text-xs font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last';
                 labelEl.textContent = WING_NAMES[wi];
@@ -1887,11 +1893,13 @@
                 rows.forEach(r => {
                     const row = document.createElement('div');
                     row.className = 'grid grid-cols-2 gap-3 lg:gap-4';
-                    r.forEach(c => row.appendChild(c === 'phones' ? createPhoneCard() : createDeskCard(dk(c), data)));
+                    r.forEach(c => row.appendChild(c === null ? document.createElement('div') : createDeskCard(dk(c), data)));
                     col.appendChild(row);
                 });
                 grid.appendChild(col);
             });
+            const pslot = document.getElementById('phone-card-slot');
+            if (pslot) { pslot.innerHTML = ''; pslot.appendChild(createPhoneCard()); }
             renderPhones();
 
             let out = null; 
@@ -1927,7 +1935,7 @@
             tbody.innerHTML = "";
             student.history.slice().reverse().forEach(h => {
                 let durata = h.in ? `<span class="text-sm text-amber-300 font-mono font-bold ml-3 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-500/30">⏱ ${calcolaDurata(h.out, h.in)}</span>` : '';
-                tbody.innerHTML += `<tr><td class="px-4 py-4 font-black text-2xl sm:text-3xl text-cyan-400 font-mono">${h.out}</td><td class="px-4 py-4 font-black text-2xl sm:text-3xl text-emerald-400 font-mono">${h.in || '--:--'} ${durata}</td><td class="px-4 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
+                tbody.innerHTML += `<tr><td class="px-4 py-4 font-black text-xl md:text-3xl text-cyan-400 font-mono">${h.out}</td><td class="px-4 py-4 font-black text-xl md:text-3xl text-emerald-400 font-mono">${h.in || '--:--'} ${durata}</td><td class="px-4 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
             });
 
             document.getElementById('status-view-mode').classList.remove('hidden');
