@@ -1,7 +1,10 @@
 {
-  "name": "smartcheck-school",
+  "name": "smartcheck-os",
   "version": "1.0.0",
+  "private": true,
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0"
+    "@libsql/client": "^0.14.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2"
   }
 }
