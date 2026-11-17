@@ -7,6 +7,19 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// Chiave condivisa con gli ESP32 (header x-device-key). Impostala nelle variabili d'ambiente di Vercel.
+const DEVICE_KEY = process.env.DEVICE_KEY || '';
+// Vercel gira in UTC: data e ora vanno sempre calcolate sul fuso di Roma
+const romeDate = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+const romeTime = () => new Date().toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit' });
+const isDevice = req => DEVICE_KEY && req.get('x-device-key') === DEVICE_KEY;
+async function requireStaff(req, res, next) {
+    if (isDevice(req)) return next();
+    const u = await getSessionUser(req);
+    if (u && u.role !== 'studente') return next();
+    res.status(401).json({ error: 'Non autorizzato' });
+}
+
 // Connessione a Turso tramite Variabili d'Ambiente protette su Vercel
 const db = createClient({
     url: process.env.TURSO_DATABASE_URL,
@@ -143,6 +156,15 @@ async function ensureDb() {
             rssi INTEGER DEFAULT -58,
             is_tampered INTEGER DEFAULT 0
         )`
+    ], 'write');
+
+    await db.batch([
+        `CREATE TABLE IF NOT EXISTS phone_slots (
+            class_name TEXT NOT NULL, date TEXT NOT NULL, slot INTEGER NOT NULL,
+            present INTEGER NOT NULL DEFAULT 0, time TEXT,
+            PRIMARY KEY (class_name, date, slot)
+        )`,
+        `CREATE TABLE IF NOT EXISTS scan_log (student_id INTEGER PRIMARY KEY, ts INTEGER NOT NULL)`
     ], 'write');
 
     const check = await db.execute('SELECT COUNT(*) as c FROM users');
@@ -336,43 +358,91 @@ app.get('/api/class-bundle/:cls', async (req, res) => {
     });
 });
 
-app.post('/api/attendance', async (req, res) => {
-    const { student_id, class_id, date, status, time } = req.body;
-    const prev = await db.execute({
-        sql: "SELECT status FROM attendance WHERE student_id = ? AND date = ?",
-        args: [student_id, date]
-    });
-    const prevStatus = prev.rows[0]?.status;
+// Regole: un solo alunno in bagno; una sola uscita aperta per alunno; se il bagno e' occupato si va in coda;
+// al rientro entra automaticamente il primo della coda.
+async function applyStatus({ student_id, class_name, date, status, time }) {
+    const prev = (await db.execute({ sql: "SELECT status FROM attendance WHERE student_id = ? AND date = ?", args: [student_id, date] })).rows[0]?.status;
+    if (status === prev) return { ok: true, unchanged: true };
 
-    await db.execute({
-        sql: `INSERT INTO attendance (student_id, class_name, date, status, time)
-              VALUES (?, ?, ?, ?, ?)
-              ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status, time = excluded.time`,
-        args: [student_id, class_id, date, status, time]
-    });
-
-    if (status === 'bagno' && prevStatus !== 'bagno') {
-        await db.execute({
-            sql: "INSERT INTO bathroom_history (student_id, class_name, date, out_time, in_time) VALUES (?, ?, ?, ?, NULL)",
-            args: [student_id, class_id, date, time]
-        });
-        await db.execute({
-            sql: "DELETE FROM bathroom_queue WHERE student_id = ? AND class_name = ?",
-            args: [student_id, class_id]
-        });
-    } else if (prevStatus === 'bagno' && status !== 'bagno') {
-        const openTrip = await db.execute({
-            sql: "SELECT id FROM bathroom_history WHERE student_id = ? AND date = ? AND in_time IS NULL ORDER BY id DESC LIMIT 1",
-            args: [student_id, date]
-        });
-        if (openTrip.rows[0]) {
-            await db.execute({
-                sql: "UPDATE bathroom_history SET in_time = ? WHERE id = ?",
-                args: [time, openTrip.rows[0].id]
-            });
+    if (status === 'bagno') {
+        const occ = (await db.execute({ sql: "SELECT student_id FROM attendance WHERE class_name = ? AND date = ? AND status = 'bagno' AND student_id != ?", args: [class_name, date, student_id] })).rows[0];
+        if (occ) {
+            const inQ = await db.execute({ sql: "SELECT id FROM bathroom_queue WHERE student_id = ? AND class_name = ?", args: [student_id, class_name] });
+            if (inQ.rows.length === 0) {
+                const u = (await db.execute({ sql: "SELECT full_name, desk_id FROM users WHERE id = ?", args: [student_id] })).rows[0] || {};
+                await db.execute({ sql: "INSERT INTO bathroom_queue (student_id, student_name, desk_id, class_name, booked_at) VALUES (?, ?, ?, ?, ?)", args: [student_id, u.full_name || '', u.desk_id || null, class_name, time] });
+            }
+            return { ok: true, queued: true };
         }
     }
 
+    await db.execute({
+        sql: `INSERT INTO attendance (student_id, class_name, date, status, time) VALUES (?, ?, ?, ?, ?)
+              ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status, time = excluded.time`,
+        args: [student_id, class_name, date, status, time]
+    });
+
+    const open = (await db.execute({ sql: "SELECT id FROM bathroom_history WHERE student_id = ? AND date = ? AND in_time IS NULL ORDER BY id DESC LIMIT 1", args: [student_id, date] })).rows[0];
+    let promoted = null;
+    if (status === 'bagno') {
+        if (!open) await db.execute({ sql: "INSERT INTO bathroom_history (student_id, class_name, date, out_time, in_time) VALUES (?, ?, ?, ?, NULL)", args: [student_id, class_name, date, time] });
+        await db.execute({ sql: "DELETE FROM bathroom_queue WHERE student_id = ? AND class_name = ?", args: [student_id, class_name] });
+    } else {
+        if (open) await db.execute({ sql: "UPDATE bathroom_history SET in_time = ? WHERE id = ?", args: [time, open.id] });
+        await db.execute({ sql: "DELETE FROM bathroom_queue WHERE student_id = ? AND class_name = ?", args: [student_id, class_name] });
+        if (prev === 'bagno' && date === romeDate()) {
+            const next = (await db.execute({ sql: "SELECT student_id FROM bathroom_queue WHERE class_name = ? ORDER BY id ASC LIMIT 1", args: [class_name] })).rows[0];
+            if (next) { await applyStatus({ student_id: next.student_id, class_name, date, status: 'bagno', time }); promoted = next.student_id; }
+        }
+    }
+    return { ok: true, promoted };
+}
+
+app.post('/api/attendance', requireStaff, async (req, res) => {
+    const { student_id, class_id, date, status, time } = req.body;
+    res.json(await applyStatus({ student_id, class_name: class_id, date, status, time }));
+});
+
+// Evento dal lettore NFC (ESP32). hold=true quando la tessera resta sul lettore il tempo di una richiesta bagno.
+app.post('/api/reader/scan', async (req, res) => {
+    if (!isDevice(req)) return res.status(401).json({ error: 'Chiave dispositivo non valida' });
+    const { student_id, desk_id, class_name = '5AEE', hold = false } = req.body;
+    const stu = (await db.execute(student_id
+        ? { sql: "SELECT id, full_name FROM users WHERE id = ? AND role = 'studente'", args: [student_id] }
+        : { sql: "SELECT id, full_name FROM users WHERE desk_id = ? AND class_name = ? AND role = 'studente'", args: [desk_id, class_name] })).rows[0];
+    if (!stu) return res.status(404).json({ error: 'Alunno non trovato' });
+
+    const now = Date.now();
+    const last = (await db.execute({ sql: "SELECT ts FROM scan_log WHERE student_id = ?", args: [stu.id] })).rows[0];
+    if (last && now - Number(last.ts) < 4000) return res.json({ ok: true, ignored: 'duplicate' }); // anti doppia lettura
+    await db.execute({ sql: "INSERT INTO scan_log (student_id, ts) VALUES (?, ?) ON CONFLICT(student_id) DO UPDATE SET ts = excluded.ts", args: [stu.id, now] });
+
+    const date = romeDate(), time = romeTime();
+    const cur = (await db.execute({ sql: "SELECT status FROM attendance WHERE student_id = ? AND date = ?", args: [stu.id, date] })).rows[0]?.status || 'assente';
+    let target;
+    if (cur === 'bagno') target = 'presente';
+    else if (hold) target = 'bagno';
+    else if (['assente', 'ritardo', 'seconda_ora', 'fuori_aula', 'uscita_anticipata'].includes(cur)) target = 'presente';
+    else return res.json({ ok: true, ignored: 'already_present' });
+
+    const r = await applyStatus({ student_id: stu.id, class_name, date, status: target, time });
+    res.json({ ...r, student: stu.full_name, status: r.queued ? 'in_coda' : target });
+});
+
+// Cassetta telefoni: 24 slot, il sensore (cella di carico) manda { slot, present }
+app.get('/api/phones/:cls', async (req, res) => {
+    const r = await db.execute({ sql: "SELECT slot, present, time FROM phone_slots WHERE class_name = ? AND date = ?", args: [req.params.cls, req.query.date || romeDate()] });
+    res.json({ slots: r.rows });
+});
+app.post('/api/phones', requireStaff, async (req, res) => {
+    const { class_name = '5AEE', slot, present } = req.body;
+    const n = Number(slot);
+    if (!(n >= 1 && n <= 24)) return res.status(400).json({ error: 'Slot non valido (1-24)' });
+    await db.execute({
+        sql: `INSERT INTO phone_slots (class_name, date, slot, present, time) VALUES (?, ?, ?, ?, ?)
+              ON CONFLICT(class_name, date, slot) DO UPDATE SET present = excluded.present, time = excluded.time`,
+        args: [class_name, req.body.date || romeDate(), n, present ? 1 : 0, romeTime()]
+    });
     res.json({ ok: true });
 });
 
@@ -384,6 +454,8 @@ app.post('/api/bathroom-queue/join', async (req, res) => {
         args: [student_id, class_name]
     });
     if (exists.rows.length > 0) return res.status(400).json({ error: 'Sei già in coda' });
+    const inWc = await db.execute({ sql: "SELECT 1 FROM attendance WHERE student_id = ? AND date = ? AND status = 'bagno'", args: [student_id, romeDate()] });
+    if (inWc.rows.length > 0) return res.status(400).json({ error: 'Sei già in bagno' });
 
     await db.execute({
         sql: "INSERT INTO bathroom_queue (student_id, student_name, desk_id, class_name, booked_at) VALUES (?, ?, ?, ?, ?)",
