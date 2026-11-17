@@ -7,8 +7,7 @@
     <meta name="theme-color" content="#060913">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    
+        
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -136,7 +135,14 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .aisle-pill-active { background: #2563eb !important; color: white !important; border-color: #60a5fa !important; box-shadow: 0 4px 15px rgba(37,99,235,0.35); }
-    </style>
+    
+.stab{color:#64748b;border-bottom:3px solid transparent;padding-bottom:6px;transition:all .2s}
+.stab:hover{color:#fff}.stab.on{color:#60a5fa;border-color:#60a5fa}
+@keyframes cvL{from{opacity:.15;transform:translateX(-36px)}to{opacity:1;transform:none}}
+@keyframes cvR{from{opacity:.15;transform:translateX(36px)}to{opacity:1;transform:none}}
+.cv-slide-l{animation:cvL .35s cubic-bezier(.16,1,.3,1)}.cv-slide-r{animation:cvR .35s cubic-bezier(.16,1,.3,1)}
+.cv-day{width:46px}.cv-day-number{width:40px!important;height:40px!important;font-size:15px!important}
+</style>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col selection:bg-blue-500">
 
@@ -294,21 +300,24 @@
                     
                     <!-- SWITCHER MODALITÀ: AULA / LABORATORIO / ARMADIO -->
                     <div class="flex items-center bg-slate-900/95 p-1 rounded-xl border border-slate-700/80 text-[11px] font-mono font-bold">
-                        <button onclick="switchMainMode('aula')" id="mode-btn-aula" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white shadow flex items-center gap-1.5 transition">
+                        <button onclick="switchMainMode('aula')" id="mode-btn-aula" class="px-4 py-2.5 rounded-lg text-sm bg-blue-600 text-white shadow flex items-center gap-1.5 transition">
                             <i class="fa-solid fa-chalkboard"></i> <span>Aula</span>
                         </button>
-                        <button onclick="switchMainMode('lab')" id="mode-btn-lab" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                        <button onclick="switchMainMode('lab')" id="mode-btn-lab" class="px-4 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition">
                             <i class="fa-solid fa-flask"></i> <span>Banchi Lab</span>
                             <span id="badge-lab-inuse" class="hidden px-1.5 py-0.2 rounded-full bg-amber-500 text-black text-[9px] font-black">0</span>
                         </button>
-                        <button onclick="switchMainMode('cabinet')" id="mode-btn-cabinet" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                        <button onclick="switchMainMode('cabinet')" id="mode-btn-cabinet" class="px-4 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition">
                             <i class="fa-solid fa-boxes-stacked"></i> <span>Armadio</span>
+                        </button>
+                        <button onclick="switchMainMode('phones')" id="mode-btn-phones" class="px-4 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-mobile-screen"></i> <span>Telefoni</span>
                         </button>
                     </div>
 
                     <!-- Selettore Data -->
                     <div class="relative group cursor-pointer" onclick="openNativeDatePicker()">
-                        <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-2 border border-slate-700/70 hover:border-blue-500/60 transition relative">
+                        <div class="glass-panel px-4 py-2.5 rounded-xl flex items-center gap-2 border border-slate-700/70 hover:border-blue-500/60 transition relative">
                             <i class="fa-regular fa-calendar text-xs text-blue-400 shrink-0"></i>
                             <div class="flex flex-col text-left">
                                 <span class="text-[7px] text-slate-500 font-mono font-bold uppercase tracking-widest leading-none">DATA</span>
@@ -319,12 +328,12 @@
                         </div>
                     </div>
 
-                    <button onclick="openListModal()" class="px-3 py-2 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 transition flex items-center gap-1.5 shadow-sm shrink-0">
-                        <i class="fa-solid fa-list-check text-slate-400 text-xs"></i> <span class="hidden sm:inline">Elenco</span>
+                    <button onclick="openListModal()" class="px-4 py-3 bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm font-bold text-slate-200 transition flex items-center gap-1.5 shadow-sm shrink-0">
+                        <i class="fa-solid fa-list-check text-slate-400 text-lg"></i> <span class="hidden sm:inline">Elenco</span>
                     </button>
 
-                    <button id="sign-btn" onclick="openSignModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5 shrink-0">
-                        <i class="fa-solid fa-pen-nib text-xs"></i> <span class="hidden sm:inline">Registro</span>
+                    <button id="sign-btn" onclick="openSignModal()" class="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-black uppercase tracking-wider shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5 shrink-0">
+                        <i class="fa-solid fa-pen-nib text-lg"></i> <span class="hidden sm:inline">Registro</span>
                     </button>
                 </div>
 
@@ -336,7 +345,7 @@
                         <div id="clock" class="mono text-sm sm:text-xl font-black text-white tracking-wider leading-none">00:00:00</div>
                         <div id="hour-badge" class="text-[7px] sm:text-[9px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-0.5">CARICAMENTO...</div>
                     </div>
-                    <button onclick="logout()" title="Disconnetti" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-red-950/30 text-red-400 border border-red-900/40 rounded-xl text-sm hover:bg-red-900/40 hover:text-white transition shrink-0">
+                    <button onclick="logout()" title="Disconnetti" class="w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center text-lg bg-red-950/30 text-red-400 border border-red-900/40 rounded-xl text-sm hover:bg-red-900/40 hover:text-white transition shrink-0">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
                 </div>
@@ -345,7 +354,7 @@
         </header>
 
         <!-- ================= CONTENUTO 3A: MAPPA AULA TRADIZIONALE ================= -->
-        <main id="section-mode-aula" class="flex-grow flex flex-col items-center justify-between w-full px-4 lg:px-10 xl:px-16 pt-2 pb-24 max-w-[1850px] mx-auto min-h-[calc(100vh-65px)]">
+        <main id="section-mode-aula" class="flex-grow flex flex-col items-center justify-between w-full px-3 lg:px-6 xl:px-8 pt-2 pb-24 max-w-none mx-auto min-h-[calc(100vh-65px)]">
             
             <div id="history-warning" class="hidden w-full max-w-md bg-amber-950/30 border border-amber-500/40 rounded-full py-1 px-4 mb-1.5 flex items-center justify-center gap-2 text-amber-300 backdrop-blur-md animate-pulse text-center">
                 <i class="fa-solid fa-clock-rotate-left text-xs"></i> 
@@ -358,15 +367,15 @@
             <!-- SELETTORE ALI PER SMARTPHONE -->
             <div class="desk-switcher-mobile w-full max-w-md mb-3">
                 <div class="p-1 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center gap-1 text-xs font-mono font-bold">
-                    <button onclick="switchMobileAisle('left')" id="tab-aisle-left" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Ala SX (8)</button>
-                    <button onclick="switchMobileAisle('center')" id="tab-aisle-center" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Centro (7)</button>
+                    <button onclick="switchMobileAisle('left')" id="tab-aisle-left" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Ala SX (7)</button>
+                    <button onclick="switchMobileAisle('center')" id="tab-aisle-center" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Centro (8)</button>
                     <button onclick="switchMobileAisle('right')" id="tab-aisle-right" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Ala DX (8)</button>
                     <button onclick="switchMobileAisle('all')" id="tab-aisle-all" class="flex-1 py-2 rounded-xl text-center transition border border-transparent text-slate-400">Tutti</button>
                 </div>
             </div>
 
             <div id="mobile-classroom-grid" class="w-full space-y-3"></div>
-            <div class="grid-cols-3 gap-6 lg:gap-10 xl:gap-16 2xl:gap-20 w-full my-auto flex-grow items-center" id="classroom-grid"></div>
+            <div class="grid-cols-3 gap-4 lg:gap-6 xl:gap-8 w-full my-auto flex-grow items-center" id="classroom-grid"></div>
 
             <!-- Cattedra Docente -->
             <div id="teacher-desk" onclick="openSignModal()" class="mt-4 lg:mt-6 mb-2 w-full max-w-md md:max-w-lg lg:max-w-xl min-h-[64px] lg:min-h-[76px] px-6 py-3.5 bg-gradient-to-r from-blue-950/80 via-slate-900/90 to-blue-950/80 glass-panel border-2 border-blue-500/50 border-b-4 border-b-blue-500 rounded-2xl sm:rounded-3xl flex items-center justify-between cursor-pointer hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/30 hover:scale-[1.02] transition-all group shadow-xl relative overflow-hidden">
@@ -389,6 +398,11 @@
                     <i class="fa-solid fa-arrow-right text-xs text-slate-500 group-hover:text-blue-400"></i>
                 </div>
             </div>
+        </main>
+
+        <main id="section-mode-phones" class="hidden flex-grow w-full max-w-5xl mx-auto px-3 sm:px-6 pt-4 pb-24">
+            <div id="phone-box"></div>
+            <div id="phone-summary" class="grid md:grid-cols-2 gap-4 mt-6"></div>
         </main>
 
         <!-- ================= CONTENUTO 3B: VISTA BANCHI LABORATORIO & RICERCA COMPONENTI ================= -->
@@ -479,26 +493,22 @@
         <!-- Dock Barra Inferiore -->
         <div class="fixed bottom-2.5 sm:bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-auto max-w-5xl glass-panel px-3 sm:px-6 py-1.5 sm:py-2 rounded-2xl flex items-center justify-between sm:justify-center gap-3 sm:gap-6 shadow-2xl z-50 border border-slate-700/60 backdrop-blur-2xl">
             <div class="flex items-center gap-2 sm:gap-3.5 shrink-0">
-                <button onclick="openAgendaModal()" class="dock-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-pink-400 hover:text-pink-300 group" title="Agenda Impegni">
-                    <i class="fa-solid fa-calendar-check text-sm sm:text-base"></i>
-                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Agenda</span>
+                <button onclick="openAgendaModal()" class="dock-btn w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center text-pink-400 hover:text-pink-300 group" title="Agenda Impegni">
+                    <i class="fa-solid fa-calendar-check text-lg sm:text-2xl"></i>
+                    <span class="text-[9px] sm:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Agenda</span>
                 </button>
-                <button onclick="toggleNoticeModal()" class="dock-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-amber-400 hover:text-amber-300 group" title="Bacheca Circolari">
-                    <i class="fa-solid fa-bullhorn text-sm sm:text-base"></i>
-                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Avvisi</span>
+                <button onclick="toggleNoticeModal()" class="dock-btn w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center text-amber-400 hover:text-amber-300 group" title="Bacheca Circolari">
+                    <i class="fa-solid fa-bullhorn text-lg sm:text-2xl"></i>
+                    <span class="text-[9px] sm:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Avvisi</span>
                 </button>
-                <button id="dock-right" onclick="openGradesModal()" class="dock-btn w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-emerald-400 hover:text-emerald-300 group" title="Valutazioni e Medie">
-                    <i class="fa-solid fa-chart-pie text-sm sm:text-base"></i>
-                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Voti</span>
-                </button>
-                <button onclick="openBathroomQueueModal()" class="dock-btn relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-cyan-400 hover:text-cyan-300 group" title="Coda Bagno">
-                    <i class="fa-solid fa-restroom text-sm sm:text-base"></i>
-                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Coda</span>
+                <button onclick="openBathroomQueueModal()" class="dock-btn relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center text-cyan-400 hover:text-cyan-300 group" title="Coda Bagno">
+                    <i class="fa-solid fa-restroom text-lg sm:text-2xl"></i>
+                    <span class="text-[9px] sm:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Coda</span>
                     <span id="queue-badge-count" class="hidden absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-cyan-500 text-[9px] font-black text-black flex items-center justify-center font-mono shadow-md animate-pulse">0</span>
                 </button>
-                <button onclick="switchMainMode('lab')" class="dock-btn relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex flex-col items-center justify-center text-purple-400 hover:text-purple-300 group" title="Vista Laboratorio & Armadio">
-                    <i class="fa-solid fa-screwdriver-wrench text-sm sm:text-base"></i>
-                    <span class="text-[7px] sm:text-[8px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Lab</span>
+                <button onclick="switchMainMode('lab')" class="dock-btn relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center text-purple-400 hover:text-purple-300 group" title="Vista Laboratorio & Armadio">
+                    <i class="fa-solid fa-screwdriver-wrench text-lg sm:text-2xl"></i>
+                    <span class="text-[9px] sm:text-[11px] font-mono font-bold uppercase mt-0.5 text-slate-400 group-hover:text-white">Lab</span>
                 </button>
             </div>
             
@@ -615,7 +625,7 @@
                     </div>
                     <div>
                         <h2 class="text-lg sm:text-xl font-black text-white tracking-tight">Gestione Coda Bagno</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Sincronizzazione locale WebSocket istantanea</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Sincronizzazione automatica ogni pochi secondi</p>
                     </div>
                 </div>
                 <button onclick="closeBathroomQueueModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">✕</button>
@@ -773,10 +783,9 @@
             <div class="flex justify-between items-start mb-5 sm:mb-6">
                 <div>
                     <h2 id="modal-detail-name" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Nome Cognome</h2>
-                    <div class="flex gap-4 mt-3 text-xs font-mono uppercase font-bold" id="student-modal-tabs">
-                        <button onclick="switchTab('presence')" id="tab-presence" class="text-blue-400 border-b-2 border-blue-400 pb-1">Presenze</button>
-                        <button onclick="switchTab('grades')" id="tab-grades" class="text-slate-500 hover:text-white pb-1">Voti</button>
-                        <button onclick="switchTab('notes')" id="tab-notes" class="text-slate-500 hover:text-white pb-1">Note</button>
+                    <div class="flex gap-6 mt-4 text-sm sm:text-base font-mono uppercase font-bold" id="student-modal-tabs">
+                        <button onclick="switchTab('presence')" id="tab-presence" class="stab on">Presenze</button>
+                        <button onclick="switchTab('notes')" id="tab-notes" class="stab">Note</button>
                     </div>
                 </div>
                 <button onclick="document.getElementById('modal-student-detail').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
@@ -808,48 +817,17 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-[#11192e] p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-center">
-                        <div class="text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Uscite Registrate Oggi</div>
-                        <div id="modal-detail-count" class="text-2xl sm:text-3xl font-black text-white font-mono">0</div>
+                    <div class="bg-[#11192e] p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center">
+<div class="text-xs sm:text-base font-mono text-slate-300 uppercase font-bold mb-2 tracking-wider">Uscite Registrate Oggi</div>
+<div id="modal-detail-count" class="text-6xl sm:text-7xl font-black text-white font-mono">0</div>
                     </div>
                 </div>
                 <div class="bg-[#0e1628] rounded-2xl overflow-hidden border border-slate-800">
-                    <table class="w-full text-left text-xs font-mono text-slate-300">
-                        <thead class="bg-slate-900 text-[10px] uppercase font-bold text-slate-400">
+                    <table class="w-full text-left text-base font-mono text-slate-300">
+                        <thead class="bg-slate-900 text-xs sm:text-sm uppercase font-bold text-slate-400">
                             <tr><th class="px-4 sm:px-5 py-2.5">Uscita</th><th class="px-4 sm:px-5 py-2.5">Rientro</th><th class="px-4 sm:px-5 py-2.5 text-right">Stato</th></tr>
                         </thead>
                         <tbody id="modal-history-body" class="divide-y divide-slate-800/60"></tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div id="content-grades" class="hidden">
-                <div id="teacher-subject-block" class="mb-3 text-center text-xs font-mono text-slate-400">
-                    Visualizzazione: <span id="teacher-subject-name" class="text-blue-400 font-bold">--</span>
-                </div>
-                <div id="grade-input-area" class="bg-[#11192e] p-4 rounded-2xl border border-slate-800 mb-5 flex flex-wrap gap-3 items-end">
-                    <div class="flex-grow min-w-[140px]">
-                        <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Materia</label>
-                        <select id="new-grade-subject" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 text-xs outline-none"></select>
-                    </div>
-                    <div class="w-24">
-                        <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Voto</label>
-                        <select id="new-grade-value" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 font-mono font-bold text-xs outline-none">
-                            <option value="10">10</option><option value="9.5">9.5</option><option value="9">9</option><option value="8.5">8.5</option><option value="8">8</option><option value="7.5">7.5</option><option value="7">7</option><option value="6.5">6.5</option><option value="6">6</option><option value="5.5">5.5</option><option value="5">5</option><option value="4.5">4.5</option><option value="4">4</option>
-                        </select>
-                    </div>
-                    <div class="w-24">
-                        <label class="text-[10px] font-mono text-slate-400 uppercase font-bold block mb-1">Tipo</label>
-                        <select id="new-grade-type" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2 text-xs outline-none"><option>Scritto</option><option>Orale</option><option>Pratico</option></select>
-                    </div>
-                    <button onclick="addGrade()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-5 rounded-xl h-9 uppercase font-mono text-xs">Aggiungi</button>
-                </div>
-                <div class="bg-[#0e1628] rounded-2xl border border-slate-800 max-h-60 overflow-y-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-900 text-[10px] font-mono uppercase text-slate-400 sticky top-0 z-10">
-                            <tr><th class="px-4 py-2.5">Data</th><th class="px-4 py-2.5">Materia</th><th class="px-4 py-2.5">Tipo</th><th class="px-4 py-2.5 text-right">Voto</th><th class="px-4 py-2.5 text-right"></th></tr>
-                        </thead>
-                        <tbody id="teacher-grades-list" class="text-xs font-mono text-slate-300 divide-y divide-slate-800/60"></tbody>
                     </table>
                 </div>
             </div>
@@ -913,6 +891,16 @@
         let pendingAgendaType = null;
         let clockTimer = null;
         let currentMobileAisle = 'left';
+        let calDir = 'r';
+        // Disposizione banchi: righe dalla PRIMA (vicino alla cattedra) all'ULTIMA; numeri = #banco. 'phones' = cassetta telefoni
+        const SEAT_LAYOUT = [
+            [['phones', 7], [23, 15], [1, 10], [21, 12]],
+            [[9, 8], [2, 14], [22, 4], [3, 18]],
+            [[6, 5], [11, 20], [13, 17], [16, 19]]
+        ];
+        const WING_NAMES = ['ALA SINISTRA', 'FILA CENTRALE', 'ALA DESTRA'];
+        const dk = n => 'banco_' + String(n).padStart(2, '0');
+        const deskIdsFlat = w => SEAT_LAYOUT[w].flat().filter(x => typeof x === 'number').map(dk);
 
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
@@ -1019,6 +1007,7 @@
 
         async function changeDate(val) {
             if (!val) return;
+            calDir = val < selectedDate ? 'l' : 'r';
             selectedDate = val;
             const isToday = (selectedDate === getTodayStr());
             const disp = document.getElementById('date-display');
@@ -1029,6 +1018,7 @@
             document.getElementById('history-warning')?.classList.toggle('hidden', isToday);
             document.getElementById('bathroom-bar')?.classList.toggle('hidden', !isToday);
 
+            renderCalendarStrip();
             await syncClassroomData();
         }
 
@@ -1178,7 +1168,11 @@
 
                 (bundle.bathroomHistory || []).forEach(row => {
                     const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id);
-                    if (seat) seat.history.push({ out: row.out_time, in: row.in_time });
+                    if (seat) {
+                        const last = seat.history[seat.history.length - 1];
+                        // un'uscita ha senso solo se la precedente e' chiusa: scarta letture duplicate
+                        if (!(last && (!last.in || last.out === row.out_time))) seat.history.push({ out: row.out_time, in: row.in_time });
+                    }
                 });
 
                 bathroomQueue = bundle.bathroomQueue || [];
@@ -1199,6 +1193,7 @@
                     localNotesDB[n.student_id].push(n);
                 });
 
+                await loadPhones();
                 updateQueueBadges();
                 renderGrid(localSchoolDB[currentClass]);
                 renderSignaturesList();
@@ -1211,21 +1206,64 @@
             }
         }
 
+        // ================= CASSETTA TELEFONI (24 slot: 8 x 3) =================
+        // Ogni slot n corrisponde al banco #n. Il sensore (cella di carico) chiama setPhoneSlot(n, true/false)
+        // oppure emette via socket 'phone_update' { slot, present }.
+        let phoneState = {};
+                async function loadPhones() {
+            phoneState = {};
+            try { const r = await api(`/api/phones/${encodeURIComponent(currentClass)}?date=${selectedDate}`); r.slots.forEach(x => { if (x.present) phoneState[x.slot] = x.time || '✓'; }); } catch (e) {}
+        }
+        function phoneStudent(n) { const x = localSchoolDB[currentClass]?.[dk(n)]; return x && x.name !== 'Libero' ? x.name : null; }
+        async function setPhoneSlot(n, on) {
+            try { await api('/api/phones', 'POST', { class_name: currentClass, date: selectedDate, slot: n, present: !!on }); }
+            catch (e) { return toast('Errore', e.message, 'error'); }
+            await syncClassroomData();
+        }
+        function phoneToggle(n) { if (currentUser?.role !== 'studente' && phoneStudent(n)) setPhoneSlot(n, !phoneState[n]); }
+        window.setPhoneSlot = setPhoneSlot;
+        function createPhoneCard() {
+            const w = document.createElement('div'); w.className = 'w-full';
+            const total = Array.from({length: 24}, (_, i) => i + 1).filter(phoneStudent);
+            const got = total.filter(n => phoneState[n]).length;
+            const dots = Array.from({length: 24}, (_, i) => { const n = i + 1; const c = !phoneStudent(n) ? 'bg-slate-700' : (phoneState[n] ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'); return `<i class="block h-3 rounded-full ${c}"></i>`; }).join('');
+            w.innerHTML = `<button type="button" onclick="switchMainMode('phones')" class="w-full block outline-none h-full"><div class="h-32 md:h-40 lg:h-[11.5rem] xl:h-[13rem] 2xl:h-[14.5rem] w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 flex flex-col justify-between border-2 border-slate-500 bg-slate-900/70 hover:bg-slate-800/80 transition shadow-xl"><div class="flex justify-between items-center"><span class="text-lg">📱</span><span class="text-xs lg:text-sm font-mono font-black px-2.5 py-1 rounded-lg bg-black/40 text-slate-200">${got}/${total.length}</span></div><div class="grid grid-cols-8 gap-1.5 lg:gap-2 my-auto">${dots}</div><div class="text-center text-xs lg:text-sm font-mono font-bold text-slate-300 uppercase tracking-widest">Cassetta telefoni</div></div></button>`;
+            return w;
+        }
+        function renderPhones() {
+            const box = document.getElementById('phone-box'), sum = document.getElementById('phone-summary');
+            if (!box || !sum) return;
+            let slots = '';
+            for (let n = 1; n <= 24; n++) {
+                const nm = phoneStudent(n), on = nm && phoneState[n];
+                const bulb = !nm ? 'bg-slate-700' : (on ? 'bg-emerald-400 shadow-[0_0_14px_#34d399]' : 'bg-red-500 shadow-[0_0_14px_#ef4444]');
+                slots += `<div class="flex flex-col items-center gap-2 ${nm ? 'cursor-pointer' : 'opacity-40'}" onclick="phoneToggle(${n})"><i class="block w-4 h-4 sm:w-6 sm:h-6 rounded-full ${bulb}"></i><div class="w-full aspect-[1/1.9] rounded-lg border-2 ${on ? 'border-emerald-500' : 'border-slate-500'} bg-black/50 flex items-center justify-center text-xl sm:text-4xl">${on ? '📱' : ''}</div><span class="font-mono font-black text-base sm:text-2xl text-white">${n}</span></div>`;
+            }
+            box.innerHTML = `<div class="grid grid-cols-8 gap-2 sm:gap-5 p-3 sm:p-8 rounded-3xl border-4 border-slate-600 bg-slate-900/60">${slots}</div>`;
+            const all = Array.from({length: 24}, (_, i) => i + 1).filter(phoneStudent);
+            const row = (n, c) => `<div class="flex justify-between py-2 border-b border-slate-800 text-sm sm:text-base"><b class="text-white">${esc(phoneStudent(n))}</b><span class="font-mono ${c}">${phoneState[n] ? phoneState[n] : '#' + n}</span></div>`;
+            const have = all.filter(n => phoneState[n]), miss = all.filter(n => !phoneState[n]);
+            sum.innerHTML = `<div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5"><div class="text-xs font-mono font-bold text-emerald-400 uppercase mb-2">Hanno consegnato (${have.length})</div>${have.map(n => row(n, 'text-emerald-400')).join('') || '<div class="text-slate-500 text-sm py-2">Nessuno per ora</div>'}</div><div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5"><div class="text-xs font-mono font-bold text-red-400 uppercase mb-2">Mancano (${miss.length})</div>${miss.map(n => row(n, 'text-red-400')).join('') || '<div class="text-emerald-400 text-sm py-2">Tutti i telefoni consegnati</div>'}</div>`;
+        }
+        if (socket) socket.on('phone_update', d => setPhoneSlot(d.slot, d.present));
+
         // ================= 3. NUOVO SISTEMA: LABORATORIO & ARMADIO COMPONENTI =================
         function switchMainMode(mode) {
             currentMainMode = mode;
             document.getElementById('section-mode-aula')?.classList.toggle('hidden', mode !== 'aula');
             document.getElementById('section-mode-lab')?.classList.toggle('hidden', mode !== 'lab');
             document.getElementById('section-mode-cabinet')?.classList.toggle('hidden', mode !== 'cabinet');
+            document.getElementById('section-mode-phones')?.classList.toggle('hidden', mode !== 'phones');
+            if (mode === 'phones') renderPhones();
 
-            ['aula', 'lab', 'cabinet'].forEach(m => {
+            ['aula', 'lab', 'cabinet', 'phones'].forEach(m => {
                 const btn = document.getElementById(`mode-btn-${m}`);
                 if (!btn) return;
                 if (m === mode) {
-                    const activeColor = m === 'aula' ? 'bg-blue-600' : (m === 'lab' ? 'bg-amber-600' : 'bg-emerald-600');
-                    btn.className = `px-3 py-1.5 rounded-lg ${activeColor} text-white shadow flex items-center gap-1.5 transition`;
+                    const activeColor = m === 'aula' ? 'bg-blue-600' : (m === 'lab' ? 'bg-amber-600' : (m === 'phones' ? 'bg-fuchsia-600' : 'bg-emerald-600'));
+                    btn.className = `px-4 py-2.5 rounded-lg text-sm ${activeColor} text-white shadow flex items-center gap-1.5 transition`;
                 } else {
-                    btn.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition";
+                    btn.className = "px-4 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white flex items-center gap-1.5 transition";
                 }
             });
 
@@ -1782,9 +1820,7 @@
             const container = document.getElementById('mobile-classroom-grid');
             if (!container || !data) return;
             container.innerHTML = '';
-            const left = []; for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
-            const center = [`banco_09`]; for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
-            const right = []; for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
+            const left = deskIdsFlat(0), center = deskIdsFlat(1), right = deskIdsFlat(2);
 
             const renderSection = (title, deskIds) => {
                 const sec = document.createElement('div');
@@ -1816,17 +1852,17 @@
                 : (hasNotes ? `<i class="fa-solid fa-circle-info text-amber-400 absolute top-3 right-3 text-sm z-20"></i>` : '');
             
             const statusClass = String(d.status || 'assente').replace(/_/g,'-');
-            btn.innerHTML = `<div class="relative h-28 md:h-32 lg:h-36 xl:h-40 w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 flex flex-col justify-between shadow-xl status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100 hover:scale-[1.03]'} transition-all">
+            btn.innerHTML = `<div class="relative h-32 md:h-40 lg:h-[11.5rem] xl:h-[13rem] 2xl:h-[14.5rem] w-full rounded-2xl lg:rounded-3xl p-3.5 lg:p-4 flex flex-col justify-between shadow-xl status-${statusClass} ${d.name==='Libero'?'opacity-20':'opacity-100 hover:scale-[1.03]'} transition-all">
                 ${noteFlag}
                 <div class="flex justify-between items-start">
-                    <span class="text-[10px] lg:text-xs font-bold opacity-75 font-mono">#${id.split('_')[1]}</span>
-                    <span class="text-[9px] lg:text-[10px] font-mono font-black uppercase py-1 px-2.5 rounded-lg bg-black/40 border border-white/5">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
+                    <span class="text-xs lg:text-sm font-bold opacity-75 font-mono">#${id.split('_')[1]}</span>
+                    <span class="text-[10px] lg:text-xs font-mono font-black uppercase py-1 px-2.5 rounded-lg bg-black/40 border border-white/5">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
                 </div>
                 <div class="text-center flex-grow flex items-center justify-center px-1 my-1">
-                    <h3 class="font-extrabold text-xs md:text-sm lg:text-base xl:text-lg leading-tight uppercase w-full break-words text-white">${esc(d.name)}</h3>
+                    <h3 class="font-extrabold text-sm md:text-base lg:text-xl xl:text-2xl leading-tight uppercase w-full break-words text-white">${esc(d.name)}</h3>
                 </div>
                 <div class="text-center">
-                    <span class="text-[10px] lg:text-xs font-mono font-semibold opacity-85 bg-black/40 px-3 py-1 rounded-lg border border-white/5 text-slate-300">${esc(d.time || '--:--')}</span>
+                    <span class="text-xs lg:text-base font-mono font-semibold opacity-85 bg-black/40 px-3 py-1 rounded-lg border border-white/5 text-slate-300">${esc(d.time || '--:--')}</span>
                 </div>
             </div>`;
             if (d.name !== 'Libero') btn.onclick = () => openStudentDetail(id);
@@ -1841,49 +1877,22 @@
             if (!grid) return; 
             grid.innerHTML = '';
 
-            const makeColumn = (label, deskIds) => {
+            SEAT_LAYOUT.forEach((rows, wi) => {
                 const col = document.createElement('div');
-                col.className = 'flex flex-col-reverse gap-3 lg:gap-4 flex-1'; 
+                col.className = 'flex flex-col-reverse gap-3 lg:gap-4 flex-1';
                 const labelEl = document.createElement('div');
                 labelEl.className = 'text-center text-xs font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last';
-                labelEl.textContent = label;
+                labelEl.textContent = WING_NAMES[wi];
                 col.appendChild(labelEl);
-                for (let i = 0; i < deskIds.length; i += 2) {
-                    const row = document.createElement('div'); 
+                rows.forEach(r => {
+                    const row = document.createElement('div');
                     row.className = 'grid grid-cols-2 gap-3 lg:gap-4';
-                    deskIds.slice(i, i+2).forEach(id => row.appendChild(createDeskCard(id, data)));
+                    r.forEach(c => row.appendChild(c === 'phones' ? createPhoneCard() : createDeskCard(dk(c), data)));
                     col.appendChild(row);
-                }
-                return col;
-            };
-
-            const left = []; for (let i=1;i<=8;i++) left.push(`banco_${String(i).padStart(2,'0')}`);
-            const center = [`banco_09`]; for (let i=10;i<=15;i++) center.push(`banco_${String(i).padStart(2,'0')}`);
-            const right = []; for (let i=16;i<=23;i++) right.push(`banco_${String(i).padStart(2,'0')}`);
-
-            const leftCol = makeColumn('ALA SINISTRA', left);
-            const centerCol = document.createElement('div'); 
-            centerCol.className = 'flex flex-col-reverse gap-3 lg:gap-4 flex-1';
-            const centerLabel = document.createElement('div'); 
-            centerLabel.className = 'text-center text-xs font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last'; 
-            centerLabel.textContent = 'FILA CENTRALE'; 
-            centerCol.appendChild(centerLabel);
-            
-            const single = document.createElement('div'); 
-            single.className = 'flex justify-center w-full'; 
-            single.appendChild(createDeskCard('banco_09', data, true)); 
-            centerCol.appendChild(single);
-            
-            const centerPairs = center.slice(1);
-            for (let i=0;i<centerPairs.length;i+=2) {
-                const row = document.createElement('div'); 
-                row.className = 'grid grid-cols-2 gap-3 lg:gap-4';
-                row.appendChild(createDeskCard(centerPairs[i], data));
-                if (centerPairs[i+1]) row.appendChild(createDeskCard(centerPairs[i+1], data));
-                centerCol.appendChild(row);
-            }
-
-            grid.appendChild(leftCol); grid.appendChild(centerCol); grid.appendChild(makeColumn('ALA DESTRA', right));
+                });
+                grid.appendChild(col);
+            });
+            renderPhones();
 
             let out = null; 
             Object.values(data).forEach(v => { if (v.status === 'bagno') out = v.name; });
@@ -1917,8 +1926,8 @@
             const tbody = document.getElementById('modal-history-body');
             tbody.innerHTML = "";
             student.history.slice().reverse().forEach(h => {
-                let durata = h.in ? `<span class="text-[10px] text-amber-300 font-mono font-bold ml-2 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-500/30">⏱ ${calcolaDurata(h.out, h.in)}</span>` : '';
-                tbody.innerHTML += `<tr><td class="px-4 py-3 font-bold text-cyan-400 font-mono">${h.out}</td><td class="px-4 py-3 font-bold text-emerald-400 font-mono">${h.in || '--:--'} ${durata}</td><td class="px-4 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
+                let durata = h.in ? `<span class="text-sm text-amber-300 font-mono font-bold ml-3 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-500/30">⏱ ${calcolaDurata(h.out, h.in)}</span>` : '';
+                tbody.innerHTML += `<tr><td class="px-4 py-4 font-black text-2xl sm:text-3xl text-cyan-400 font-mono">${h.out}</td><td class="px-4 py-4 font-black text-2xl sm:text-3xl text-emerald-400 font-mono">${h.in || '--:--'} ${durata}</td><td class="px-4 py-3 text-right">${h.in ? '<span class="text-[9px] text-slate-500 font-mono uppercase font-bold">Rientrato</span>' : '<span class="text-[9px] text-cyan-400 font-mono uppercase font-bold animate-pulse">Fuori aula</span>'}</td></tr>`;
             });
 
             document.getElementById('status-view-mode').classList.remove('hidden');
@@ -1949,7 +1958,29 @@
             document.getElementById(`btn-${status}`)?.classList.add('btn-selected');
         }
 
+        let _statusBusy = false;
         async function confirmStatusChange() {
+            if (_statusBusy) return;
+            const st = localSchoolDB[currentClass]?.[selectedStudentId];
+            if (!st || !pendingStatus) return;
+            _statusBusy = true;
+            try {
+                if (pendingStatus === st.status) { toast('Nessuna modifica', `${st.name} è già ${pendingStatus.replace(/_/g,' ')}`, 'info'); return; }
+                if (pendingStatus === 'bagno') {
+                    const occ = Object.values(localSchoolDB[currentClass] || {}).find(x => x.status === 'bagno' && x.db_id !== st.db_id);
+                    if (occ) {
+                        try {
+                            await api('/api/bathroom-queue/join', 'POST', { student_id: st.db_id, student_name: st.name, desk_id: selectedStudentId, class_name: currentClass, class_id: currentClassId, booked_at: new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}) });
+                            await syncClassroomData();
+                            toast('In coda', `Bagno occupato da ${occ.name}: ${st.name} è in coda`, 'info');
+                        } catch (e) { toast('Attenzione', e.message, 'error'); }
+                        return;
+                    }
+                }
+                await _confirmStatusChangeRaw();
+            } finally { _statusBusy = false; }
+        }
+        async function _confirmStatusChangeRaw() {
             const student = localSchoolDB[currentClass]?.[selectedStudentId];
             if (!student || !pendingStatus) return;
 
@@ -2112,23 +2143,27 @@
             renderSignaturesList();
         }
 
+        const isoLocal = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
         function renderCalendarStrip() {
             const container = document.getElementById('cv-calendar-container');
             if (!container) return;
             container.innerHTML = '';
             const labels = ['D','L','M','M','G','V','S'];
             const selected = new Date(`${selectedDate}T12:00:00`);
-            for (let i=-3; i<=3; i++) {
+            for (let i = -3; i <= 3; i++) {
                 const d = new Date(selected);
                 d.setDate(selected.getDate() + i);
-                const iso = d.toISOString().slice(0,10);
+                const iso = isoLocal(d);
                 const day = document.createElement('button');
                 day.type = 'button';
-                day.className = `cv-day ${iso===selectedDate?'active':''} ${iso===getTodayStr()?'today':''}`;
+                day.className = `cv-day ${iso === selectedDate ? 'active' : ''} ${iso === getTodayStr() ? 'today' : ''} ${iso > getTodayStr() ? 'future' : ''}`;
                 day.innerHTML = `<span class="cv-day-letter">${labels[d.getDay()]}</span><div class="cv-day-number">${d.getDate()}</div>`;
                 day.onclick = () => changeDate(iso);
                 container.appendChild(day);
             }
+            container.classList.remove('cv-slide-l', 'cv-slide-r');
+            void container.offsetWidth;
+            container.classList.add('cv-slide-' + calDir);
         }
 
         function selectSignHour(h) {
@@ -2299,10 +2334,10 @@
         }
 
         function switchTab(t) {
-            document.getElementById('content-presence')?.classList.toggle('hidden', t !== 'presence');
-            document.getElementById('content-grades')?.classList.toggle('hidden', t !== 'grades');
-            document.getElementById('content-notes')?.classList.toggle('hidden', t !== 'notes');
-            if (t === 'grades') loadTeacherGradesView();
+            ['presence', 'notes'].forEach(k => {
+                document.getElementById('content-' + k)?.classList.toggle('hidden', k !== t);
+                document.getElementById('tab-' + k)?.classList.toggle('on', k === t);
+            });
             if (t === 'notes') loadNotes();
         }
 
@@ -2435,6 +2470,14 @@
             socket.on('sync_needed', () => { if (currentClass) syncClassroomData(); });
             socket.on('lab_sync', () => { if (currentClass) syncLabData(); });
         }
+
+        // Aggiornamento automatico (Vercel non supporta WebSocket): ricarica i dati ogni 4 s se nessuna finestra di modifica e' aperta
+        setInterval(() => {
+            if (!currentClass || document.hidden || currentMainMode !== 'aula' && currentMainMode !== 'phones') return;
+            if (selectedDate !== getTodayStr()) return;
+            if (!document.getElementById('modal-student-detail').classList.contains('hidden')) return;
+            syncClassroomData();
+        }, 4000);
 
         window.addEventListener('DOMContentLoaded', async () => {
             startClock();
