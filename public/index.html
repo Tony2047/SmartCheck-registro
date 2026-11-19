@@ -279,7 +279,7 @@
                     <div class="flex items-center gap-3">
                         <span>A.S. <strong class="text-white">2026/2027</strong></span>
                         <span class="text-slate-700">•</span>
-                        <span class="text-slate-400">LAN / SQLite</span>
+                        <span class="text-slate-400">Cloud / Turso</span>
                     </div>
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-emerald-400 font-semibold text-[11px]">
                         <i class="fa-solid fa-shield-halved text-[10px]"></i> LOCAL v2026.4
@@ -314,7 +314,7 @@
                             <label for="input-username" class="block text-[11px] font-mono uppercase font-semibold tracking-wider text-slate-300">Identificativo Utente</label>
                             <div class="relative group">
                                 <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-400 text-sm transition-colors"></i>
-                                <input type="text" id="input-username" autocomplete="username" placeholder="cognome.nome / admin" class="w-full bg-[#0e172b] border border-slate-700/90 text-white placeholder:text-slate-500 pl-12 pr-4 py-4 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 outline-none font-medium text-base transition-all">
+                                <input type="text" id="input-username" autocomplete="username" placeholder="Nome utente" class="w-full bg-[#0e172b] border border-slate-700/90 text-white placeholder:text-slate-500 pl-12 pr-4 py-4 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 outline-none font-medium text-base transition-all">
                             </div>
                         </div>
 
@@ -397,23 +397,24 @@
                 </div>
             </header>
 
-            <div class="mb-6 sm:mb-8 p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-900/20 via-slate-900/40 to-transparent border border-blue-500/15 flex items-center justify-between">
+            <section class="mb-6 sm:mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-5">
                 <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-white">Seleziona la Sezione Operativa</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Apri il registro interattivo, la mappa dei banchi d'aula, i banchi di laboratorio e l'armadio componenti.</p>
+                    <p class="text-[11px] font-mono uppercase tracking-[0.28em] text-blue-400 font-semibold">Selezione classe</p>
+                    <h3 class="font-display text-3xl sm:text-4xl font-bold text-white mt-1.5 tracking-tight">Quale classe apriamo?</h3>
+                    <p class="text-sm text-slate-400 mt-2 max-w-xl">Registro, mappa dei banchi, coda bagno e cassetta telefoni: scegli la classe per iniziare.</p>
                 </div>
-                <div class="hidden md:flex items-center gap-2 text-xs font-mono text-emerald-400 bg-black/30 px-3.5 py-2 rounded-xl border border-emerald-800/50 shrink-0 ml-4">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Server Locale LAN Attivo
+                <div class="relative w-full lg:w-96">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                    <input id="class-search" type="text" autocomplete="off" oninput="renderClassSelector()" placeholder="Cerca una classe..." class="w-full bg-[#0e172b] border border-slate-700 rounded-2xl pl-11 pr-4 py-3.5 text-white font-mono text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition placeholder:text-slate-600">
                 </div>
-            </div>
-
-            <div class="glass-panel p-4 sm:p-6 md:p-8 lg:p-10 rounded-3xl border border-slate-800/80">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 items-start" id="classes-container"></div>
-            </div>
+            </section>
+            <div id="class-resume"></div>
+            <div id="class-dept-chips" class="flex flex-wrap gap-2 mb-7"></div>
+            <div id="classes-container" class="space-y-9"></div>
         </div>
 
         <footer class="mt-8 sm:mt-12 text-center text-xs font-mono text-slate-600">
-            SmartCheck School OS • Ecosistema Scolastico Locale Indipendente (SQLite + WebSockets) 2026/2027
+            SmartCheck School OS • 2026/2027
         </footer>
     </div>
 
@@ -730,7 +731,7 @@
                 <div class="p-3 bg-gradient-to-r from-purple-950/30 to-blue-950/20 border border-purple-500/20 rounded-2xl mb-3 flex items-center justify-between">
                     <div class="flex items-center gap-2 text-xs font-mono text-purple-300">
                         <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
-                        Motore Diagnostico Locale SmartCheck AI • Connesso a SQLite & Telemetria Lab
+                        Motore Diagnostico Locale SmartCheck AI • Connesso a Turso & Telemetria Lab
                     </div>
                     <span class="text-[10px] font-mono text-emerald-400">100% Offline Ready</span>
                 </div>
@@ -944,6 +945,7 @@
                         <div class="text-[10px] font-mono text-slate-400 uppercase font-bold mb-1">Stato in Aula</div>
                         <div id="status-view-mode" class="cursor-pointer" onclick="toggleStatusEdit()">
                             <div id="modal-detail-status" class="font-display text-xl sm:text-2xl font-bold text-white">--</div>
+                            <div id="modal-detail-entry" class="mt-2 text-xs sm:text-sm font-mono text-slate-400 flex items-center gap-2"></div>
                             <div id="status-edit-hint" class="text-[10px] text-blue-400 mt-2 font-mono flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
                                 <i class="fa-solid fa-pen text-[9px]"></i> Clicca per modificare
                             </div>
@@ -1017,20 +1019,7 @@
     <script>
         const socket = (typeof io !== 'undefined') ? io() : null;
 
-        const ALL_SUBJECTS = ["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"];
         
-        const FULL_CLASSES_STRUCT = {
-            "ELETTRONICA": ["1AEE", "2AEE", "3AEE", "4AEE", "5AEE"],
-            "MECCANICA": ["1AMM", "2AMM", "3AMM", "4AMM", "5AMM", "4 MAUT", "4 MROB", "5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"],
-            "CHIMICA": ["1ACM", "2ACM", "3ACM", "4ACM", "5ACM"]
-        };
-
-        const DEPT_CONFIG = {
-            "ELETTRONICA": { icon: "fa-microchip", badge: "Tecnologico", color: "text-blue-400", bgBadge: "bg-blue-500/10 text-blue-400 border-blue-500/30", hoverBorder: "hover:border-blue-500 hover:shadow-blue-500/25" },
-            "MECCANICA": { icon: "fa-gears", badge: "Meccatronica", color: "text-amber-400", bgBadge: "bg-amber-500/10 text-amber-400 border-amber-500/30", hoverBorder: "hover:border-amber-500 hover:shadow-amber-500/25" },
-            "CHIMICA": { icon: "fa-flask-vial", badge: "Biotecnologie", color: "text-emerald-400", bgBadge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30", hoverBorder: "hover:border-emerald-500 hover:shadow-emerald-500/25" }
-        };
-
         let currentUser = null;
         let verifiedUsername = null;
         let currentClass = null;
@@ -1044,15 +1033,20 @@
         let currentMobileAisle = 'left';
         let calDir = 'r';
 
-        // Disposizione banchi: righe dalla PRIMA (vicino alla cattedra) all'ULTIMA; numeri = #banco
-        const SEAT_LAYOUT = [
-            [[null, 7], [23, 15], [1, 10], [21, 12]],
-            [[9, 8], [2, 14], [22, 4], [3, 18]],
-            [[6, 5], [11, 20], [13, 17], [16, 19]]
-        ];
-        const WING_NAMES = ['ALA SINISTRA', 'FILA CENTRALE', 'ALA DESTRA'];
+        // Classi, materie e disposizione banchi arrivano da Turso (GET /api/config) solo dopo il login
+        let CFG = { classes: [], subjects: [], layouts: {} };
+        async function loadConfig() { try { CFG = await api('/api/config'); } catch (e) { console.error('Config non caricata', e); } }
         const dk = n => 'banco_' + String(n).padStart(2, '0');
-        const deskIdsFlat = w => SEAT_LAYOUT[w].flat().filter(x => typeof x === 'number').map(dk);
+        // Disposizione: ali -> righe (dalla prima, vicino alla cattedra, all'ultima). Riga con 1 solo numero = banco singolo centrato.
+        function getLayout() {
+            const L = CFG.layouts?.[currentClass];
+            if (L && L.wings) return L.wings;
+            const ids = Object.keys(localSchoolDB[currentClass] || {}).map(k => parseInt(k.split('_')[1])).sort((a, b) => a - b);
+            const pairs = []; for (let i = 0; i < ids.length; i += 2) pairs.push(ids.slice(i, i + 2));
+            const per = Math.max(1, Math.ceil(pairs.length / 3));
+            return ['ALA SINISTRA', 'FILA CENTRALE', 'ALA DESTRA'].map((name, i) => ({ name, rows: pairs.slice(i * per, (i + 1) * per) }));
+        }
+        const deskIdsFlat = w => (getLayout()[w]?.rows || []).flat().filter(x => typeof x === 'number').map(dk);
 
         const getTodayStr = () => new Date().toLocaleDateString('it-IT', {year: 'numeric', month: '2-digit', day: '2-digit'}).split('/').reverse().join('-');
         let selectedDate = getTodayStr();
@@ -1208,7 +1202,7 @@
 
         async function verifyUser() {
             if (window.location.protocol === 'file:') {
-                toast('Apri tramite Server!', 'Apri http://localhost:3000 nel browser dopo aver avviato node server.js', 'error', 6000);
+                toast('Pagina non servita', 'Apri SmartCheck dall\'indirizzo del sito, non dal file salvato sul computer.', 'error', 6000);
                 return;
             }
             const inputEl = document.getElementById('input-username');
@@ -1218,7 +1212,7 @@
             const btn = document.getElementById('btn-next');
 
             if (!input) {
-                toast('Campo Vuoto', 'Inserisci il nome utente (es. navarroli.antonio o admin)', 'error');
+                toast('Campo Vuoto', 'Inserisci il nome utente', 'error');
                 return;
             }
 
@@ -1256,7 +1250,7 @@
                 document.getElementById('view-login').classList.add('hidden');
 
                 if (currentUser.role === 'studente') {
-                    await loadClassroom('5AEE');
+                    await loadClassroom(currentUser.class_name);
                 } else {
                     const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
                     if (activeCls) await loadClassroom(activeCls);
@@ -1311,6 +1305,7 @@
             window.scrollTo(0, 0);
             currentClass = cls;
             localStorage.setItem('SC_ACTIVE_CLASS', cls);
+            if (!CFG.subjects.length) await loadConfig();
 
             document.getElementById('view-hub')?.classList.add('hidden');
             document.getElementById('view-classroom')?.classList.remove('hidden');
@@ -1351,7 +1346,7 @@
 
                 (bundle.attendance || []).forEach(row => {
                     const seat = Object.values(localSchoolDB[currentClass]).find(s => s.db_id === row.student_id);
-                    if (seat) { seat.status = row.status || 'assente'; seat.time = row.time || '--:--'; }
+                    if (seat) { seat.status = row.status || 'assente'; seat.time = row.time || '--:--'; seat.first_in = row.first_in || null; }
                 });
 
                 (bundle.bathroomHistory || []).forEach(row => {
@@ -1746,7 +1741,7 @@
                 const res = await api('/api/lab/checkout', 'POST', {
                     item_id: itemId,
                     workbench_id: benchId,
-                    class_name: currentClass || '5AEE'
+                    class_name: currentClass
                 });
                 await syncLabData();
                 toast('Componente Prelevato', `${res.unitLabel} assegnato a ${res.benchId.replace('lab_banco_', 'Banco Lab #')}`, 'success');
@@ -2015,7 +2010,7 @@
                     <span class="text-[8px] font-mono font-bold uppercase py-0.5 px-2 rounded-md bg-black/40">${esc(String(d.status || 'assente').replace(/_/g,' '))}</span>
                 </div>
                 <div class="font-display font-bold text-sm text-white leading-tight my-1">${esc(d.name)}</div>
-                <div class="text-[9px] font-mono opacity-80 text-right">${esc(d.time || '--:--')}</div>
+                <div class="text-[9px] font-mono opacity-80 text-right">${deskTimeHtml(d)}</div>
             `;
             if (!isLibero) card.onclick = () => openStudentDetail(id);
             return card;
@@ -2040,6 +2035,12 @@
             if (currentMobileAisle === 'right' || currentMobileAisle === 'all') renderSection("Ala Destra", right);
         }
 
+        // Sotto al banco: in bagno = orario di uscita; altrimenti = orario della prima timbratura (non cambia ai rientri)
+        function deskTimeHtml(d) {
+            if (d.status === 'bagno') return `<i class="fa-solid fa-restroom mr-1.5 text-cyan-300"></i>${esc(d.time || '--:--')}`;
+            if (d.first_in && !['assente', 'uscita_anticipata', 'fuori_aula'].includes(d.status)) return `<i class="fa-solid fa-right-to-bracket mr-1.5 text-emerald-300"></i>${esc(d.first_in)}`;
+            return esc(d.time || '--:--');
+        }
         function createDeskCard(id, data, isSingle=false) {
             const d = data[id] || {name:'Libero',status:'assente',time:'--:--'};
             const wrap = document.createElement('div'); 
@@ -2067,7 +2068,7 @@
                     <h3 class="font-display font-bold text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl leading-tight uppercase w-full break-words text-white">${esc(d.name)}</h3>
                 </div>
                 <div class="text-center">
-                    <span class="text-xs lg:text-base font-mono font-semibold opacity-85 bg-black/40 px-3 py-1 rounded-lg border border-white/5 text-slate-300">${esc(d.time || '--:--')}</span>
+                    <span class="text-xs lg:text-base font-mono font-semibold opacity-85 bg-black/40 px-3 py-1 rounded-lg border border-white/5 text-slate-300">${deskTimeHtml(d)}</span>
                 </div>
             </div>`;
             if (d.name !== 'Libero') btn.onclick = () => openStudentDetail(id);
@@ -2082,17 +2083,23 @@
             if (!grid) return; 
             grid.innerHTML = '';
 
-            SEAT_LAYOUT.forEach((rows, wi) => {
+            getLayout().forEach(w => {
                 const col = document.createElement('div');
                 col.className = 'flex flex-col-reverse gap-3 lg:gap-6 xl:gap-8 flex-1';
                 const labelEl = document.createElement('div');
                 labelEl.className = 'text-center text-xs font-mono font-bold text-slate-400 uppercase tracking-[0.3em] mb-2 opacity-75 order-last';
-                labelEl.textContent = WING_NAMES[wi];
+                labelEl.textContent = w.name;
                 col.appendChild(labelEl);
-                rows.forEach(r => {
+                w.rows.forEach(r => {
                     const row = document.createElement('div');
                     row.className = 'grid grid-cols-2 gap-3 lg:gap-4';
-                    r.forEach(c => row.appendChild(c === null ? document.createElement('div') : createDeskCard(dk(c), data)));
+                    if (r.length === 1 && r[0] !== null) {
+                        const cell = createDeskCard(dk(r[0]), data);
+                        cell.className = 'col-span-2 w-1/2 justify-self-center';
+                        row.appendChild(cell);
+                    } else {
+                        r.forEach(c => row.appendChild(c === null ? document.createElement('div') : createDeskCard(dk(c), data)));
+                    }
                     col.appendChild(row);
                 });
                 grid.appendChild(col);
@@ -2129,6 +2136,9 @@
             const statusEl = document.getElementById('modal-detail-status');
             statusEl.innerText = student.status.toUpperCase().replace(/_/g, ' ');
             document.getElementById('modal-detail-count').innerText = student.history.length;
+            document.getElementById('modal-detail-entry').innerHTML = student.first_in
+                ? `<i class="fa-solid fa-right-to-bracket text-emerald-400"></i> Ingresso a scuola <b class="text-emerald-300 text-sm sm:text-base">${esc(student.first_in)}</b>`
+                : `<i class="fa-solid fa-right-to-bracket text-slate-600"></i> Nessuna timbratura di ingresso`;
 
             const tbody = document.getElementById('modal-history-body');
             tbody.innerHTML = "";
@@ -2448,7 +2458,7 @@
             const input = document.getElementById('subject-search').value.toLowerCase();
             const drop = document.getElementById('subject-dropdown');
             drop.innerHTML = "";
-            ALL_SUBJECTS.forEach(s => {
+            (CFG.subjects || []).forEach(s => {
                 if (s.toLowerCase().includes(input)) {
                     const div = document.createElement('div');
                     div.innerText = s;
@@ -2470,7 +2480,7 @@
             document.getElementById('modal-add-agenda').classList.remove('hidden');
             const sel = document.getElementById('agenda-subject');
             sel.innerHTML = "";
-            ALL_SUBJECTS.forEach(s => sel.innerHTML += `<option>${s}</option>`);
+            (CFG.subjects || []).forEach(s => sel.innerHTML += `<option>${s}</option>`);
         }
 
         function selectAgendaType(t) {
@@ -2577,7 +2587,7 @@
             if (!student?.db_id) return;
             const subjSelect = document.getElementById('new-grade-subject');
             if (subjSelect && subjSelect.children.length === 0) {
-                ALL_SUBJECTS.forEach(s => subjSelect.innerHTML += `<option value="${s}">${s}</option>`);
+                (CFG.subjects || []).forEach(s => subjSelect.innerHTML += `<option value="${s}">${s}</option>`);
             }
             const list = document.getElementById('teacher-grades-list');
             if (!list) return;
@@ -2665,34 +2675,67 @@
             });
         }
 
-        function initHub() {
+        async function initHub() {
             document.getElementById('view-hub').classList.remove('hidden');
             document.getElementById('hub-user-name').innerText = currentUser.name;
             document.getElementById('hub-role-badge').innerText = currentUser.role.toUpperCase();
             document.getElementById('btn-open-admin-console')?.classList.toggle('hidden', currentUser.role !== 'admin');
+            await loadConfig();
             renderClassSelector();
         }
 
+        const ACCENT = {
+            blue:    { b: 'bg-blue-500/10 text-blue-400 border-blue-500/30',          h: 'hover:border-blue-500/70 hover:shadow-blue-500/20',       g: 'group-hover:text-blue-400',    bar: 'from-blue-500',    chip: 'bg-blue-600 border-blue-500 text-white' },
+            amber:   { b: 'bg-amber-500/10 text-amber-400 border-amber-500/30',       h: 'hover:border-amber-500/70 hover:shadow-amber-500/20',     g: 'group-hover:text-amber-400',   bar: 'from-amber-500',   chip: 'bg-amber-600 border-amber-500 text-white' },
+            emerald: { b: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', h: 'hover:border-emerald-500/70 hover:shadow-emerald-500/20', g: 'group-hover:text-emerald-400', bar: 'from-emerald-500', chip: 'bg-emerald-600 border-emerald-500 text-white' }
+        };
+        let hubDept = '*';
+        function setHubDept(d) { hubDept = d; renderClassSelector(); }
         function renderClassSelector() {
-            const container = document.getElementById('classes-container');
-            if (!container) return;
-            container.innerHTML = '';
-            for (const [dept, classes] of Object.entries(FULL_CLASSES_STRUCT)) {
-                const cfg = DEPT_CONFIG[dept];
-                const col = document.createElement('div');
-                col.className = 'flex flex-col space-y-4 bg-slate-900/40 p-5 sm:p-6 rounded-3xl border border-slate-800/80 shadow-lg';
-                col.innerHTML = `<div class="flex items-center justify-between pb-3.5 border-b border-slate-800"><h3 class="text-base font-bold text-white uppercase">${dept}</h3><span class="text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border ${cfg.bgBadge}">${cfg.badge}</span></div><div class="class-list-container pt-1.5"></div>`;
-                const list = col.querySelector('.class-list-container');
-                classes.forEach(c => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.onclick = () => loadClassroom(c);
-                    btn.className = `w-full py-3.5 px-4 bg-slate-900/90 border border-slate-700/70 rounded-2xl ${cfg.hoverBorder} text-left flex items-center justify-between transition`;
-                    btn.innerHTML = `<span class="text-xl font-bold font-mono text-white">${esc(c)}</span><i class="fa-solid fa-arrow-right text-xs text-slate-400"></i>`;
-                    list.appendChild(btn);
-                });
-                container.appendChild(col);
+            const wrap = document.getElementById('classes-container');
+            if (!wrap) return;
+            const depts = CFG.classes || [];
+            const q = (document.getElementById('class-search')?.value || '').toLowerCase().replace(/\s+/g, '');
+
+            // Riprendi dall'ultima classe aperta
+            const resume = document.getElementById('class-resume'); resume.innerHTML = '';
+            const last = localStorage.getItem('SC_ACTIVE_CLASS');
+            if (last && !q && depts.some(d => d.classes.includes(last))) {
+                const r = document.createElement('button'); r.type = 'button'; r.onclick = () => loadClassroom(last);
+                r.className = 'w-full mb-6 p-4 sm:p-5 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-blue-600/20 via-blue-900/10 to-transparent hover:border-blue-400/60 transition flex items-center justify-between text-left';
+                r.innerHTML = `<div><div class="text-[10px] font-mono uppercase tracking-[0.2em] text-blue-300">Riprendi da dove eri</div><div class="font-mono text-2xl sm:text-3xl font-bold text-white mt-1">${esc(last)}</div></div><i class="fa-solid fa-arrow-right text-blue-300 text-xl"></i>`;
+                resume.appendChild(r);
             }
+
+            // Filtri per indirizzo
+            const chips = document.getElementById('class-dept-chips'); chips.innerHTML = '';
+            [{ dept: '*', label: 'Tutte', accent: 'blue' }, ...depts.map(d => ({ dept: d.dept, label: d.dept, accent: d.accent }))].forEach(c => {
+                const on = hubDept === c.dept;
+                const b = document.createElement('button'); b.type = 'button'; b.onclick = () => setHubDept(c.dept);
+                b.className = `px-4 py-2 rounded-xl border text-xs font-mono font-bold uppercase tracking-wider transition ${on ? (ACCENT[c.accent] || ACCENT.blue).chip : 'bg-slate-900/70 border-slate-700 text-slate-400 hover:text-white hover:border-slate-500'}`;
+                b.textContent = c.label; chips.appendChild(b);
+            });
+
+            // Sezioni per indirizzo
+            wrap.innerHTML = '';
+            let shown = 0;
+            depts.filter(d => hubDept === '*' || d.dept === hubDept).forEach(d => {
+                const list = d.classes.filter(c => !q || c.toLowerCase().replace(/\s+/g, '').includes(q));
+                if (!list.length) return;
+                shown += list.length;
+                const a = ACCENT[d.accent] || ACCENT.blue;
+                const sec = document.createElement('section');
+                sec.innerHTML = `<div class="flex items-center gap-3 mb-4"><div class="w-11 h-11 rounded-xl border flex items-center justify-center ${a.b}"><i class="fa-solid ${esc(d.icon)}"></i></div><div><h4 class="font-display text-lg font-bold text-white uppercase tracking-wide">${esc(d.dept)}</h4><div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">${esc(d.badge)} • ${list.length} classi</div></div></div><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4"></div>`;
+                const grid = sec.lastElementChild;
+                list.forEach(c => {
+                    const btn = document.createElement('button'); btn.type = 'button'; btn.onclick = () => loadClassroom(c);
+                    btn.className = `group relative text-left p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-700/70 ${a.h} hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 overflow-hidden`;
+                    btn.innerHTML = `<span class="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r ${a.bar} to-transparent opacity-60"></span><div class="font-mono text-2xl sm:text-3xl font-bold text-white leading-none">${esc(c)}</div><div class="mt-4 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-500 ${a.g} transition"><span>Apri registro</span><i class="fa-solid fa-arrow-right"></i></div>`;
+                    grid.appendChild(btn);
+                });
+                wrap.appendChild(sec);
+            });
+            if (!shown) wrap.innerHTML = `<div class="py-16 text-center text-sm font-mono text-slate-500 border border-dashed border-slate-800 rounded-2xl">${depts.length ? 'Nessuna classe corrisponde alla ricerca.' : 'Caricamento classi...'}</div>`;
         }
 
         function backToHub() {
@@ -2727,7 +2770,7 @@
                 if (data.user) {
                     currentUser = data.user;
                     document.getElementById('view-login').classList.add('hidden');
-                    if (currentUser.role === 'studente') await loadClassroom('5AEE');
+                    if (currentUser.role === 'studente') await loadClassroom(currentUser.class_name);
                     else {
                         const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
                         if (activeCls) await loadClassroom(activeCls);
