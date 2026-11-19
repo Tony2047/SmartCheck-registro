@@ -7,6 +7,13 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// Dati iniziali della configurazione (classi, materie, disposizione banchi): vengono copiati nel database
+// al primo avvio e da quel momento si leggono/modificano solo da Turso (tabella app_config), mai dall'HTML.
+const SEED_CONFIG = {
+    'classes': [{"dept": "ELETTRONICA", "icon": "fa-microchip", "badge": "Tecnologico", "accent": "blue", "classes": ["1AEE", "2AEE", "3AEE", "4AEE", "5AEE"]}, {"dept": "MECCANICA", "icon": "fa-gears", "badge": "Meccatronica", "accent": "amber", "classes": ["1AMM", "2AMM", "3AMM", "4AMM", "5AMM", "4 MAUT", "4 MROB", "5 MA/R", "1 MA/R", "2 MA/R", "3 MA/R"]}, {"dept": "CHIMICA", "icon": "fa-flask-vial", "badge": "Biotecnologie", "accent": "emerald", "classes": ["1ACM", "2ACM", "3ACM", "4ACM", "5ACM"]}],
+    'subjects': ["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"],
+    'layout:5AEE': {"wings": [{"name": "ALA SINISTRA", "rows": [[7], [15, 23], [10, 1], [12, 21]]}, {"name": "FILA CENTRALE", "rows": [[9, 8], [2, 14], [22, 4], [3, 18]]}, {"name": "ALA DESTRA", "rows": [[5, 6], [20, 11], [17, 13], [19, 16]]}]}
+};
 // Chiave condivisa con gli ESP32 (header x-device-key). Impostala nelle variabili d'ambiente di Vercel.
 const DEVICE_KEY = process.env.DEVICE_KEY || '';
 // Vercel gira in UTC: data e ora vanno sempre calcolate sul fuso di Roma
@@ -19,6 +26,16 @@ async function requireStaff(req, res, next) {
     if (u && u.role !== 'studente') return next();
     res.status(401).json({ error: 'Non autorizzato' });
 }
+// Tutte le API richiedono una sessione valida (o la chiave dispositivo), tranne login e lettore NFC
+app.use('/api', async (req, res, next) => {
+    try {
+        if (/^\/auth\//.test(req.path) || req.path === '/reader/scan' || isDevice(req)) return next();
+        const u = await getSessionUser(req);
+        if (!u) return res.status(401).json({ error: 'Sessione non attiva' });
+        req.user = u;
+        next();
+    } catch (e) { next(e); }
+});
 
 // Connessione a Turso tramite Variabili d'Ambiente protette su Vercel
 const db = createClient({
@@ -166,6 +183,15 @@ async function ensureDb() {
         )`,
         `CREATE TABLE IF NOT EXISTS scan_log (student_id INTEGER PRIMARY KEY, ts INTEGER NOT NULL)`
     ], 'write');
+
+    try {
+        await db.execute("ALTER TABLE attendance ADD COLUMN first_in TEXT");
+        await db.execute("UPDATE attendance SET first_in = time WHERE first_in IS NULL AND status IN ('presente', 'ritardo', 'seconda_ora')");
+    } catch (e) { /* colonna gia' presente */ }
+    await db.execute("CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
+    for (const [k, v] of Object.entries(SEED_CONFIG)) {
+        await db.execute({ sql: "INSERT OR IGNORE INTO app_config (key, value) VALUES (?, ?)", args: [k, JSON.stringify(v)] });
+    }
 
     const check = await db.execute('SELECT COUNT(*) as c FROM users');
     if (Number(check.rows[0].c) === 0) {
@@ -330,12 +356,13 @@ app.post('/api/auth/logout', (req, res) => {
 // ================= ROTTE AULA E PRESENZE =================
 app.get('/api/class-bundle/:cls', async (req, res) => {
     const cls = req.params.cls;
-    const date = req.query.date || new Date().toISOString().slice(0, 10);
+    if (req.user && req.user.role === 'studente' && req.user.class_name !== cls) return res.status(403).json({ error: 'Accesso negato' });
+    const date = req.query.date || romeDate();
 
     const [students, allUsers, attendance, bathroomHistory, bathroomQueue, signatures, agenda, grades, notes] = await Promise.all([
         db.execute({ sql: "SELECT id, full_name, desk_id FROM users WHERE role = 'studente' AND class_name = ?", args: [cls] }),
         db.execute("SELECT id, full_name FROM users"),
-        db.execute({ sql: "SELECT student_id, status, time FROM attendance WHERE class_name = ? AND date = ?", args: [cls, date] }),
+        db.execute({ sql: "SELECT student_id, status, time, first_in FROM attendance WHERE class_name = ? AND date = ?", args: [cls, date] }),
         db.execute({ sql: "SELECT student_id, out_time, in_time FROM bathroom_history WHERE class_name = ? AND date = ?", args: [cls, date] }),
         db.execute({ sql: "SELECT * FROM bathroom_queue WHERE class_name = ? ORDER BY id ASC", args: [cls] }),
         db.execute({ sql: "SELECT * FROM signatures WHERE class_name = ? AND date = ? ORDER BY hour ASC", args: [cls, date] }),
@@ -377,9 +404,10 @@ async function applyStatus({ student_id, class_name, date, status, time }) {
     }
 
     await db.execute({
-        sql: `INSERT INTO attendance (student_id, class_name, date, status, time) VALUES (?, ?, ?, ?, ?)
-              ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status, time = excluded.time`,
-        args: [student_id, class_name, date, status, time]
+        sql: `INSERT INTO attendance (student_id, class_name, date, status, time, first_in) VALUES (?, ?, ?, ?, ?, ?)
+              ON CONFLICT(student_id, date) DO UPDATE SET status = excluded.status, time = excluded.time,
+                  first_in = COALESCE(attendance.first_in, excluded.first_in)`,
+        args: [student_id, class_name, date, status, time, ['presente', 'ritardo', 'seconda_ora'].includes(status) ? time : null]
     });
 
     const open = (await db.execute({ sql: "SELECT id FROM bathroom_history WHERE student_id = ? AND date = ? AND in_time IS NULL ORDER BY id DESC LIMIT 1", args: [student_id, date] })).rows[0];
@@ -427,6 +455,28 @@ app.post('/api/reader/scan', async (req, res) => {
 
     const r = await applyStatus({ student_id: stu.id, class_name, date, status: target, time });
     res.json({ ...r, student: stu.full_name, status: r.queued ? 'in_coda' : target });
+});
+
+// Configurazione (classi, materie, disposizione banchi) letta dal database, solo dopo il login
+app.get('/api/config', async (req, res) => {
+    const r = await db.execute("SELECT key, value FROM app_config");
+    const out = { classes: [], subjects: [], layouts: {} };
+    for (const row of r.rows) {
+        const v = JSON.parse(row.value);
+        if (row.key === 'classes') out.classes = v;
+        else if (row.key === 'subjects') out.subjects = v;
+        else if (row.key.startsWith('layout:')) out.layouts[row.key.slice(7)] = v;
+    }
+    if (req.user && req.user.role === 'studente') {
+        const mine = out.layouts[req.user.class_name];
+        out.classes = []; out.layouts = mine ? { [req.user.class_name]: mine } : {};
+    }
+    res.json(out);
+});
+app.put('/api/config/:key', async (req, res) => {
+    if (!req.user || req.user.role !== 'admin') return res.status(403).json({ error: 'Solo amministratore' });
+    await db.execute({ sql: "INSERT INTO app_config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", args: [req.params.key, JSON.stringify(req.body.value)] });
+    res.json({ ok: true });
 });
 
 // Cassetta telefoni: 24 slot, il sensore (cella di carico) manda { slot, present }
