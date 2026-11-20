@@ -200,11 +200,7 @@
             <div class="lg:col-span-7 relative p-7 sm:p-10 lg:p-14 xl:p-16 flex flex-col justify-between bg-gradient-to-br from-[#0c152b]/95 via-[#091022]/90 to-[#060a16]/95 border-b lg:border-b-0 lg:border-r border-slate-800/80">
                 <div>
                     <!-- Top Status Strip -->
-                    <div class="flex flex-wrap items-center justify-between gap-3 mb-7 sm:mb-10">
-                        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] font-mono font-semibold text-emerald-400 uppercase tracking-wider">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            Architettura Locale Sicura • Zero-Cloud
-                        </div>
+                    <div class="flex items-center justify-end gap-3 mb-7 sm:mb-10">
                         <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-mono text-slate-300">
                             <i class="fa-regular fa-clock text-cyan-400 text-[11px]"></i>
                             <span id="login-clock" class="font-semibold tracking-wider">--:--:--</span>
@@ -212,7 +208,7 @@
                     </div>
 
                     <!-- Brand Lockup -->
-                    <div class="flex items-center gap-4 mb-5 sm:mb-6">
+                    <div class="flex items-center gap-4 mb-8 sm:mb-10">
                         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 p-[1px] shadow-xl shadow-blue-600/25 shrink-0">
                             <div class="w-full h-full rounded-[15px] bg-[#091226] flex items-center justify-center text-cyan-400 text-2xl sm:text-3xl font-display font-bold">
                                 <i class="fa-solid fa-microchip"></i>
@@ -225,10 +221,6 @@
                             </h1>
                         </div>
                     </div>
-
-                    <p class="text-slate-300/90 text-sm sm:text-base xl:text-lg leading-relaxed max-w-xl mb-7 sm:mb-9">
-                        Piattaforma centralizzata d'istituto per il controllo in tempo reale di presenze d'aula, turnazione bagno, postazioni di laboratorio, armadio componenti e custodia smartphone.
-                    </p>
 
                     <!-- Feature Telemetry Tiles -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
@@ -278,8 +270,6 @@
                 <div class="mt-8 pt-5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-slate-400">
                     <div class="flex items-center gap-3">
                         <span>A.S. <strong class="text-white">2026/2027</strong></span>
-                        <span class="text-slate-700">•</span>
-                        <span class="text-slate-400">Cloud / Turso</span>
                     </div>
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-emerald-400 font-semibold text-[11px]">
                         <i class="fa-solid fa-shield-halved text-[10px]"></i> LOCAL v2026.4
@@ -1241,8 +1231,21 @@
             const password = passEl ? passEl.value : '';
             const err = document.getElementById('login-error');
             const errText = document.getElementById('error-text');
+            const btn = document.getElementById('btn-entra');
 
             if (!verifiedUsername) { resetLogin(); return; }
+            if (!password) {
+                errText.innerText = "Inserisci la password";
+                err.classList.remove('hidden');
+                passEl?.focus();
+                return;
+            }
+
+            err.classList.add('hidden');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>Accesso in corso...</span>';
+            }
 
             try {
                 const data = await api('/api/auth/login', 'POST', { username: verifiedUsername, password });
@@ -1261,6 +1264,11 @@
             } catch (e) {
                 errText.innerText = e.message || "Password non corretta";
                 err.classList.remove('hidden');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Accedi alla Piattaforma</span> <i class="fa-solid fa-arrow-right text-sm"></i>';
+                }
             }
         }
 
