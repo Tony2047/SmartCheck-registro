@@ -350,6 +350,12 @@
                         <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-display font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-600/25 border border-blue-400/25 flex items-center justify-center gap-2.5 text-base tracking-wide">
                             <span>Continua</span> <i class="fa-solid fa-arrow-right text-sm"></i>
                         </button>
+
+                        <div id="step1-forgot-wrap" class="text-center">
+                            <button type="button" onclick="openForgotPasswordModal()" class="text-xs font-mono text-slate-400 hover:text-cyan-300 transition py-1 inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-key text-[10px]"></i> Password dimenticata? Recupera con codice OTP
+                            </button>
+                        </div>
                     </div>
 
                     <p id="login-error" class="text-red-300 text-xs font-semibold text-center hidden bg-red-950/40 p-3.5 rounded-2xl border border-red-700/50">
@@ -469,36 +475,116 @@
         </div>
     </div>
 
-    <!-- ================= MODALE PASSWORD DIMENTICATA ================= -->
-    <div id="modal-forgot-password" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-md p-6 sm:p-7 rounded-3xl border border-slate-700 shadow-2xl space-y-5">
-            <div class="flex items-start justify-between gap-3">
+    <!-- ================= MODALE RECUPERO PASSWORD CON OTP VIA EMAIL ================= -->
+    <div id="modal-forgot-password" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+        <div class="glass-panel w-full max-w-md p-6 sm:p-7 rounded-3xl border border-slate-700 shadow-2xl space-y-5 my-auto">
+            <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/35 text-cyan-400 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-key"></i>
+                        <i class="fa-solid fa-envelope-open-text"></i>
                     </div>
                     <div>
-                        <h3 class="font-display text-lg font-bold text-white">Password Dimenticata</h3>
-                        <p class="text-[11px] font-mono text-slate-400">Procedura di ripristino account</p>
+                        <h3 class="font-display text-lg font-bold text-white leading-tight">Recupero Password OTP</h3>
+                        <p id="forgot-subtitle" class="text-[11px] font-mono text-slate-400 mt-0.5">Ricevi un codice a scadenza via email</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeForgotPasswordModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+                <button type="button" onclick="closeForgotPasswordModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center shrink-0">✕</button>
             </div>
 
-            <div class="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
-                    <div class="font-mono text-[10px] uppercase font-bold text-cyan-400 mb-1">Ripristino immediato tramite Amministratore</div>
-                    Richiedi il reset all'amministratore di sistema. Verrà generato un <strong>codice temporaneo monouso</strong>: al prossimo accesso la piattaforma ti farà impostare una nuova password personale.
+            <!-- STEP 1: INVIO CODICE OTP -->
+            <div id="forgot-step-1" class="space-y-4">
+                <div>
+                    <label for="forgot-identifier" class="block text-[10px] font-mono uppercase font-bold text-slate-300 mb-1.5">Nome Utente o Email Associata</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" id="forgot-identifier" autocomplete="username" placeholder="es. navarroli.antonio o la tua email" class="w-full bg-slate-900 border border-slate-700 text-white pl-9 pr-4 py-3.5 rounded-xl text-sm outline-none focus:border-cyan-500 transition">
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+                        Invieremo un codice numerico <strong>OTP a 6 cifre</strong> valido per <strong>10 minuti</strong> all'email associata al tuo account.
+                    </p>
                 </div>
-                <div class="p-3.5 rounded-2xl bg-blue-950/30 border border-blue-500/25 text-xs text-slate-400">
-                    <i class="fa-regular fa-envelope text-blue-400 mr-1.5"></i>
-                    Il recupero autonomo con verifica via email sarà attivato nella prossima fase di configurazione dell'istituto.
+
+                <p id="forgot-error-1" class="hidden text-red-300 text-xs font-semibold text-center bg-red-950/40 p-3 rounded-xl border border-red-700/50"></p>
+
+                <button type="button" id="btn-forgot-send" onclick="requestOtpReset()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-display font-bold text-sm transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-paper-plane text-xs"></i>
+                    <span>Invia Codice OTP via Email</span>
+                </button>
+
+                <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+                    <i class="fa-solid fa-circle-info text-blue-400 mr-1"></i>
+                    Non hai ancora associato un'email? Chiedi all'amministratore un codice di reset temporaneo dalla Console Admin.
                 </div>
             </div>
 
-            <button type="button" onclick="closeForgotPasswordModal()" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-display font-bold text-sm transition">
-                Ho capito
-            </button>
+            <!-- STEP 2: VERIFICA OTP & NUOVA PASSWORD -->
+            <div id="forgot-step-2" class="hidden space-y-4">
+                <div class="p-3.5 rounded-2xl bg-emerald-950/35 border border-emerald-500/40 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Codice OTP Inviato</div>
+                        <div class="text-xs text-slate-200 mt-0.5 truncate">Controlla <strong id="forgot-masked-email" class="text-white">--</strong></div>
+                    </div>
+                    <div class="px-2.5 py-1 rounded-lg bg-black/50 border border-emerald-500/35 text-xs font-mono font-bold text-emerald-300 shrink-0 flex items-center gap-1.5">
+                        <i class="fa-regular fa-clock text-[10px]"></i>
+                        <span id="forgot-countdown">10:00</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="forgot-otp" class="block text-[10px] font-mono uppercase font-bold text-slate-300 mb-1">Codice OTP (6 cifre)</label>
+                    <input type="text" id="forgot-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)" placeholder="000000" class="w-full bg-slate-900 border border-slate-700 text-emerald-300 text-center font-mono text-2xl font-bold tracking-[0.45em] py-3 rounded-xl outline-none focus:border-emerald-500 placeholder:text-slate-700">
+                </div>
+
+                <div class="space-y-2.5">
+                    <div>
+                        <label for="forgot-new-password" class="block text-[10px] font-mono uppercase font-bold text-slate-300 mb-1">Nuova Password</label>
+                        <div class="relative">
+                            <input type="password" id="forgot-new-password" autocomplete="new-password" oninput="updateForgotPassChecks()" placeholder="Almeno 8 caratteri (lettere e numeri)" class="w-full bg-slate-900 border border-slate-700 text-white pl-4 pr-11 py-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                            <button type="button" onclick="toggleInputPassword('forgot-new-password', 'forgot-eye-1')" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-slate-400 hover:text-white flex items-center justify-center">
+                                <i id="forgot-eye-1" class="fa-regular fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="forgot-confirm-password" class="block text-[10px] font-mono uppercase font-bold text-slate-300 mb-1">Conferma Nuova Password</label>
+                        <div class="relative">
+                            <input type="password" id="forgot-confirm-password" autocomplete="new-password" oninput="updateForgotPassChecks()" placeholder="Ripeti la nuova password" class="w-full bg-slate-900 border border-slate-700 text-white pl-4 pr-11 py-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                            <button type="button" onclick="toggleInputPassword('forgot-confirm-password', 'forgot-eye-2')" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-slate-400 hover:text-white flex items-center justify-center">
+                                <i id="forgot-eye-2" class="fa-regular fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1.5 text-[10px] font-mono font-semibold">
+                        <div id="fg-rule-len" class="px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1">
+                            <i class="fa-regular fa-circle text-[8px]"></i> <span>8+ car.</span>
+                        </div>
+                        <div id="fg-rule-mix" class="px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1">
+                            <i class="fa-regular fa-circle text-[8px]"></i> <span>Lett+num</span>
+                        </div>
+                        <div id="fg-rule-match" class="px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1">
+                            <i class="fa-regular fa-circle text-[8px]"></i> <span>Uguali</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p id="forgot-error-2" class="hidden text-red-300 text-xs font-semibold text-center bg-red-950/40 p-3 rounded-xl border border-red-700/50"></p>
+
+                <button type="button" id="btn-forgot-confirm" onclick="confirmOtpReset()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-display font-bold text-sm transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check text-xs"></i>
+                    <span>Verifica OTP e Salva Password</span>
+                </button>
+
+                <div class="flex items-center justify-between gap-2 pt-1 text-xs font-mono">
+                    <button type="button" onclick="backToForgotStep1()" class="text-slate-400 hover:text-white transition flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left text-[10px]"></i> Cambia account
+                    </button>
+                    <button type="button" id="btn-forgot-resend" onclick="requestOtpReset(true)" class="text-cyan-400 hover:text-cyan-300 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                        Reinvia codice
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1470,6 +1556,7 @@
                 verifiedUsername = data.username;
                 document.getElementById('username-field-wrap').classList.add('hidden');
                 document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('step1-forgot-wrap')?.classList.add('hidden');
                 document.getElementById('password-container').classList.remove('hidden');
                 document.getElementById('user-welcome').innerText = data.full_name;
                 setLoginStepUI(2);
@@ -1596,12 +1683,209 @@
             }
         }
 
+        let forgotExpiryTimer = null;
+        let forgotCooldownTimer = null;
+        let forgotActiveIdentifier = '';
+
+        function clearForgotTimers() {
+            if (forgotExpiryTimer) { clearInterval(forgotExpiryTimer); forgotExpiryTimer = null; }
+            if (forgotCooldownTimer) { clearInterval(forgotCooldownTimer); forgotCooldownTimer = null; }
+        }
+
+        function startForgotCountdown(seconds) {
+            if (forgotExpiryTimer) clearInterval(forgotExpiryTimer);
+            let remaining = Math.max(0, Number(seconds) || 600);
+            const el = document.getElementById('forgot-countdown');
+            const render = () => {
+                if (!el) return;
+                const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+                const s = String(remaining % 60).padStart(2, '0');
+                el.innerText = remaining > 0 ? `${m}:${s}` : 'SCADUTO';
+                el.className = remaining > 60 ? '' : 'text-red-400';
+            };
+            render();
+            forgotExpiryTimer = setInterval(() => {
+                remaining--;
+                render();
+                if (remaining <= 0) { clearInterval(forgotExpiryTimer); forgotExpiryTimer = null; }
+            }, 1000);
+        }
+
+        function startForgotResendCooldown(seconds) {
+            if (forgotCooldownTimer) clearInterval(forgotCooldownTimer);
+            const btn = document.getElementById('btn-forgot-resend');
+            if (!btn) return;
+            let wait = Math.max(0, Number(seconds) || 60);
+            const render = () => {
+                if (wait > 0) {
+                    btn.disabled = true;
+                    btn.innerText = `Reinvia tra ${wait}s`;
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = 'Reinvia codice';
+                }
+            };
+            render();
+            forgotCooldownTimer = setInterval(() => {
+                wait--;
+                render();
+                if (wait <= 0) { clearInterval(forgotCooldownTimer); forgotCooldownTimer = null; }
+            }, 1000);
+        }
+
         function openForgotPasswordModal() {
+            clearForgotTimers();
+            document.getElementById('forgot-step-1')?.classList.remove('hidden');
+            document.getElementById('forgot-step-2')?.classList.add('hidden');
+            document.getElementById('forgot-error-1')?.classList.add('hidden');
+            document.getElementById('forgot-error-2')?.classList.add('hidden');
+            document.getElementById('forgot-subtitle').innerText = 'Ricevi un codice a scadenza via email';
+
+            const idInput = document.getElementById('forgot-identifier');
+            const prefill = verifiedUsername || (document.getElementById('input-username')?.value || '').trim();
+            if (idInput) idInput.value = prefill;
+
+            ['forgot-otp', 'forgot-new-password', 'forgot-confirm-password'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            updateForgotPassChecks();
             document.getElementById('modal-forgot-password')?.classList.remove('hidden');
+            setTimeout(() => idInput?.focus(), 80);
         }
 
         function closeForgotPasswordModal() {
+            clearForgotTimers();
             document.getElementById('modal-forgot-password')?.classList.add('hidden');
+        }
+
+        function backToForgotStep1() {
+            clearForgotTimers();
+            document.getElementById('forgot-step-2')?.classList.add('hidden');
+            document.getElementById('forgot-step-1')?.classList.remove('hidden');
+            document.getElementById('forgot-error-1')?.classList.add('hidden');
+            document.getElementById('forgot-subtitle').innerText = 'Ricevi un codice a scadenza via email';
+        }
+
+        function updateForgotPassChecks() {
+            const p1 = document.getElementById('forgot-new-password')?.value || '';
+            const p2 = document.getElementById('forgot-confirm-password')?.value || '';
+            const setRule = (id, ok) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.className = ok
+                    ? 'px-2 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 flex items-center gap-1 transition'
+                    : 'px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1 transition';
+                const icon = el.querySelector('i');
+                if (icon) icon.className = ok ? 'fa-solid fa-circle-check text-[9px]' : 'fa-regular fa-circle text-[8px]';
+            };
+            setRule('fg-rule-len', p1.length >= 8);
+            setRule('fg-rule-mix', /[a-zA-Z]/.test(p1) && /[0-9]/.test(p1));
+            setRule('fg-rule-match', p1.length > 0 && p1 === p2);
+        }
+
+        async function requestOtpReset(isResend = false) {
+            const idInput = document.getElementById('forgot-identifier');
+            const identifier = (isResend ? forgotActiveIdentifier : (idInput?.value || '')).trim().toLowerCase();
+            const errEl = document.getElementById(isResend ? 'forgot-error-2' : 'forgot-error-1');
+            const sendBtn = document.getElementById('btn-forgot-send');
+            const resendBtn = document.getElementById('btn-forgot-resend');
+
+            errEl?.classList.add('hidden');
+            if (!identifier) {
+                errEl.innerText = 'Inserisci il tuo nome utente o la tua email associata';
+                errEl?.classList.remove('hidden');
+                return;
+            }
+
+            if (isResend && resendBtn) {
+                resendBtn.disabled = true;
+                resendBtn.innerText = 'Invio in corso...';
+            } else if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<span>Invio codice OTP...</span>';
+            }
+
+            try {
+                const data = await api('/api/auth/forgot/request', 'POST', { identifier });
+                forgotActiveIdentifier = data.username || identifier;
+                document.getElementById('forgot-masked-email').innerText = data.masked_email || '***';
+                document.getElementById('forgot-step-1')?.classList.add('hidden');
+                document.getElementById('forgot-step-2')?.classList.remove('hidden');
+                document.getElementById('forgot-subtitle').innerText = 'Inserisci il codice ricevuto e scegli la nuova password';
+                document.getElementById('forgot-error-2')?.classList.add('hidden');
+                startForgotCountdown(data.expires_in_seconds || 600);
+                startForgotResendCooldown(data.cooldown_seconds || 60);
+                toast('Codice OTP Inviato', `Controlla la tua email (${data.masked_email})`, 'success', 4500);
+                setTimeout(() => document.getElementById('forgot-otp')?.focus(), 100);
+            } catch (e) {
+                errEl.innerText = e.message || 'Impossibile inviare il codice OTP';
+                errEl?.classList.remove('hidden');
+                if (isResend && resendBtn) {
+                    resendBtn.disabled = false;
+                    resendBtn.innerText = 'Reinvia codice';
+                }
+            } finally {
+                if (!isResend && sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fa-regular fa-paper-plane text-xs"></i><span>Invia Codice OTP via Email</span>';
+                }
+            }
+        }
+
+        async function confirmOtpReset() {
+            const otp = (document.getElementById('forgot-otp')?.value || '').trim();
+            const new_password = document.getElementById('forgot-new-password')?.value || '';
+            const confirm_password = document.getElementById('forgot-confirm-password')?.value || '';
+            const errEl = document.getElementById('forgot-error-2');
+            const btn = document.getElementById('btn-forgot-confirm');
+
+            errEl?.classList.add('hidden');
+            if (!/^\d{6}$/.test(otp)) {
+                errEl.innerText = 'Inserisci il codice OTP a 6 cifre ricevuto via email';
+                errEl?.classList.remove('hidden');
+                return;
+            }
+            if (new_password.length < 8 || !/[a-zA-Z]/.test(new_password) || !/[0-9]/.test(new_password)) {
+                errEl.innerText = 'La password deve avere almeno 8 caratteri con lettere e numeri';
+                errEl?.classList.remove('hidden');
+                return;
+            }
+            if (new_password !== confirm_password) {
+                errEl.innerText = 'Le due password non coincidono';
+                errEl?.classList.remove('hidden');
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>Verifica in corso...</span>';
+            }
+            try {
+                const data = await api('/api/auth/forgot/confirm', 'POST', {
+                    identifier: forgotActiveIdentifier,
+                    otp,
+                    new_password,
+                    confirm_password
+                });
+                closeForgotPasswordModal();
+                toast('Password Ripristinata', 'Ora puoi accedere con la tua nuova password', 'success', 5000);
+                // Porta l'utente pronto al login con il proprio username
+                resetLogin();
+                const uInput = document.getElementById('input-username');
+                if (uInput && data.username) {
+                    uInput.value = data.username;
+                    verifyUser();
+                }
+            } catch (e) {
+                errEl.innerText = e.message || 'Errore nella verifica del codice OTP';
+                errEl?.classList.remove('hidden');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-check text-xs"></i><span>Verifica OTP e Salva Password</span>';
+                }
+            }
         }
 
         function switchAccountTab(tab) {
@@ -1751,6 +2035,7 @@
             document.getElementById('password-container').classList.add('hidden');
             document.getElementById('username-field-wrap').classList.remove('hidden');
             document.getElementById('btn-next').classList.remove('hidden');
+            document.getElementById('step1-forgot-wrap')?.classList.remove('hidden');
             document.getElementById('login-error').classList.add('hidden');
             const passInput = document.getElementById('input-password');
             if (passInput) { passInput.value = ''; passInput.type = 'password'; }
@@ -3337,6 +3622,8 @@
             document.getElementById('input-username').addEventListener('keydown', e => { if (e.key === 'Enter') verifyUser(); });
             document.getElementById('input-password').addEventListener('keydown', e => { if (e.key === 'Enter') processAuth(); });
             document.getElementById('first-confirm-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitFirstPassword(); });
+            document.getElementById('forgot-identifier')?.addEventListener('keydown', e => { if (e.key === 'Enter') requestOtpReset(false); });
+            document.getElementById('forgot-confirm-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') confirmOtpReset(); });
 
             // Ripristino automatico sessione da Cookie HttpOnly sicuro
             try {
