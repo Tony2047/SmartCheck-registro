@@ -14,28 +14,14 @@ const SEED_CONFIG = {
     'subjects': ["Chimica analitica","Chimica organica","Complementi di matematica","Diritto","DPOI","Elettrotecnica","Fisica","Geografia","Inglese","Italiano","Matematica","Religione","Scienze","Scienze motorie","Sistemi Automatici","Sistemi e automazione","STA","Storia","Supplenza","Tecnologie chimiche","Tecnologie informatiche","Tecnologie meccaniche","TPSEE","TTRG"],
     'layout:5AEE': {"wings": [{"name": "ALA SINISTRA", "rows": [[7], [15, 23], [10, 1], [12, 21]]}, {"name": "FILA CENTRALE", "rows": [[9, 8], [2, 14], [22, 4], [3, 18]]}, {"name": "ALA DESTRA", "rows": [[5, 6], [20, 11], [17, 13], [19, 16]]}]}
 };
+
 // Chiave condivisa con gli ESP32 (header x-device-key). Impostala nelle variabili d'ambiente di Vercel.
 const DEVICE_KEY = process.env.DEVICE_KEY || '';
 // Vercel gira in UTC: data e ora vanno sempre calcolate sul fuso di Roma
 const romeDate = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
 const romeTime = () => new Date().toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit' });
-const isDevice = req => DEVICE_KEY && req.get('x-device-key') === DEVICE_KEY;
-async function requireStaff(req, res, next) {
-    if (isDevice(req)) return next();
-    const u = await getSessionUser(req);
-    if (u && u.role !== 'studente') return next();
-    res.status(401).json({ error: 'Non autorizzato' });
-}
-// Tutte le API richiedono una sessione valida (o la chiave dispositivo), tranne login e lettore NFC
-app.use('/api', async (req, res, next) => {
-    try {
-        if (/^\/auth\//.test(req.path) || req.path === '/reader/scan' || isDevice(req)) return next();
-        const u = await getSessionUser(req);
-        if (!u) return res.status(401).json({ error: 'Sessione non attiva' });
-        req.user = u;
-        next();
-    } catch (e) { next(e); }
-});
+const romeDateTime = () => `${romeDate()} ${romeTime()}`;
+const isDevice = req => Boolean(DEVICE_KEY) && req.get('x-device-key') === DEVICE_KEY;
 
 // Connessione a Turso tramite Variabili d'Ambiente protette su Vercel
 const db = createClient({
@@ -43,11 +29,62 @@ const db = createClient({
     authToken: process.env.TURSO_AUTH_TOKEN
 });
 
+// Chiave per firma cookie di sessione (e retrocompatibilità hash legacy)
 const SECRET = process.env.SESSION_SECRET || process.env.TURSO_AUTH_TOKEN || 'smartcheck-secret-key-2026';
 
-// Funzioni crittografiche per password e cookie firmati (zero dipendenze esterne)
-function hashPassword(pwd) {
+// ================= CRITTOGRAFIA PASSWORD (SCRYPT + SALT UNIVOCO) & SESSIONI =================
+function legacyHashPassword(pwd) {
     return crypto.createHmac('sha256', SECRET).update(String(pwd)).digest('hex');
+}
+
+function hashPassword(pwd) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const derived = crypto.scryptSync(String(pwd), salt, 64).toString('hex');
+    return `scrypt$${salt}$${derived}`;
+}
+
+function verifyPassword(pwd, storedHash) {
+    if (!storedHash || typeof storedHash !== 'string') return false;
+    try {
+        if (storedHash.startsWith('scrypt$')) {
+            const parts = storedHash.split('$');
+            if (parts.length !== 3) return false;
+            const [, salt, keyHex] = parts;
+            const derived = crypto.scryptSync(String(pwd), salt, 64);
+            const keyBuf = Buffer.from(keyHex, 'hex');
+            if (derived.length !== keyBuf.length) return false;
+            return crypto.timingSafeEqual(derived, keyBuf);
+        }
+        // Retrocompatibilità con hash HMAC-SHA256 esistenti prima del cambio password obbligatorio
+        const legacyBuf = Buffer.from(legacyHashPassword(pwd), 'hex');
+        const storedBuf = Buffer.from(storedHash, 'hex');
+        if (legacyBuf.length !== storedBuf.length) return false;
+        return crypto.timingSafeEqual(legacyBuf, storedBuf);
+    } catch (e) {
+        return false;
+    }
+}
+
+function validateNewPassword(pwd, username = '') {
+    const p = String(pwd || '');
+    if (p.length < 8) return 'La password deve contenere almeno 8 caratteri';
+    if (p.length > 72) return 'La password è troppo lunga (massimo 72 caratteri)';
+    if (!/[a-zA-Z]/.test(p) || !/[0-9]/.test(p)) return 'La password deve includere almeno una lettera e un numero';
+    const low = p.toLowerCase();
+    const blocked = ['1234', '12345678', '123456789', 'password', 'password1', 'password123', 'admin', 'admin123', 'admin1234', 'smartcheck', 'qwerty12', 'scuola123'];
+    if (blocked.includes(low)) return 'Scegli una password personale meno prevedibile';
+    if (username && low === String(username).toLowerCase()) return 'La password non può coincidere con il nome utente';
+    return null;
+}
+
+function generateTempPassword() {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const bytes = crypto.randomBytes(6);
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += alphabet[bytes[i] % alphabet.length];
+    }
+    return `SC-${code}`;
 }
 
 function signToken(userId) {
@@ -56,10 +93,27 @@ function signToken(userId) {
 }
 
 function verifyToken(token) {
-    if (!token || !token.includes('.')) return null;
+    if (!token || typeof token !== 'string' || !token.includes('.')) return null;
     const [id, sig] = token.split('.');
-    const expected = crypto.createHmac('sha256', SECRET).update(String(id)).digest('hex');
-    return sig === expected ? Number(id) : null;
+    if (!id || !sig || !/^\d+$/.test(id)) return null;
+    try {
+        const expectedHex = crypto.createHmac('sha256', SECRET).update(String(id)).digest('hex');
+        const sigBuf = Buffer.from(sig, 'hex');
+        const expBuf = Buffer.from(expectedHex, 'hex');
+        if (sigBuf.length !== expBuf.length) return null;
+        return crypto.timingSafeEqual(sigBuf, expBuf) ? Number(id) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function setSessionCookie(res, userId) {
+    res.cookie('sc_session', signToken(userId), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 3600 * 1000
+    });
 }
 
 // ================= INIZIALIZZAZIONE AUTOMATICA DB TURSO =================
@@ -77,7 +131,10 @@ async function ensureDb() {
             role TEXT NOT NULL,
             class_name TEXT DEFAULT '5AEE',
             desk_id TEXT,
-            workbench_id TEXT DEFAULT 'lab_banco_01'
+            workbench_id TEXT DEFAULT 'lab_banco_01',
+            must_change_password INTEGER NOT NULL DEFAULT 1,
+            email TEXT,
+            password_updated_at TEXT
         )`,
         `CREATE TABLE IF NOT EXISTS attendance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -184,10 +241,16 @@ async function ensureDb() {
         `CREATE TABLE IF NOT EXISTS scan_log (student_id INTEGER PRIMARY KEY, ts INTEGER NOT NULL)`
     ], 'write');
 
+    // Migrazioni incrementali sicure su tabelle già esistenti
     try {
         await db.execute("ALTER TABLE attendance ADD COLUMN first_in TEXT");
         await db.execute("UPDATE attendance SET first_in = time WHERE first_in IS NULL AND status IN ('presente', 'ritardo', 'seconda_ora')");
     } catch (e) { /* colonna gia' presente */ }
+
+    try { await db.execute("ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 1"); } catch (e) {}
+    try { await db.execute("ALTER TABLE users ADD COLUMN email TEXT"); } catch (e) {}
+    try { await db.execute("ALTER TABLE users ADD COLUMN password_updated_at TEXT"); } catch (e) {}
+
     await db.execute("CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
     for (const [k, v] of Object.entries(SEED_CONFIG)) {
         await db.execute({ sql: "INSERT OR IGNORE INTO app_config (key, value) VALUES (?, ?)", args: [k, JSON.stringify(v)] });
@@ -195,9 +258,6 @@ async function ensureDb() {
 
     const check = await db.execute('SELECT COUNT(*) as c FROM users');
     if (Number(check.rows[0].c) === 0) {
-        const defaultPass = hashPassword('1234');
-        const adminPass = hashPassword('admin');
-
         const students5AEE = [
             ['agnitti.filippo', 'Agnitti Filippo'],
             ['calo.emiliano', 'Calò Emiliano'],
@@ -226,20 +286,20 @@ async function ensureDb() {
 
         const seedQueries = [
             {
-                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                args: ['admin', adminPass, 'Amministratore Sistema', 'admin', '5AEE', null, null]
+                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+                args: ['admin', hashPassword('admin'), 'Amministratore Sistema', 'admin', '5AEE', null, null]
             },
             {
-                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                args: ['petrilli.antonio', defaultPass, 'Prof. Antonio Petrilli', 'docente', '5AEE', null, null]
+                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+                args: ['petrilli.antonio', hashPassword('1234'), 'Prof. Antonio Petrilli', 'docente', '5AEE', null, null]
             },
             {
-                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                args: ['mascio.fabio', defaultPass, 'Prof. Fabio Mascio', 'docente', '5AEE', null, null]
+                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+                args: ['mascio.fabio', hashPassword('1234'), 'Prof. Fabio Mascio', 'docente', '5AEE', null, null]
             },
             {
-                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                args: ['roselli.michele', defaultPass, 'Prof. Michele Roselli', 'docente', '5AEE', null, null]
+                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+                args: ['roselli.michele', hashPassword('1234'), 'Prof. Michele Roselli', 'docente', '5AEE', null, null]
             }
         ];
 
@@ -247,8 +307,8 @@ async function ensureDb() {
             const deskId = `banco_${String(idx + 1).padStart(2, '0')}`;
             const benchId = `lab_banco_${String((idx % 8) + 1).padStart(2, '0')}`;
             seedQueries.push({
-                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                args: [uname, defaultPass, fname, 'studente', '5AEE', deskId, benchId]
+                sql: 'INSERT INTO users (username, password_hash, full_name, role, class_name, desk_id, workbench_id, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+                args: [uname, hashPassword('1234'), fname, 'studente', '5AEE', deskId, benchId]
             });
         });
 
@@ -292,6 +352,7 @@ async function ensureDb() {
     dbReady = true;
 }
 
+// 1) Inizializzazione DB sempre per prima (prima di qualsiasi controllo sessione)
 app.use(async (req, res, next) => {
     try {
         await ensureDb();
@@ -306,13 +367,55 @@ async function getSessionUser(req) {
     const uid = verifyToken(req.cookies?.sc_session);
     if (!uid) return null;
     const r = await db.execute({
-        sql: 'SELECT id, username, full_name as name, role, class_name, desk_id, workbench_id FROM users WHERE id = ?',
+        sql: 'SELECT id, username, full_name as name, role, class_name, desk_id, workbench_id, must_change_password, email FROM users WHERE id = ?',
         args: [uid]
     });
-    return r.rows[0] || null;
+    const row = r.rows[0];
+    if (!row) return null;
+    return {
+        id: Number(row.id),
+        username: row.username,
+        name: row.name,
+        role: row.role,
+        class_name: row.class_name,
+        desk_id: row.desk_id,
+        workbench_id: row.workbench_id,
+        email: row.email || null,
+        must_change_password: Number(row.must_change_password) === 1
+    };
 }
 
-// ================= ROTTE AUTENTICAZIONE =================
+async function requireStaff(req, res, next) {
+    if (isDevice(req)) return next();
+    const u = req.user || await getSessionUser(req);
+    if (u && !u.must_change_password && u.role !== 'studente') return next();
+    res.status(403).json({ error: 'Permessi docenti/admin richiesti' });
+}
+
+async function requireAdmin(req, res, next) {
+    const u = req.user || await getSessionUser(req);
+    if (u && !u.must_change_password && u.role === 'admin') return next();
+    res.status(403).json({ error: 'Permessi amministratore richiesti' });
+}
+
+// 2) Protezione globale delle API: sessione obbligatoria + blocco totale finché must_change_password = 1
+app.use('/api', async (req, res, next) => {
+    try {
+        if (/^\/auth\//.test(req.path) || req.path === '/reader/scan' || isDevice(req)) return next();
+        const u = await getSessionUser(req);
+        if (!u) return res.status(401).json({ error: 'Sessione non attiva' });
+        if (u.must_change_password) {
+            return res.status(403).json({
+                error: 'Devi impostare la tua password personale al primo accesso',
+                must_change_password: true
+            });
+        }
+        req.user = u;
+        next();
+    } catch (e) { next(e); }
+});
+
+// ================= ROTTE AUTENTICAZIONE & GESTIONE PASSWORD =================
 app.post('/api/auth/verify', async (req, res) => {
     const username = String(req.body.username || '').trim().toLowerCase();
     const r = await db.execute({
@@ -325,20 +428,39 @@ app.post('/api/auth/verify', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
     const username = String(req.body.username || '').trim().toLowerCase();
-    const passHash = hashPassword(req.body.password || '');
+    const password = String(req.body.password || '');
     const r = await db.execute({
-        sql: 'SELECT id, username, full_name as name, role, class_name, desk_id, workbench_id FROM users WHERE username = ? AND password_hash = ?',
-        args: [username, passHash]
+        sql: 'SELECT id, username, password_hash, full_name as name, role, class_name, desk_id, workbench_id, must_change_password, email FROM users WHERE username = ?',
+        args: [username]
     });
-    if (r.rows.length === 0) return res.status(401).json({ error: 'Password non corretta' });
+    const row = r.rows[0];
+    if (!row || !verifyPassword(password, row.password_hash)) {
+        return res.status(401).json({ error: 'Password non corretta' });
+    }
 
-    const user = r.rows[0];
-    res.cookie('sc_session', signToken(user.id), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 3600 * 1000
-    });
+    const mustChange = Number(row.must_change_password) === 1;
+
+    // Se l'account aveva già una password definitiva ma ancora in formato legacy, aggiorna silenziosamente a scrypt
+    if (!mustChange && !String(row.password_hash).startsWith('scrypt$')) {
+        await db.execute({
+            sql: 'UPDATE users SET password_hash = ? WHERE id = ?',
+            args: [hashPassword(password), row.id]
+        });
+    }
+
+    const user = {
+        id: Number(row.id),
+        username: row.username,
+        name: row.name,
+        role: row.role,
+        class_name: row.class_name,
+        desk_id: row.desk_id,
+        workbench_id: row.workbench_id,
+        email: row.email || null,
+        must_change_password: mustChange
+    };
+
+    setSessionCookie(res, user.id);
     res.json({ user });
 });
 
@@ -348,9 +470,132 @@ app.get('/api/auth/me', async (req, res) => {
     res.json({ user });
 });
 
+// Impostazione password obbligatoria al primo accesso (o dopo reset amministratore)
+app.post('/api/auth/first-password', async (req, res) => {
+    const user = await getSessionUser(req);
+    if (!user) return res.status(401).json({ error: 'Sessione scaduta, rifai il login' });
+    if (!user.must_change_password) {
+        return res.status(400).json({ error: 'La password personale è già stata configurata' });
+    }
+
+    const newPass = String(req.body.new_password || '');
+    const confirmPass = String(req.body.confirm_password || '');
+    const email = String(req.body.email || '').trim().toLowerCase();
+
+    if (newPass !== confirmPass) {
+        return res.status(400).json({ error: 'Le due password non coincidono' });
+    }
+    const validationErr = validateNewPassword(newPass, user.username);
+    if (validationErr) return res.status(400).json({ error: validationErr });
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: 'Indirizzo email non valido' });
+    }
+
+    const newHash = hashPassword(newPass);
+    await db.execute({
+        sql: `UPDATE users
+              SET password_hash = ?,
+                  must_change_password = 0,
+                  email = COALESCE(NULLIF(?, ''), email),
+                  password_updated_at = ?
+              WHERE id = ?`,
+        args: [newHash, email, romeDateTime(), user.id]
+    });
+
+    const updated = await getSessionUser(req);
+    res.json({ ok: true, user: updated });
+});
+
+// Cambio password volontario da utente autenticato
+app.post('/api/auth/change-password', async (req, res) => {
+    const user = await getSessionUser(req);
+    if (!user) return res.status(401).json({ error: 'Sessione non attiva' });
+
+    const currentPass = String(req.body.current_password || '');
+    const newPass = String(req.body.new_password || '');
+    const confirmPass = String(req.body.confirm_password || '');
+    const email = String(req.body.email || '').trim().toLowerCase();
+
+    const r = await db.execute({
+        sql: 'SELECT password_hash FROM users WHERE id = ?',
+        args: [user.id]
+    });
+    if (!r.rows[0] || !verifyPassword(currentPass, r.rows[0].password_hash)) {
+        return res.status(401).json({ error: 'La password attuale non è corretta' });
+    }
+
+    if (newPass !== confirmPass) {
+        return res.status(400).json({ error: 'Le nuove password non coincidono' });
+    }
+    if (newPass === currentPass) {
+        return res.status(400).json({ error: 'La nuova password deve essere diversa da quella attuale' });
+    }
+    const validationErr = validateNewPassword(newPass, user.username);
+    if (validationErr) return res.status(400).json({ error: validationErr });
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: 'Indirizzo email non valido' });
+    }
+
+    await db.execute({
+        sql: `UPDATE users
+              SET password_hash = ?,
+                  must_change_password = 0,
+                  email = COALESCE(NULLIF(?, ''), email),
+                  password_updated_at = ?
+              WHERE id = ?`,
+        args: [hashPassword(newPass), email, romeDateTime(), user.id]
+    });
+
+    res.json({ ok: true });
+});
+
 app.post('/api/auth/logout', (req, res) => {
     res.clearCookie('sc_session');
     res.json({ ok: true });
+});
+
+// ================= GESTIONE UTENTI & RESET PASSWORD (SOLO ADMIN) =================
+app.get('/api/admin/users', requireAdmin, async (req, res) => {
+    const r = await db.execute(`
+        SELECT id, username, full_name, role, class_name, desk_id, must_change_password, email, password_updated_at
+        FROM users
+        ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'docente' THEN 2 ELSE 3 END, full_name ASC
+    `);
+    res.json({
+        users: r.rows.map(u => ({
+            ...u,
+            id: Number(u.id),
+            must_change_password: Number(u.must_change_password) === 1
+        }))
+    });
+});
+
+app.post('/api/admin/users/:id/reset-password', requireAdmin, async (req, res) => {
+    const targetId = Number(req.params.id);
+    if (!targetId) return res.status(400).json({ error: 'ID utente non valido' });
+
+    const r = await db.execute({
+        sql: 'SELECT id, username, full_name FROM users WHERE id = ?',
+        args: [targetId]
+    });
+    const target = r.rows[0];
+    if (!target) return res.status(404).json({ error: 'Utente non trovato' });
+
+    const tempPassword = generateTempPassword();
+    await db.execute({
+        sql: 'UPDATE users SET password_hash = ?, must_change_password = 1, password_updated_at = NULL WHERE id = ?',
+        args: [hashPassword(tempPassword), targetId]
+    });
+
+    res.json({
+        ok: true,
+        id: Number(target.id),
+        username: target.username,
+        full_name: target.full_name,
+        temp_password: tempPassword
+    });
 });
 
 // ================= ROTTE AULA E PRESENZE =================
@@ -473,8 +718,7 @@ app.get('/api/config', async (req, res) => {
     }
     res.json(out);
 });
-app.put('/api/config/:key', async (req, res) => {
-    if (!req.user || req.user.role !== 'admin') return res.status(403).json({ error: 'Solo amministratore' });
+app.put('/api/config/:key', requireAdmin, async (req, res) => {
     await db.execute({ sql: "INSERT INTO app_config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", args: [req.params.key, JSON.stringify(req.body.value)] });
     res.json({ ok: true });
 });
@@ -499,6 +743,9 @@ app.post('/api/phones', requireStaff, async (req, res) => {
 // ================= ROTTE CODA BAGNO =================
 app.post('/api/bathroom-queue/join', async (req, res) => {
     const { student_id, student_name, desk_id, class_name, booked_at } = req.body;
+    if (req.user.role === 'studente' && Number(student_id) !== Number(req.user.id)) {
+        return res.status(403).json({ error: 'Puoi prenotare solo per il tuo account' });
+    }
     const exists = await db.execute({
         sql: "SELECT id FROM bathroom_queue WHERE student_id = ? AND class_name = ?",
         args: [student_id, class_name]
@@ -509,13 +756,20 @@ app.post('/api/bathroom-queue/join', async (req, res) => {
 
     await db.execute({
         sql: "INSERT INTO bathroom_queue (student_id, student_name, desk_id, class_name, booked_at) VALUES (?, ?, ?, ?, ?)",
-        args: [student_id, student_name, desk_id, class_name, booked_at]
+        args: [student_id, student_name, desk_id, class_name, booked_at || romeTime()]
     });
     res.json({ ok: true });
 });
 
 app.post('/api/bathroom-queue/remove', async (req, res) => {
     const { identifier, class_name } = req.body;
+    if (req.user.role === 'studente') {
+        await db.execute({
+            sql: "DELETE FROM bathroom_queue WHERE student_id = ? AND class_name = ?",
+            args: [req.user.id, class_name]
+        });
+        return res.json({ ok: true });
+    }
     await db.execute({
         sql: "DELETE FROM bathroom_queue WHERE (id = ? OR student_id = ?) AND class_name = ?",
         args: [identifier, identifier, class_name]
@@ -523,7 +777,7 @@ app.post('/api/bathroom-queue/remove', async (req, res) => {
     res.json({ ok: true });
 });
 
-app.post('/api/bathroom-queue/clear', async (req, res) => {
+app.post('/api/bathroom-queue/clear', requireStaff, async (req, res) => {
     await db.execute({
         sql: "DELETE FROM bathroom_queue WHERE class_name = ?",
         args: [req.body.class_name]
@@ -534,6 +788,7 @@ app.post('/api/bathroom-queue/clear', async (req, res) => {
 // ================= ROTTE LABORATORIO & ARMADIO =================
 app.get('/api/lab/state/:cls', async (req, res) => {
     const cls = req.params.cls;
+    if (req.user && req.user.role === 'studente' && req.user.class_name !== cls) return res.status(403).json({ error: 'Accesso negato' });
     const [workbenches, students, inventory, activeLoans, historyLoans] = await Promise.all([
         db.execute("SELECT * FROM lab_workbenches ORDER BY id ASC"),
         db.execute({ sql: "SELECT id, full_name, workbench_id FROM users WHERE role = 'studente' AND class_name = ?", args: [cls] }),
@@ -557,17 +812,14 @@ app.get('/api/lab/state/:cls', async (req, res) => {
 });
 
 app.post('/api/lab/assign-bench', async (req, res) => {
-    const user = await getSessionUser(req);
-    if (!user) return res.status(401).json({ error: 'Non autenticato' });
     await db.execute({
         sql: "UPDATE users SET workbench_id = ? WHERE id = ?",
-        args: [req.body.workbench_id, user.id]
+        args: [req.body.workbench_id, req.user.id]
     });
     res.json({ ok: true });
 });
 
 app.post('/api/lab/checkout', async (req, res) => {
-    const user = await getSessionUser(req);
     const { item_id, workbench_id, class_name } = req.body;
     const r = await db.execute({ sql: "SELECT * FROM lab_inventory WHERE id = ?", args: [item_id] });
     const item = r.rows[0];
@@ -577,8 +829,8 @@ app.post('/api/lab/checkout', async (req, res) => {
 
     const unitNum = Number(item.total_qty) - Number(item.available_qty) + 1;
     const unitLabel = `${item.name} (#${unitNum})`;
-    const nowTime = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-    const studentName = user ? user.name : 'Operatore';
+    const nowTime = romeTime();
+    const studentName = req.user ? req.user.name : 'Operatore';
 
     await db.batch([
         { sql: "UPDATE lab_inventory SET available_qty = available_qty - 1 WHERE id = ?", args: [item_id] },
@@ -597,7 +849,7 @@ app.post('/api/lab/checkin', async (req, res) => {
     const loan = r.rows[0];
     if (!loan) return res.status(404).json({ error: 'Prestito già rientrato' });
 
-    const nowTime = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const nowTime = romeTime();
     await db.batch([
         { sql: "UPDATE lab_loans SET status = 'returned', returned_at = ? WHERE id = ?", args: [nowTime, loan_id] },
         { sql: "UPDATE lab_inventory SET available_qty = MIN(total_qty, available_qty + 1) WHERE id = ?", args: [loan.item_id] }
@@ -607,22 +859,21 @@ app.post('/api/lab/checkin', async (req, res) => {
 });
 
 // ================= ROTTE FIRME, AGENDA, VOTI, NOTE & ESP32 =================
-app.post('/api/signatures', async (req, res) => {
-    const user = await getSessionUser(req);
+app.post('/api/signatures', requireStaff, async (req, res) => {
     const { date, hour, subject, topic, class_name } = req.body;
     await db.execute({
         sql: "INSERT INTO signatures (class_name, date, hour, subject, topic, teacher) VALUES (?, ?, ?, ?, ?, ?)",
-        args: [class_name, date, hour, subject, topic, user ? user.name : 'Docente']
+        args: [class_name, date, hour, subject, topic, req.user ? req.user.name : 'Docente']
     });
     res.json({ ok: true });
 });
 
-app.delete('/api/signatures/:id', async (req, res) => {
+app.delete('/api/signatures/:id', requireStaff, async (req, res) => {
     await db.execute({ sql: "DELETE FROM signatures WHERE id = ?", args: [req.params.id] });
     res.json({ ok: true });
 });
 
-app.post('/api/agenda', async (req, res) => {
+app.post('/api/agenda', requireStaff, async (req, res) => {
     const { date, subject, type, description, class_name } = req.body;
     await db.execute({
         sql: "INSERT INTO agenda (class_name, date, subject, type, description) VALUES (?, ?, ?, ?, ?)",
@@ -631,12 +882,12 @@ app.post('/api/agenda', async (req, res) => {
     res.json({ ok: true });
 });
 
-app.delete('/api/agenda/:id', async (req, res) => {
+app.delete('/api/agenda/:id', requireStaff, async (req, res) => {
     await db.execute({ sql: "DELETE FROM agenda WHERE id = ?", args: [req.params.id] });
     res.json({ ok: true });
 });
 
-app.post('/api/grades', async (req, res) => {
+app.post('/api/grades', requireStaff, async (req, res) => {
     const { student_id, subject, value, type, date, class_id } = req.body;
     await db.execute({
         sql: "INSERT INTO grades (student_id, class_name, subject, value, type, date) VALUES (?, ?, ?, ?, ?, ?)",
@@ -645,32 +896,31 @@ app.post('/api/grades', async (req, res) => {
     res.json({ ok: true });
 });
 
-app.delete('/api/grades/:id', async (req, res) => {
+app.delete('/api/grades/:id', requireStaff, async (req, res) => {
     await db.execute({ sql: "DELETE FROM grades WHERE id = ?", args: [req.params.id] });
     res.json({ ok: true });
 });
 
-app.post('/api/notes', async (req, res) => {
-    const user = await getSessionUser(req);
+app.post('/api/notes', requireStaff, async (req, res) => {
     const { student_id, text, type, date, class_id } = req.body;
     await db.execute({
         sql: "INSERT INTO notes (student_id, class_name, text, type, date, teacher) VALUES (?, ?, ?, ?, ?, ?)",
-        args: [student_id, class_id, text, type, date, user ? user.name : 'Docente']
+        args: [student_id, class_id, text, type, date, req.user ? req.user.name : 'Docente']
     });
     res.json({ ok: true });
 });
 
-app.delete('/api/notes/:id', async (req, res) => {
+app.delete('/api/notes/:id', requireStaff, async (req, res) => {
     await db.execute({ sql: "DELETE FROM notes WHERE id = ?", args: [req.params.id] });
     res.json({ ok: true });
 });
 
-app.get('/api/devices', async (req, res) => {
+app.get('/api/devices', requireAdmin, async (req, res) => {
     const r = await db.execute("SELECT * FROM esp_devices");
     res.json({ devices: r.rows });
 });
 
-app.post('/api/devices/tamper', async (req, res) => {
+app.post('/api/devices/tamper', requireAdmin, async (req, res) => {
     const r = await db.execute({ sql: "SELECT is_tampered FROM esp_devices WHERE device_code = ?", args: [req.body.device_code] });
     if (r.rows[0]) {
         const next = Number(r.rows[0].is_tampered) ? 0 : 1;
