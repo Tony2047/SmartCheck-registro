@@ -95,6 +95,161 @@ function generateTempPassword() {
     return `SC-${code}`;
 }
 
+// ================= OTP RESET PASSWORD VIA EMAIL (ZERO DIPENDENZE ESTERNE) =================
+const OTP_EXPIRY_MS = 10 * 60 * 1000;   // 10 minuti
+const OTP_COOLDOWN_MS = 60 * 1000;      // 60 secondi tra invii
+const OTP_MAX_ATTEMPTS = 5;
+
+function generateOtpCode() {
+    return String(crypto.randomInt(100000, 1000000));
+}
+
+function hashOtp(userId, otp) {
+    return crypto.createHmac('sha256', SECRET).update(`otp:${userId}:${String(otp).trim()}`).digest('hex');
+}
+
+function verifyOtpHash(userId, otp, storedHex) {
+    if (!storedHex || typeof storedHex !== 'string') return false;
+    try {
+        const expected = Buffer.from(hashOtp(userId, otp), 'hex');
+        const stored = Buffer.from(storedHex, 'hex');
+        if (expected.length !== stored.length) return false;
+        return crypto.timingSafeEqual(expected, stored);
+    } catch (e) {
+        return false;
+    }
+}
+
+function maskEmail(email) {
+    const [local = '', domain = ''] = String(email || '').split('@');
+    if (!local || !domain) return '***';
+    const visLocal = local.length <= 2 ? local[0] : local.slice(0, 2);
+    const dParts = domain.split('.');
+    const dName = dParts[0] || '';
+    const dTld = dParts.slice(1).join('.');
+    const visDom = dName.length <= 2 ? dName[0] : dName.slice(0, 2);
+    return `${visLocal}***@${visDom}***${dTld ? '.' + dTld : ''}`;
+}
+
+function parseFromHeader(rawFrom, fallbackName = 'SmartCheck OS') {
+    const raw = String(rawFrom || '').trim();
+    const m = raw.match(/^(.*)<([^>]+)>$/);
+    if (m) {
+        return {
+            name: m[1].trim().replace(/^"|"$/g, '') || fallbackName,
+            email: m[2].trim()
+        };
+    }
+    return { name: fallbackName, email: raw };
+}
+
+async function sendOtpEmail({ toEmail, toName, username, otp }) {
+    const brevoKey = (process.env.BREVO_API_KEY || '').trim();
+    const resendKey = (process.env.RESEND_API_KEY || '').trim();
+    const fromName = (process.env.MAIL_FROM_NAME || 'SmartCheck OS').trim();
+    const fromRaw = (process.env.MAIL_FROM || '').trim();
+
+    if (!brevoKey && !resendKey) {
+        const err = new Error('Servizio email OTP non ancora configurato su Vercel (imposta BREVO_API_KEY o RESEND_API_KEY).');
+        err.statusCode = 503;
+        throw err;
+    }
+
+    const subject = `SmartCheck OS — Codice OTP di ripristino password (${otp})`;
+    const textContent = [
+        `Ciao ${toName || username},`,
+        ``,
+        `Hai richiesto il ripristino della password per l'account @${username} su SmartCheck OS.`,
+        ``,
+        `Il tuo codice OTP monouso è: ${otp}`,
+        `Validità: 10 minuti (massimo ${OTP_MAX_ATTEMPTS} tentativi).`,
+        ``,
+        `Se non hai richiesto tu questa operazione, ignora questa email: la tua password attuale resterà invariata.`
+    ].join('\n');
+
+    const safeName = String(toName || username).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c]));
+    const safeUser = String(username).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c]));
+
+    const htmlContent = `
+        <div style="font-family:Inter,Arial,sans-serif;background:#060913;padding:32px 16px;color:#e2e8f0;">
+            <div style="max-width:500px;margin:0 auto;background:#0c152b;border:1px solid #1e293b;border-radius:20px;overflow:hidden;">
+                <div style="height:4px;background:linear-gradient(90deg,#3b82f6,#06b6d4,#10b981);"></div>
+                <div style="padding:28px;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#38bdf8;font-weight:700;margin-bottom:8px;">SmartCheck OS • Sicurezza Account</div>
+                    <h2 style="margin:0 0 12px 0;font-size:22px;color:#ffffff;">Codice di Ripristino Password</h2>
+                    <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#cbd5e1;">
+                        Ciao <strong>${safeName}</strong> (<span style="color:#7dd3fc;">@${safeUser}</span>), usa questo codice OTP monouso per impostare la tua nuova password:
+                    </p>
+                    <div style="background:#060a16;border:1px solid #334155;border-radius:16px;padding:20px;text-align:center;margin-bottom:20px;">
+                        <div style="font-family:'Courier New',monospace;font-size:34px;font-weight:800;letter-spacing:10px;color:#34d399;">${otp}</div>
+                        <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Scade tra <strong>10 minuti</strong> • Monouso</div>
+                    </div>
+                    <p style="margin:0;font-size:12px;line-height:1.5;color:#64748b;">
+                        Se non hai richiesto tu il reset della password, ignora semplicemente questa email: il tuo account rimane protetto.
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (brevoKey) {
+        const sender = parseFromHeader(fromRaw, fromName);
+        if (!sender.email) {
+            const err = new Error('Variabile MAIL_FROM mancante su Vercel (inserisci l\'email mittente verificata su Brevo).');
+            err.statusCode = 503;
+            throw err;
+        }
+        const resp = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'api-key': brevoKey,
+                'content-type': 'application/json',
+                'accept': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { name: sender.name, email: sender.email },
+                to: [{ email: toEmail, name: toName || username }],
+                subject,
+                htmlContent,
+                textContent
+            })
+        });
+        if (!resp.ok) {
+            const errBody = await resp.text().catch(() => '');
+            console.error('Errore invio Brevo:', resp.status, errBody);
+            const err = new Error('Invio email non riuscito (verifica API key e mittente su Brevo).');
+            err.statusCode = 502;
+            throw err;
+        }
+        return 'brevo';
+    }
+
+    // Fallback: Resend API
+    const resendFrom = fromRaw || `${fromName} <onboarding@resend.dev>`;
+    const resp = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${resendKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            from: resendFrom,
+            to: [toEmail],
+            subject,
+            html: htmlContent,
+            text: textContent
+        })
+    });
+    if (!resp.ok) {
+        const errBody = await resp.text().catch(() => '');
+        console.error('Errore invio Resend:', resp.status, errBody);
+        const err = new Error('Invio email non riuscito (verifica API key o dominio mittente su Resend).');
+        err.statusCode = 502;
+        throw err;
+    }
+    return 'resend';
+}
+
 function signToken(userId) {
     const sig = crypto.createHmac('sha256', SECRET).update(String(userId)).digest('hex');
     return `${userId}.${sig}`;
@@ -246,7 +401,16 @@ async function ensureDb() {
             present INTEGER NOT NULL DEFAULT 0, time TEXT,
             PRIMARY KEY (class_name, date, slot)
         )`,
-        `CREATE TABLE IF NOT EXISTS scan_log (student_id INTEGER PRIMARY KEY, ts INTEGER NOT NULL)`
+        `CREATE TABLE IF NOT EXISTS scan_log (student_id INTEGER PRIMARY KEY, ts INTEGER NOT NULL)`,
+        `CREATE TABLE IF NOT EXISTS password_resets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            otp_hash TEXT NOT NULL,
+            expires_at INTEGER NOT NULL,
+            attempts INTEGER NOT NULL DEFAULT 0,
+            used INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL
+        )`
     ], 'write');
 
     // Migrazioni incrementali sicure su tabelle già esistenti
@@ -636,6 +800,146 @@ app.post('/api/auth/change-password', async (req, res) => {
 
     const updated = await getSessionUser(req);
     res.json({ ok: true, user: updated });
+});
+
+// Richiesta codice OTP a scadenza (10 min) sull'email associata all'account
+app.post('/api/auth/forgot/request', async (req, res) => {
+    const identifier = String(req.body.identifier || req.body.username || '').trim().toLowerCase();
+    if (!identifier) {
+        return res.status(400).json({ error: 'Inserisci nome utente o email associata' });
+    }
+
+    const r = await db.execute({
+        sql: `SELECT id, username, full_name, email
+              FROM users
+              WHERE LOWER(username) = ? OR (email IS NOT NULL AND email != '' AND LOWER(email) = ?)
+              LIMIT 1`,
+        args: [identifier, identifier]
+    });
+    const user = r.rows[0];
+    if (!user) {
+        return res.status(404).json({ error: 'Nessun account trovato con questo nome utente o email' });
+    }
+    if (!user.email || !String(user.email).trim()) {
+        return res.status(400).json({
+            error: 'Questo account non ha ancora un\'email associata. Chiedi il codice di reset temporaneo all\'amministratore.'
+        });
+    }
+
+    const now = Date.now();
+    const recent = await db.execute({
+        sql: 'SELECT created_at FROM password_resets WHERE user_id = ? ORDER BY id DESC LIMIT 1',
+        args: [user.id]
+    });
+    if (recent.rows[0]) {
+        const elapsed = now - Number(recent.rows[0].created_at);
+        if (elapsed < OTP_COOLDOWN_MS) {
+            const waitSec = Math.ceil((OTP_COOLDOWN_MS - elapsed) / 1000);
+            return res.status(429).json({
+                error: `Hai già richiesto un codice di recente. Attendi ${waitSec} secondi prima di inviarne un altro.`,
+                retry_after: waitSec
+            });
+        }
+    }
+
+    const otp = generateOtpCode();
+    try {
+        await sendOtpEmail({
+            toEmail: String(user.email).trim().toLowerCase(),
+            toName: user.full_name,
+            username: user.username,
+            otp
+        });
+    } catch (e) {
+        return res.status(e.statusCode || 502).json({ error: e.message || 'Errore invio email OTP' });
+    }
+
+    const otpHash = hashOtp(user.id, otp);
+    await db.batch([
+        { sql: 'UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0', args: [user.id] },
+        {
+            sql: 'INSERT INTO password_resets (user_id, otp_hash, expires_at, attempts, used, created_at) VALUES (?, ?, ?, 0, 0, ?)',
+            args: [user.id, otpHash, now + OTP_EXPIRY_MS, now]
+        }
+    ], 'write');
+
+    res.json({
+        ok: true,
+        username: user.username,
+        masked_email: maskEmail(user.email),
+        expires_in_seconds: Math.floor(OTP_EXPIRY_MS / 1000),
+        cooldown_seconds: Math.floor(OTP_COOLDOWN_MS / 1000)
+    });
+});
+
+// Verifica codice OTP e salvataggio nuova password
+app.post('/api/auth/forgot/confirm', async (req, res) => {
+    const identifier = String(req.body.identifier || req.body.username || '').trim().toLowerCase();
+    const otp = String(req.body.otp || '').replace(/\s+/g, '');
+    const newPass = String(req.body.new_password || '');
+    const confirmPass = String(req.body.confirm_password || '');
+
+    if (!identifier) return res.status(400).json({ error: 'Account non specificato' });
+    if (!/^\d{6}$/.test(otp)) return res.status(400).json({ error: 'Inserisci il codice OTP a 6 cifre' });
+    if (newPass !== confirmPass) return res.status(400).json({ error: 'Le due password non coincidono' });
+
+    const rUser = await db.execute({
+        sql: `SELECT id, username, full_name
+              FROM users
+              WHERE LOWER(username) = ? OR (email IS NOT NULL AND email != '' AND LOWER(email) = ?)
+              LIMIT 1`,
+        args: [identifier, identifier]
+    });
+    const user = rUser.rows[0];
+    if (!user) return res.status(404).json({ error: 'Account non trovato' });
+
+    const validationErr = validateNewPassword(newPass, user.username);
+    if (validationErr) return res.status(400).json({ error: validationErr });
+
+    const rReset = await db.execute({
+        sql: 'SELECT id, otp_hash, expires_at, attempts FROM password_resets WHERE user_id = ? AND used = 0 ORDER BY id DESC LIMIT 1',
+        args: [user.id]
+    });
+    const resetRow = rReset.rows[0];
+    if (!resetRow) {
+        return res.status(400).json({ error: 'Nessun codice OTP attivo. Richiedi un nuovo codice.' });
+    }
+
+    const now = Date.now();
+    if (now > Number(resetRow.expires_at)) {
+        await db.execute({ sql: 'UPDATE password_resets SET used = 1 WHERE id = ?', args: [resetRow.id] });
+        return res.status(400).json({ error: 'Codice OTP scaduto. Richiedi un nuovo codice.' });
+    }
+
+    if (Number(resetRow.attempts) >= OTP_MAX_ATTEMPTS) {
+        await db.execute({ sql: 'UPDATE password_resets SET used = 1 WHERE id = ?', args: [resetRow.id] });
+        return res.status(429).json({ error: 'Troppi tentativi errati. Richiedi un nuovo codice OTP.' });
+    }
+
+    if (!verifyOtpHash(user.id, otp, resetRow.otp_hash)) {
+        const nextAttempts = Number(resetRow.attempts) + 1;
+        const exhausted = nextAttempts >= OTP_MAX_ATTEMPTS;
+        await db.execute({
+            sql: 'UPDATE password_resets SET attempts = ?, used = ? WHERE id = ?',
+            args: [nextAttempts, exhausted ? 1 : 0, resetRow.id]
+        });
+        const remaining = OTP_MAX_ATTEMPTS - nextAttempts;
+        return res.status(400).json({
+            error: exhausted
+                ? 'Codice OTP bloccato per troppi tentativi errati. Richiedi un nuovo codice.'
+                : `Codice OTP non valido (${remaining} ${remaining === 1 ? 'tentativo rimasto' : 'tentativi rimasti'}).`
+        });
+    }
+
+    await db.batch([
+        { sql: 'UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0', args: [user.id] },
+        {
+            sql: 'UPDATE users SET password_hash = ?, must_change_password = 0, password_updated_at = ? WHERE id = ?',
+            args: [hashPassword(newPass), romeDateTime(), user.id]
+        }
+    ], 'write');
+
+    res.json({ ok: true, username: user.username });
 });
 
 app.post('/api/auth/logout', (req, res) => {
