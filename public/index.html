@@ -337,9 +337,14 @@
                                 <span>Accedi alla Piattaforma</span> <i class="fa-solid fa-arrow-right text-sm"></i>
                             </button>
 
-                            <button type="button" onclick="resetLogin()" class="w-full text-center text-xs font-mono text-slate-400 hover:text-white transition py-1.5 flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-arrow-left text-[10px]"></i> Cambia identificativo utente
-                            </button>
+                            <div class="flex items-center justify-between gap-2 pt-1">
+                                <button type="button" onclick="resetLogin()" class="text-xs font-mono text-slate-400 hover:text-white transition py-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-arrow-left text-[10px]"></i> Cambia utente
+                                </button>
+                                <button type="button" onclick="openForgotPasswordModal()" class="text-xs font-mono text-cyan-400 hover:text-cyan-300 transition py-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-key text-[10px]"></i> Password dimenticata?
+                                </button>
+                            </div>
                         </div>
                         
                         <button type="button" id="btn-next" onclick="verifyUser()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 text-white font-display font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-600/25 border border-blue-400/25 flex items-center justify-center gap-2.5 text-base tracking-wide">
@@ -356,6 +361,173 @@
                         <span>Server Locale d'Istituto</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= 1B. PRIMO ACCESSO: CREAZIONE PASSWORD PERSONALE ================= -->
+    <div id="view-first-password" class="hidden fixed inset-0 z-[105] bg-[#040711] login-grid-bg overflow-y-auto flex items-center justify-center p-4 sm:p-6">
+        <div class="pointer-events-none fixed inset-0 overflow-hidden">
+            <div class="login-glow-blue absolute -top-40 -left-32 w-[520px] h-[520px] rounded-full"></div>
+            <div class="login-glow-cyan absolute -bottom-44 -right-32 w-[520px] h-[520px] rounded-full"></div>
+        </div>
+
+        <div class="relative z-10 w-full max-w-lg rounded-[28px] overflow-hidden border border-slate-700/70 bg-[#080d1b]/95 backdrop-blur-2xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9)] fade-in my-auto">
+            <div class="h-[3px] w-full bg-gradient-to-r from-amber-400 via-blue-500 to-emerald-400"></div>
+            <div class="p-6 sm:p-9 space-y-6">
+                <div class="flex items-center justify-between gap-3">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider">
+                        <i class="fa-solid fa-shield-halved"></i> Primo Accesso Obbligatorio
+                    </span>
+                    <button type="button" onclick="logout()" class="text-xs font-mono text-slate-400 hover:text-red-400 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i> Esci
+                    </button>
+                </div>
+
+                <div>
+                    <h2 class="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">Crea la tua Password</h2>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-1.5 leading-relaxed">
+                        La password temporanea non può rimanere attiva. Scegli ora una password personale che rimarrà associata al tuo account.
+                    </p>
+                </div>
+
+                <div class="p-3.5 bg-blue-500/10 border border-blue-500/25 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center text-white text-sm shrink-0">
+                        <i class="fa-solid fa-user-lock"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div id="first-pass-fullname" class="font-display font-bold text-white text-sm sm:text-base truncate">--</div>
+                        <div id="first-pass-username" class="text-[11px] font-mono text-cyan-300 truncate">@--</div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label for="first-new-password" class="block text-[11px] font-mono uppercase font-semibold tracking-wider text-slate-300">Nuova Password Personale</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="password" id="first-new-password" autocomplete="new-password" oninput="updateFirstPassChecks()" placeholder="Almeno 8 caratteri (lettere e numeri)" class="w-full bg-[#0e172b] border border-slate-700/90 text-white placeholder:text-slate-500 pl-11 pr-12 py-3.5 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 outline-none text-sm sm:text-base transition-all">
+                            <button type="button" onclick="toggleInputPassword('first-new-password', 'first-eye-1')" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl text-slate-400 hover:text-white flex items-center justify-center">
+                                <i id="first-eye-1" class="fa-regular fa-eye text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="first-confirm-password" class="block text-[11px] font-mono uppercase font-semibold tracking-wider text-slate-300">Conferma Nuova Password</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-check-double absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="password" id="first-confirm-password" autocomplete="new-password" oninput="updateFirstPassChecks()" placeholder="Ripeti la nuova password" class="w-full bg-[#0e172b] border border-slate-700/90 text-white placeholder:text-slate-500 pl-11 pr-12 py-3.5 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 outline-none text-sm sm:text-base transition-all">
+                            <button type="button" onclick="toggleInputPassword('first-confirm-password', 'first-eye-2')" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl text-slate-400 hover:text-white flex items-center justify-center">
+                                <i id="first-eye-2" class="fa-regular fa-eye text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Indicatori requisiti password -->
+                    <div class="grid grid-cols-3 gap-2 text-[10px] font-mono font-semibold">
+                        <div id="fp-rule-len" class="px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-regular fa-circle text-[9px]"></i> <span>8+ caratteri</span>
+                        </div>
+                        <div id="fp-rule-mix" class="px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-regular fa-circle text-[9px]"></i> <span>Lettere + num</span>
+                        </div>
+                        <div id="fp-rule-match" class="px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-regular fa-circle text-[9px]"></i> <span>Coincidono</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 pt-1">
+                        <label for="first-recovery-email" class="block text-[11px] font-mono uppercase font-semibold tracking-wider text-slate-400">Email di recupero <span class="text-slate-500 normal-case">(opzionale)</span></label>
+                        <div class="relative">
+                            <i class="fa-regular fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                            <input type="email" id="first-recovery-email" autocomplete="email" placeholder="Per il futuro recupero password automatico" class="w-full bg-[#0e172b] border border-slate-800 text-white placeholder:text-slate-500 pl-11 pr-4 py-3 rounded-2xl focus:border-blue-500 outline-none text-sm transition-all">
+                        </div>
+                    </div>
+
+                    <p id="first-pass-error" class="hidden text-red-300 text-xs font-semibold text-center bg-red-950/40 p-3 rounded-2xl border border-red-700/50">
+                        <i class="fa-solid fa-triangle-exclamation mr-1.5 text-red-400"></i> <span id="first-pass-error-text">--</span>
+                    </p>
+
+                    <button type="button" id="btn-save-first-password" onclick="submitFirstPassword()" class="w-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-display font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 text-base">
+                        <span>Salva Password e Accedi</span> <i class="fa-solid fa-check text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODALE PASSWORD DIMENTICATA ================= -->
+    <div id="modal-forgot-password" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="glass-panel w-full max-w-md p-6 sm:p-7 rounded-3xl border border-slate-700 shadow-2xl space-y-5">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/35 text-cyan-400 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display text-lg font-bold text-white">Password Dimenticata</h3>
+                        <p class="text-[11px] font-mono text-slate-400">Procedura di ripristino account</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeForgotPasswordModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+            </div>
+
+            <div class="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+                    <div class="font-mono text-[10px] uppercase font-bold text-cyan-400 mb-1">Ripristino immediato tramite Amministratore</div>
+                    Richiedi il reset all'amministratore di sistema. Verrà generato un <strong>codice temporaneo monouso</strong>: al prossimo accesso la piattaforma ti farà impostare una nuova password personale.
+                </div>
+                <div class="p-3.5 rounded-2xl bg-blue-950/30 border border-blue-500/25 text-xs text-slate-400">
+                    <i class="fa-regular fa-envelope text-blue-400 mr-1.5"></i>
+                    Il recupero autonomo con verifica via email sarà attivato nella prossima fase di configurazione dell'istituto.
+                </div>
+            </div>
+
+            <button type="button" onclick="closeForgotPasswordModal()" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-display font-bold text-sm transition">
+                Ho capito
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= MODALE CAMBIA PASSWORD (UTENTE LOGGATO) ================= -->
+    <div id="modal-change-password" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="glass-panel w-full max-w-md p-6 sm:p-7 rounded-3xl border border-slate-700 shadow-2xl space-y-5">
+            <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/35 text-blue-400 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display text-lg font-bold text-white">Sicurezza Account</h3>
+                        <p class="text-[11px] font-mono text-slate-400">Modifica la tua password personale</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeChangePasswordModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+            </div>
+
+            <div class="space-y-3.5">
+                <div>
+                    <label class="block text-[10px] font-mono uppercase font-bold text-slate-400 mb-1">Password Attuale</label>
+                    <input type="password" id="cp-current" autocomplete="current-password" placeholder="Inserisci password attuale" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-mono uppercase font-bold text-slate-400 mb-1">Nuova Password (min. 8 caratteri, lettere e numeri)</label>
+                    <input type="password" id="cp-new" autocomplete="new-password" placeholder="Nuova password" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-mono uppercase font-bold text-slate-400 mb-1">Conferma Nuova Password</label>
+                    <input type="password" id="cp-confirm" autocomplete="new-password" placeholder="Ripeti nuova password" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-mono uppercase font-bold text-slate-400 mb-1">Email di recupero (opzionale)</label>
+                    <input type="email" id="cp-email" autocomplete="email" placeholder="es. nome@scuola.it" class="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                </div>
+                <p id="cp-error" class="hidden text-red-300 text-xs font-semibold text-center bg-red-950/40 p-2.5 rounded-xl border border-red-700/50"></p>
+                <button type="button" id="btn-save-change-pass" onclick="submitChangePassword()" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-display font-bold text-sm transition shadow-lg">
+                    Aggiorna Password
+                </button>
             </div>
         </div>
     </div>
@@ -377,9 +549,12 @@
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
                     <button id="btn-open-admin-console" onclick="openAdminConsoleModal()" class="hidden px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600/20 border border-blue-500/40 rounded-xl text-blue-400 hover:bg-blue-600 hover:text-white transition text-xs font-bold flex items-center gap-2 shadow-lg">
-                        <i class="fa-solid fa-microchip"></i> Console Flotta & AI
+                        <i class="fa-solid fa-microchip"></i> Console Admin
+                    </button>
+                    <button onclick="openChangePasswordModal()" title="Cambia password" class="px-3.5 sm:px-4 py-2 sm:py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white transition text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-key text-cyan-400"></i> <span class="hidden sm:inline">Password</span>
                     </button>
                     <button onclick="logout()" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-red-950/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-900/30 hover:text-white transition text-xs font-bold flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Esci
@@ -480,6 +655,9 @@
                         <div id="clock" class="mono text-sm sm:text-xl font-bold text-white tracking-wider leading-none">00:00:00</div>
                         <div id="hour-badge" class="text-[7px] sm:text-[9px] font-mono text-purple-400 font-bold uppercase tracking-widest text-right leading-none mt-0.5">CARICAMENTO...</div>
                     </div>
+                    <button onclick="openChangePasswordModal()" title="Cambia Password" class="w-9 h-9 md:w-12 md:h-12 flex items-center justify-center text-sm md:text-base bg-slate-800/80 text-cyan-400 border border-slate-700/70 rounded-xl hover:bg-slate-700 hover:text-white transition shrink-0">
+                        <i class="fa-solid fa-key"></i>
+                    </button>
                     <button onclick="logout()" title="Disconnetti" class="w-9 h-9 md:w-12 md:h-12 flex items-center justify-center text-sm md:text-lg bg-red-950/30 text-red-400 border border-red-900/40 rounded-xl text-sm hover:bg-red-900/40 hover:text-white transition shrink-0">
                         <i class="fa-solid fa-power-off"></i>
                     </button>
@@ -684,8 +862,9 @@
                 
                 <div class="flex items-center gap-2">
                     <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs font-mono font-bold">
-                        <button onclick="switchAdminTab('fleet')" id="tab-admin-fleet" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md">Flotta Nodi</button>
-                        <button onclick="switchAdminTab('ai')" id="tab-admin-ai" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Assistente AI</button>
+                        <button onclick="switchAdminTab('fleet')" id="tab-admin-fleet" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white shadow-md">Flotta Nodi</button>
+                        <button onclick="switchAdminTab('users')" id="tab-admin-users" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Utenti & Password</button>
+                        <button onclick="switchAdminTab('ai')" id="tab-admin-ai" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">Assistente AI</button>
                     </div>
                     <button onclick="closeAdminConsoleModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition ml-2">✕</button>
                 </div>
@@ -749,6 +928,36 @@
                         <span>Invia</span> <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
                 </div>
+            </div>
+
+            <!-- SCHEDA 3: GESTIONE UTENTI & RESET PASSWORD -->
+            <div id="content-admin-users" class="hidden flex-grow flex flex-col overflow-hidden pt-4">
+                <div id="admin-temp-pass-banner" class="hidden mb-4 p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <div class="text-[10px] font-mono uppercase font-bold text-emerald-400">Codice Temporaneo Generato (Monouso)</div>
+                        <div class="text-sm text-white mt-0.5">
+                            Utente <strong id="admin-reset-target">--</strong> → Password temporanea:
+                            <span id="admin-reset-code" class="ml-1 px-2.5 py-0.5 rounded-lg bg-black/50 border border-emerald-400/40 font-mono text-base font-bold text-emerald-300 tracking-wider select-all">--</span>
+                        </div>
+                        <div class="text-[11px] text-slate-400 mt-1">Al prossimo accesso l'utente dovrà obbligatoriamente creare una nuova password personale.</div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" onclick="copyResetCode()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> Copia
+                        </button>
+                        <button type="button" onclick="document.getElementById('admin-temp-pass-banner').classList.add('hidden')" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white">✕</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4">
+                    <div class="relative flex-grow max-w-md">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" id="admin-users-search" oninput="renderAdminUsersList()" placeholder="Cerca per nome, username o classe..." class="w-full bg-slate-900 border border-slate-700 text-white pl-9 pr-4 py-2.5 rounded-xl text-xs sm:text-sm outline-none focus:border-blue-500">
+                    </div>
+                    <div class="text-xs font-mono text-slate-400" id="admin-users-stats">-- utenti</div>
+                </div>
+
+                <div class="flex-grow overflow-y-auto pr-1 space-y-2" id="admin-users-list"></div>
             </div>
         </div>
     </div>
@@ -1226,6 +1435,161 @@
             }
         }
 
+        function toggleInputPassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            icon.className = isHidden ? 'fa-regular fa-eye-slash text-sm text-blue-400' : 'fa-regular fa-eye text-sm';
+        }
+
+        function openFirstPasswordScreen(user) {
+            document.getElementById('view-login')?.classList.add('hidden');
+            document.getElementById('view-hub')?.classList.add('hidden');
+            document.getElementById('view-classroom')?.classList.add('hidden');
+            document.getElementById('view-first-password')?.classList.remove('hidden');
+            document.getElementById('first-pass-fullname').innerText = user.name || '--';
+            document.getElementById('first-pass-username').innerText = '@' + (user.username || '--');
+            const emailEl = document.getElementById('first-recovery-email');
+            if (emailEl && user.email) emailEl.value = user.email;
+            document.getElementById('first-pass-error')?.classList.add('hidden');
+            updateFirstPassChecks();
+            setTimeout(() => document.getElementById('first-new-password')?.focus(), 100);
+        }
+
+        function updateFirstPassChecks() {
+            const p1 = document.getElementById('first-new-password')?.value || '';
+            const p2 = document.getElementById('first-confirm-password')?.value || '';
+            const setRule = (id, ok) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.className = ok
+                    ? 'px-2.5 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 flex items-center gap-1.5 transition'
+                    : 'px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 flex items-center gap-1.5 transition';
+                const icon = el.querySelector('i');
+                if (icon) icon.className = ok ? 'fa-solid fa-circle-check text-[10px]' : 'fa-regular fa-circle text-[9px]';
+            };
+            setRule('fp-rule-len', p1.length >= 8);
+            setRule('fp-rule-mix', /[a-zA-Z]/.test(p1) && /[0-9]/.test(p1));
+            setRule('fp-rule-match', p1.length > 0 && p1 === p2);
+        }
+
+        async function enterPlatformAfterAuth(showWelcome = false) {
+            document.getElementById('view-login')?.classList.add('hidden');
+            document.getElementById('view-first-password')?.classList.add('hidden');
+            if (currentUser.role === 'studente') {
+                await loadClassroom(currentUser.class_name);
+            } else {
+                const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
+                if (activeCls) await loadClassroom(activeCls);
+                else await initHub();
+            }
+            startClock();
+            if (showWelcome) toast('Accesso Eseguito', `Benvenuto/a, ${currentUser.name}`, 'success');
+        }
+
+        async function submitFirstPassword() {
+            const p1 = document.getElementById('first-new-password')?.value || '';
+            const p2 = document.getElementById('first-confirm-password')?.value || '';
+            const email = document.getElementById('first-recovery-email')?.value.trim() || '';
+            const errBox = document.getElementById('first-pass-error');
+            const errTx = document.getElementById('first-pass-error-text');
+            const btn = document.getElementById('btn-save-first-password');
+
+            errBox?.classList.add('hidden');
+            if (p1.length < 8 || !/[a-zA-Z]/.test(p1) || !/[0-9]/.test(p1)) {
+                errTx.innerText = 'Usa almeno 8 caratteri con lettere e numeri';
+                errBox?.classList.remove('hidden');
+                return;
+            }
+            if (p1 !== p2) {
+                errTx.innerText = 'Le due password non coincidono';
+                errBox?.classList.remove('hidden');
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>Salvataggio in corso...</span>';
+            }
+            try {
+                const data = await api('/api/auth/first-password', 'POST', {
+                    new_password: p1,
+                    confirm_password: p2,
+                    email
+                });
+                currentUser = data.user;
+                toast('Password Salvata', 'Account protetto con successo', 'success');
+                await enterPlatformAfterAuth(false);
+            } catch (e) {
+                errTx.innerText = e.message || 'Impossibile salvare la password';
+                errBox?.classList.remove('hidden');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Salva Password e Accedi</span> <i class="fa-solid fa-check text-sm"></i>';
+                }
+            }
+        }
+
+        function openForgotPasswordModal() {
+            document.getElementById('modal-forgot-password')?.classList.remove('hidden');
+        }
+
+        function closeForgotPasswordModal() {
+            document.getElementById('modal-forgot-password')?.classList.add('hidden');
+        }
+
+        function openChangePasswordModal() {
+            ['cp-current', 'cp-new', 'cp-confirm'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            const emailEl = document.getElementById('cp-email');
+            if (emailEl) emailEl.value = currentUser?.email || '';
+            document.getElementById('cp-error')?.classList.add('hidden');
+            document.getElementById('modal-change-password')?.classList.remove('hidden');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('modal-change-password')?.classList.add('hidden');
+        }
+
+        async function submitChangePassword() {
+            const current_password = document.getElementById('cp-current')?.value || '';
+            const new_password = document.getElementById('cp-new')?.value || '';
+            const confirm_password = document.getElementById('cp-confirm')?.value || '';
+            const email = document.getElementById('cp-email')?.value.trim() || '';
+            const errBox = document.getElementById('cp-error');
+            const btn = document.getElementById('btn-save-change-pass');
+
+            errBox?.classList.add('hidden');
+            if (!current_password || !new_password || !confirm_password) {
+                errBox.innerText = 'Compila tutti i campi password';
+                errBox?.classList.remove('hidden');
+                return;
+            }
+            if (new_password !== confirm_password) {
+                errBox.innerText = 'Le nuove password non coincidono';
+                errBox?.classList.remove('hidden');
+                return;
+            }
+
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvataggio...'; }
+            try {
+                await api('/api/auth/change-password', 'POST', { current_password, new_password, confirm_password, email });
+                if (email && currentUser) currentUser.email = email;
+                closeChangePasswordModal();
+                toast('Password Aggiornata', 'La nuova password è già attiva', 'success');
+            } catch (e) {
+                errBox.innerText = e.message || 'Errore aggiornamento password';
+                errBox?.classList.remove('hidden');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Aggiorna Password'; }
+            }
+        }
+
         async function processAuth() {
             const passEl = document.getElementById('input-password');
             const password = passEl ? passEl.value : '';
@@ -1250,17 +1614,12 @@
             try {
                 const data = await api('/api/auth/login', 'POST', { username: verifiedUsername, password });
                 currentUser = data.user;
-                document.getElementById('view-login').classList.add('hidden');
-
-                if (currentUser.role === 'studente') {
-                    await loadClassroom(currentUser.class_name);
+                if (currentUser.must_change_password) {
+                    openFirstPasswordScreen(currentUser);
+                    toast('Primo Accesso', 'Crea la tua password personale per continuare', 'info', 4500);
                 } else {
-                    const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
-                    if (activeCls) await loadClassroom(activeCls);
-                    else initHub();
+                    await enterPlatformAfterAuth(true);
                 }
-                startClock();
-                toast('Accesso Eseguito', `Benvenuto/a, ${currentUser.name}`, 'success');
             } catch (e) {
                 errText.innerText = e.message || "Password non corretta";
                 err.classList.remove('hidden');
@@ -2263,10 +2622,96 @@
             } catch(e) {}
         }
 
+        let adminUsersList = [];
+
+        async function loadAdminUsers() {
+            try {
+                const res = await api('/api/admin/users');
+                adminUsersList = res.users || [];
+                renderAdminUsersList();
+            } catch (e) {
+                toast('Errore Utenti', e.message, 'error');
+            }
+        }
+
+        function renderAdminUsersList() {
+            const box = document.getElementById('admin-users-list');
+            const stats = document.getElementById('admin-users-stats');
+            if (!box) return;
+            const q = (document.getElementById('admin-users-search')?.value || '').trim().toLowerCase();
+            const filtered = adminUsersList.filter(u =>
+                !q ||
+                String(u.full_name || '').toLowerCase().includes(q) ||
+                String(u.username || '').toLowerCase().includes(q) ||
+                String(u.class_name || '').toLowerCase().includes(q) ||
+                String(u.role || '').toLowerCase().includes(q)
+            );
+            const activeCount = adminUsersList.filter(u => !u.must_change_password).length;
+            if (stats) stats.innerText = `${activeCount}/${adminUsersList.length} con password personale`;
+
+            box.innerHTML = '';
+            if (filtered.length === 0) {
+                box.innerHTML = `<div class="p-6 text-center text-xs font-mono text-slate-500 border border-dashed border-slate-800 rounded-2xl">Nessun utente trovato.</div>`;
+                return;
+            }
+            filtered.forEach(u => {
+                const roleBadge = u.role === 'admin'
+                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                    : (u.role === 'docente' ? 'bg-blue-500/20 text-blue-300 border-blue-500/40' : 'bg-slate-800 text-slate-300 border-slate-700');
+                const passBadge = u.must_change_password
+                    ? `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">Primo accesso</span>`
+                    : `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/35">Password attiva</span>`;
+
+                box.innerHTML += `
+                    <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-bold text-white text-sm">${esc(u.full_name)}</span>
+                                <span class="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded border ${roleBadge}">${esc(u.role)}</span>
+                                ${passBadge}
+                            </div>
+                            <div class="text-[11px] font-mono text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                                <span>@${esc(u.username)}</span>
+                                <span>•</span>
+                                <span>${esc(u.class_name || '--')}</span>
+                                ${u.email ? `<span>•</span><span class="text-cyan-400">${esc(u.email)}</span>` : ''}
+                            </div>
+                        </div>
+                        <button type="button" onclick="adminResetUserPassword(${u.id})" class="px-3.5 py-2 rounded-xl bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0">
+                            <i class="fa-solid fa-rotate-left text-[11px]"></i> Reset Password
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        async function adminResetUserPassword(userId) {
+            const target = adminUsersList.find(x => Number(x.id) === Number(userId));
+            const fullName = target ? target.full_name : 'questo utente';
+            if (!confirm(`Vuoi resettare la password di ${fullName}?\nVerrà generato un codice temporaneo monouso e al prossimo accesso dovrà scegliere una nuova password.`)) return;
+            try {
+                const res = await api(`/api/admin/users/${userId}/reset-password`, 'POST');
+                document.getElementById('admin-reset-target').innerText = `${res.full_name} (@${res.username})`;
+                document.getElementById('admin-reset-code').innerText = res.temp_password;
+                document.getElementById('admin-temp-pass-banner')?.classList.remove('hidden');
+                await loadAdminUsers();
+                toast('Password Resettata', `Codice temporaneo pronto per ${res.full_name}`, 'success');
+            } catch (e) {
+                toast('Errore Reset', e.message, 'error');
+            }
+        }
+
+        function copyResetCode() {
+            const code = document.getElementById('admin-reset-code')?.innerText || '';
+            if (!code) return;
+            navigator.clipboard?.writeText(code).then(() => toast('Copiato', `Codice ${code} copiato negli appunti`, 'info'));
+        }
+
         function openAdminConsoleModal() {
             if (currentUser?.role !== 'admin') return;
             document.getElementById('modal-admin-console')?.classList.remove('hidden');
             loadDevicesData();
+            loadAdminUsers();
             syncLabData();
         }
 
@@ -2276,9 +2721,12 @@
 
         function switchAdminTab(tab) {
             document.getElementById('content-admin-fleet')?.classList.toggle('hidden', tab !== 'fleet');
+            document.getElementById('content-admin-users')?.classList.toggle('hidden', tab !== 'users');
             document.getElementById('content-admin-ai')?.classList.toggle('hidden', tab !== 'ai');
-            document.getElementById('tab-admin-fleet').className = tab === 'fleet' ? "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white shadow-md" : "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white";
-            document.getElementById('tab-admin-ai').className = tab === 'ai' ? "px-3.5 py-1.5 rounded-lg bg-purple-600 text-white shadow-md" : "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white";
+            document.getElementById('tab-admin-fleet').className = tab === 'fleet' ? "px-3 py-1.5 rounded-lg bg-blue-600 text-white shadow-md" : "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white";
+            document.getElementById('tab-admin-users').className = tab === 'users' ? "px-3 py-1.5 rounded-lg bg-amber-600 text-white shadow-md" : "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white";
+            document.getElementById('tab-admin-ai').className = tab === 'ai' ? "px-3 py-1.5 rounded-lg bg-purple-600 text-white shadow-md" : "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white";
+            if (tab === 'users') loadAdminUsers();
         }
 
         function renderFleetDashboard() {
@@ -2771,18 +3219,17 @@
             switchMobileAisle('left');
             document.getElementById('input-username').addEventListener('keydown', e => { if (e.key === 'Enter') verifyUser(); });
             document.getElementById('input-password').addEventListener('keydown', e => { if (e.key === 'Enter') processAuth(); });
+            document.getElementById('first-confirm-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitFirstPassword(); });
 
             // Ripristino automatico sessione da Cookie HttpOnly sicuro
             try {
                 const data = await api('/api/auth/me');
                 if (data.user) {
                     currentUser = data.user;
-                    document.getElementById('view-login').classList.add('hidden');
-                    if (currentUser.role === 'studente') await loadClassroom(currentUser.class_name);
-                    else {
-                        const activeCls = localStorage.getItem('SC_ACTIVE_CLASS');
-                        if (activeCls) await loadClassroom(activeCls);
-                        else initHub();
+                    if (currentUser.must_change_password) {
+                        openFirstPasswordScreen(currentUser);
+                    } else {
+                        await enterPlatformAfterAuth(false);
                     }
                 }
             } catch (e) {}
