@@ -77,6 +77,14 @@ function validateNewPassword(pwd, username = '') {
     return null;
 }
 
+function validateUsername(uname) {
+    const u = String(uname || '').trim().toLowerCase();
+    if (u.length < 3 || u.length > 40) return 'Il nome utente deve avere tra 3 e 40 caratteri';
+    if (!/^[a-z0-9._-]+$/.test(u)) return 'Il nome utente può contenere solo lettere, numeri, punti, trattini e underscore (senza spazi né @)';
+    if (/^[._-]|[._-]$/.test(u) || /\.\./.test(u)) return 'Formato nome utente non valido';
+    return null;
+}
+
 function generateTempPassword() {
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const bytes = crypto.randomBytes(6);
@@ -388,23 +396,23 @@ async function getSessionUser(req) {
 async function requireStaff(req, res, next) {
     if (isDevice(req)) return next();
     const u = req.user || await getSessionUser(req);
-    if (u && !u.must_change_password && u.role !== 'studente') return next();
+    if (u && (u.role === 'admin' || (!u.must_change_password && u.role !== 'studente'))) return next();
     res.status(403).json({ error: 'Permessi docenti/admin richiesti' });
 }
 
 async function requireAdmin(req, res, next) {
     const u = req.user || await getSessionUser(req);
-    if (u && !u.must_change_password && u.role === 'admin') return next();
+    if (u && u.role === 'admin') return next();
     res.status(403).json({ error: 'Permessi amministratore richiesti' });
 }
 
-// 2) Protezione globale delle API: sessione obbligatoria + blocco totale finché must_change_password = 1
+// 2) Protezione globale delle API: sessione obbligatoria + blocco primo accesso (admin può saltare in fase di test)
 app.use('/api', async (req, res, next) => {
     try {
         if (/^\/auth\//.test(req.path) || req.path === '/reader/scan' || isDevice(req)) return next();
         const u = await getSessionUser(req);
         if (!u) return res.status(401).json({ error: 'Sessione non attiva' });
-        if (u.must_change_password) {
+        if (u.must_change_password && u.role !== 'admin') {
             return res.status(403).json({
                 error: 'Devi impostare la tua password personale al primo accesso',
                 must_change_password: true
@@ -415,23 +423,35 @@ app.use('/api', async (req, res, next) => {
     } catch (e) { next(e); }
 });
 
-// ================= ROTTE AUTENTICAZIONE & GESTIONE PASSWORD =================
+// ================= ROTTE AUTENTICAZIONE, PROFILO & GESTIONE PASSWORD =================
+// Riconoscimento utente tramite username OPPURE email associata
 app.post('/api/auth/verify', async (req, res) => {
-    const username = String(req.body.username || '').trim().toLowerCase();
+    const identifier = String(req.body.username || req.body.identifier || '').trim().toLowerCase();
+    if (!identifier) return res.status(400).json({ error: 'Inserisci nome utente o email' });
     const r = await db.execute({
-        sql: 'SELECT username, full_name FROM users WHERE username = ?',
-        args: [username]
+        sql: `SELECT username, full_name, role
+              FROM users
+              WHERE LOWER(username) = ? OR (email IS NOT NULL AND email != '' AND LOWER(email) = ?)
+              LIMIT 1`,
+        args: [identifier, identifier]
     });
-    if (r.rows.length === 0) return res.status(404).json({ error: 'Utente non trovato' });
-    res.json(r.rows[0]);
+    if (r.rows.length === 0) return res.status(404).json({ error: 'Utente o email non trovati' });
+    res.json({
+        username: r.rows[0].username,
+        full_name: r.rows[0].full_name,
+        matched_by: identifier.includes('@') ? 'email' : 'username'
+    });
 });
 
 app.post('/api/auth/login', async (req, res) => {
-    const username = String(req.body.username || '').trim().toLowerCase();
+    const identifier = String(req.body.username || req.body.identifier || '').trim().toLowerCase();
     const password = String(req.body.password || '');
     const r = await db.execute({
-        sql: 'SELECT id, username, password_hash, full_name as name, role, class_name, desk_id, workbench_id, must_change_password, email FROM users WHERE username = ?',
-        args: [username]
+        sql: `SELECT id, username, password_hash, full_name as name, role, class_name, desk_id, workbench_id, must_change_password, email
+              FROM users
+              WHERE LOWER(username) = ? OR (email IS NOT NULL AND email != '' AND LOWER(email) = ?)
+              LIMIT 1`,
+        args: [identifier, identifier]
     });
     const row = r.rows[0];
     if (!row || !verifyPassword(password, row.password_hash)) {
@@ -470,7 +490,7 @@ app.get('/api/auth/me', async (req, res) => {
     res.json({ user });
 });
 
-// Impostazione password obbligatoria al primo accesso (o dopo reset amministratore)
+// Impostazione password obbligatoria al primo accesso (o dopo reset amministratore; opzionale per admin in fase test)
 app.post('/api/auth/first-password', async (req, res) => {
     const user = await getSessionUser(req);
     if (!user) return res.status(401).json({ error: 'Sessione scaduta, rifai il login' });
@@ -488,8 +508,17 @@ app.post('/api/auth/first-password', async (req, res) => {
     const validationErr = validateNewPassword(newPass, user.username);
     if (validationErr) return res.status(400).json({ error: validationErr });
 
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return res.status(400).json({ error: 'Indirizzo email non valido' });
+    if (email) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ error: 'Indirizzo email non valido' });
+        }
+        const dupEmail = await db.execute({
+            sql: 'SELECT id FROM users WHERE email IS NOT NULL AND LOWER(email) = ? AND id != ?',
+            args: [email, user.id]
+        });
+        if (dupEmail.rows.length > 0) {
+            return res.status(400).json({ error: 'Questa email è già associata a un altro account' });
+        }
     }
 
     const newHash = hashPassword(newPass);
@@ -507,6 +536,54 @@ app.post('/api/auth/first-password', async (req, res) => {
     res.json({ ok: true, user: updated });
 });
 
+// Modifica volontaria di nome utente e/o email associata (per accesso rapido via email)
+app.post('/api/auth/profile', async (req, res) => {
+    const user = await getSessionUser(req);
+    if (!user) return res.status(401).json({ error: 'Sessione non attiva' });
+    if (user.must_change_password && user.role !== 'admin') {
+        return res.status(403).json({ error: 'Imposta prima la tua password personale' });
+    }
+
+    const nextUsername = req.body.username !== undefined
+        ? String(req.body.username || '').trim().toLowerCase()
+        : user.username;
+    const nextEmail = req.body.email !== undefined
+        ? String(req.body.email || '').trim().toLowerCase()
+        : (user.email || '');
+
+    const userErr = validateUsername(nextUsername);
+    if (userErr) return res.status(400).json({ error: userErr });
+
+    const dupUser = await db.execute({
+        sql: 'SELECT id FROM users WHERE LOWER(username) = ? AND id != ?',
+        args: [nextUsername, user.id]
+    });
+    if (dupUser.rows.length > 0) {
+        return res.status(400).json({ error: 'Questo nome utente è già in uso' });
+    }
+
+    if (nextEmail) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)) {
+            return res.status(400).json({ error: 'Indirizzo email non valido' });
+        }
+        const dupEmail = await db.execute({
+            sql: 'SELECT id FROM users WHERE email IS NOT NULL AND LOWER(email) = ? AND id != ?',
+            args: [nextEmail, user.id]
+        });
+        if (dupEmail.rows.length > 0) {
+            return res.status(400).json({ error: 'Questa email è già associata a un altro account' });
+        }
+    }
+
+    await db.execute({
+        sql: 'UPDATE users SET username = ?, email = ? WHERE id = ?',
+        args: [nextUsername, nextEmail || null, user.id]
+    });
+
+    const updated = await getSessionUser(req);
+    res.json({ ok: true, user: updated });
+});
+
 // Cambio password volontario da utente autenticato
 app.post('/api/auth/change-password', async (req, res) => {
     const user = await getSessionUser(req);
@@ -515,7 +592,7 @@ app.post('/api/auth/change-password', async (req, res) => {
     const currentPass = String(req.body.current_password || '');
     const newPass = String(req.body.new_password || '');
     const confirmPass = String(req.body.confirm_password || '');
-    const email = String(req.body.email || '').trim().toLowerCase();
+    const email = req.body.email !== undefined ? String(req.body.email || '').trim().toLowerCase() : null;
 
     const r = await db.execute({
         sql: 'SELECT password_hash FROM users WHERE id = ?',
@@ -534,8 +611,17 @@ app.post('/api/auth/change-password', async (req, res) => {
     const validationErr = validateNewPassword(newPass, user.username);
     if (validationErr) return res.status(400).json({ error: validationErr });
 
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return res.status(400).json({ error: 'Indirizzo email non valido' });
+    if (email) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ error: 'Indirizzo email non valido' });
+        }
+        const dupEmail = await db.execute({
+            sql: 'SELECT id FROM users WHERE email IS NOT NULL AND LOWER(email) = ? AND id != ?',
+            args: [email, user.id]
+        });
+        if (dupEmail.rows.length > 0) {
+            return res.status(400).json({ error: 'Questa email è già associata a un altro account' });
+        }
     }
 
     await db.execute({
@@ -545,10 +631,11 @@ app.post('/api/auth/change-password', async (req, res) => {
                   email = COALESCE(NULLIF(?, ''), email),
                   password_updated_at = ?
               WHERE id = ?`,
-        args: [hashPassword(newPass), email, romeDateTime(), user.id]
+        args: [hashPassword(newPass), email || '', romeDateTime(), user.id]
     });
 
-    res.json({ ok: true });
+    const updated = await getSessionUser(req);
+    res.json({ ok: true, user: updated });
 });
 
 app.post('/api/auth/logout', (req, res) => {
